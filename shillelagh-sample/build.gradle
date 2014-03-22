@@ -1,4 +1,4 @@
-apply plugin: 'android-library'
+apply plugin: 'android'
 
 android {
     compileSdkVersion 19
@@ -20,5 +20,4 @@ android {
 
 dependencies {
     compile project(':shillelagh')
-    provided project(':shillelagh-processor')
 }
