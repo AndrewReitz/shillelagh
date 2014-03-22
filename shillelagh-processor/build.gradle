@@ -1,0 +1,21 @@
+apply plugin: 'java'
+
+targetCompatibility = '1.6'
+sourceCompatibility = '1.6'
+
+dependencies {
+  compile project(':shillelagh')
+  compile 'com.google.guava:guava:15.0'
+
+  testCompile 'com.google.testing.compile:compile-testing:0.4'
+  testCompile 'com.google.android:android:4.1.1.4'
+  testCompile files('libs/tools.jar')
+}
+
+tasks.withType(Test) {
+  testLogging {
+    exceptionFormat "full"
+    events "passed", "skipped", "failed"
+  }
+}
+

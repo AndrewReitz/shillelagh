@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger>
+
+    <dataSet config="main" >
+        <source path="/home/areitz/Projects/Shillelagh/shillelagh-sample/src/main/res" >
+            <file
+                path="/home/areitz/Projects/Shillelagh/shillelagh-sample/src/main/res/values/strings.xml"
+                qualifiers="" >
+                <string name="app_name" >Shillelagh
+                </string>
+            </file>
+        </source>
+        <source path="/home/areitz/Projects/Shillelagh/shillelagh-sample/build/res/rs/debug" />
+        <source path="/home/areitz/Projects/Shillelagh/shillelagh-sample/build/res/generated/debug" />
+    </dataSet>
+    <dataSet config="debug" >
+        <source path="/home/areitz/Projects/Shillelagh/shillelagh-sample/src/debug/res" />
+    </dataSet>
+
+</merger>
