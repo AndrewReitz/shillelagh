@@ -1,45 +1,57 @@
 package shillelagh.internal;
 
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.SourceVersion;
-import javax.lang.model.element.TypeElement;
-
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
-import shillelagh.Field;
-import shillelagh.Id;
+import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.Messager;
+import javax.annotation.processing.RoundEnvironment;
+import javax.lang.model.SourceVersion;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
+
 import shillelagh.Table;
 
-public class ShillelaghProcessor extends AbstractProcessor {
+import static javax.tools.Diagnostic.Kind.ERROR;
+import static javax.tools.Diagnostic.Kind.NOTE;
 
-    public static final String SUFFIX = "$$Shillelagh";
+public final class ShillelaghProcessor extends AbstractProcessor {
 
-    private static final List<Class<? extends Annotation>> TABLE_ANOTATIONS = Arrays.asList(
-            Field.class,
-            Id.class,
-            Table.class
-    );
+    public static final String SUFFIX = "$$ShillelaghInjector";
 
     @Override public Set<String> getSupportedAnnotationTypes() {
         Set<String> supportTypes = new LinkedHashSet<String>();
-        for (Class<? extends Annotation> listener : TABLE_ANOTATIONS) {
-            supportTypes.add(listener.getCanonicalName());
-        }
+        supportTypes.add(Table.class.getCanonicalName());
 
         return supportTypes;
     }
 
     @Override
-    public boolean process(Set<? extends TypeElement> typeElements, RoundEnvironment roundEnvironment) {
+    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnvironment) {
+        for (TypeElement annotation : annotations) {
+            Set<? extends Element> elements = roundEnvironment.getElementsAnnotatedWith(annotation);
+        }
+
         return false;
     }
 
     @Override public SourceVersion getSupportedSourceVersion() {
         return SourceVersion.latestSupported();
+    }
+
+    static final class ShillelaghLogger {
+        final private Messager messanger;
+
+        ShillelaghLogger(Messager messanger) {
+            this.messanger = messanger;
+        }
+
+        public void debug(String message) {
+            messanger.printMessage(NOTE, message);
+        }
+
+        public void error(String message) {
+            messanger.printMessage(ERROR, message);
+        }
     }
 }
