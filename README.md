@@ -1,6 +1,8 @@
 Shillelagh
 ==========
 
+Currently a work in progress
+
 Developed By
 ============
 
@@ -9,7 +11,7 @@ Developed By
 License
 =======
 
-    Copyright 2014 Ink Applications
+    Copyright 2014 Andrew Reitz
 
     Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
