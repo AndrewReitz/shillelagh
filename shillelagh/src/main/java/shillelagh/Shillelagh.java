@@ -15,7 +15,7 @@ public final class Shillelagh {
         // No instantiation
     }
 
-    static final Map<Class<?>, Class<?>> CACHED_CLASSES = new LinkedHashMap<>();
+    private static final Map<Class<?>, Class<?>> CACHED_CLASSES = new LinkedHashMap<>();
 
     private static final String TAG = "Shillelagh";
     private static boolean debug = false;
