@@ -28,7 +28,7 @@ public final class Shillelagh {
     public static void createTable(SQLiteDatabase database, Class<?> tableObject) {
         try {
             final Class<?> shillelagh = findShillelaghForClass(tableObject);
-            final Method method = shillelagh.getMethod(ShillelaghInjector.CREATE_TABLE);
+            final Method method = shillelagh.getMethod(ShillelaghInjector.CREATE_TABLE_FUNCTION);
             database.execSQL((String) method.invoke(null));
         } catch (RuntimeException e) {
             throw e;
