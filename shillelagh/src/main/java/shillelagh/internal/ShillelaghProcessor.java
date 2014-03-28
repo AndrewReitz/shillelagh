@@ -17,6 +17,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
+import shillelagh.Field;
 import shillelagh.Id;
 import shillelagh.Table;
 
@@ -66,16 +67,23 @@ public final class ShillelaghProcessor extends AbstractProcessor {
                     logger.d(innerElement.getKind().toString());
 
                     // Check if user wants to use an id other than _id
-                    Id idAnnoation = innerElement.getAnnotation(Id.class);
-                    if (idAnnoation != null) {
+                    Id idAnnotation = innerElement.getAnnotation(Id.class);
+                    if (idAnnotation != null) {
                         // TODO Check and make sure this is a numeric type
                         // Id attribute set and continue
                         tableObject.setIdColumnName(innerElement.getSimpleName().toString());
                     }
 
-                    for (AnnotationMirror innerAnnotation : innerElement.getAnnotationMirrors()) {
-                        logger.d("Inner Element Annotation: " + innerAnnotation.toString());
+                    String fieldName = innerElement.getSimpleName().toString();
+                    Field fieldAnnotation = innerElement.getAnnotation(Field.class);
+                    if (fieldAnnotation != null) {
+                        fieldName = fieldAnnotation.columnName();
                     }
+
+                    TypeMirror typeMirror = innerElement.asType();
+                    logger.d("HELLO " + typeMirror.toString());
+
+                    //new TableColumn(fieldName, )
                 }
 
                 List<? extends TypeMirror> typeMirrors = typeUtils
