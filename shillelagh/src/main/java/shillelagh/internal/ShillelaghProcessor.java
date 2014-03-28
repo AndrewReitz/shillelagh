@@ -12,12 +12,12 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
+import shillelagh.Id;
 import shillelagh.Table;
 
 import static javax.tools.Diagnostic.Kind.ERROR;
@@ -51,21 +51,35 @@ public final class ShillelaghProcessor extends AbstractProcessor {
     }
 
     @Override
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnvironment) {
+    public boolean process(Set<? extends TypeElement> annotations,
+            RoundEnvironment roundEnvironment) {
+
         for (TypeElement annotation : annotations) {
             Set<? extends Element> elements = roundEnvironment.getElementsAnnotatedWith(annotation);
             for (Element element : elements) {
-
                 logger.d("Element: " + element.toString());
+                boolean hasId = false;
+                TableObject tableObject = createTable(element);
+
                 for (Element innerElement : element.getEnclosedElements()) {
                     logger.d("Inner Elements: " + innerElement.getSimpleName().toString());
                     logger.d(innerElement.getKind().toString());
+
+                    // Check if user wants to use an id other than _id
+                    Id idAnnoation = innerElement.getAnnotation(Id.class);
+                    if (idAnnoation != null) {
+                        // TODO Check and make sure this is a numeric type
+                        // Id attribute set and continue
+                        tableObject.setIdColumnName(innerElement.getSimpleName().toString());
+                    }
+
                     for (AnnotationMirror innerAnnotation : innerElement.getAnnotationMirrors()) {
                         logger.d("Inner Element Annotation: " + innerAnnotation.toString());
                     }
                 }
 
-                List<? extends TypeMirror> typeMirrors = typeUtils.directSupertypes(element.asType());
+                List<? extends TypeMirror> typeMirrors = typeUtils
+                        .directSupertypes(element.asType());
                 for (TypeMirror typeMirror : typeMirrors) {
                     logger.d("SuperType: " + typeMirror.toString());
                     TypeElement typeElement = elementUtils.getTypeElement(typeMirror.toString());
@@ -75,6 +89,8 @@ public final class ShillelaghProcessor extends AbstractProcessor {
                         logger.d(enclosedElement.getKind().toString());
                     }
                 }
+
+                logger.d(tableObject.toString());
             }
         }
         return true;
@@ -84,7 +100,15 @@ public final class ShillelaghProcessor extends AbstractProcessor {
         return SourceVersion.latestSupported();
     }
 
+    private TableObject createTable(Element element) {
+        Table tableAnnotation = element.getAnnotation(Table.class);
+        String tableName = tableAnnotation.value().equals("") ? element.getSimpleName().toString()
+                : tableAnnotation.value();
+        return new TableObject(tableName);
+    }
+
     static final class ShillelaghLogger {
+
         private String TAG = "TESTING: "; // string to grep on remove later
 
         private final Messager messenger;
@@ -100,7 +124,7 @@ public final class ShillelaghProcessor extends AbstractProcessor {
         }
 
         public void e(String message) {
-            messenger.printMessage(ERROR, TAG + message);
+            messenger.printMessage(ERROR, message);
         }
     }
 }
