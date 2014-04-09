@@ -12,4 +12,7 @@ public class TestModel extends BaseModel {
 
     @Field(columnName = "RealTestName")
     String testString;
+
+    @Field
+    Integer testInteger;
 }

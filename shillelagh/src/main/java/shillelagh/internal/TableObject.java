@@ -15,15 +15,15 @@ class TableObject {
 
     private final List<TableColumn> columns = new LinkedList<>();
 
-    public TableObject(String tableName) {
+    TableObject(String tableName) {
         this.tableName = tableName;
     }
 
-    public void setIdColumnName(String idColumnName) {
+    void setIdColumnName(String idColumnName) {
         this.idColumnName = idColumnName;
     }
 
-    public void addColumn(TableColumn column) {
+    void addColumn(TableColumn column) {
 
     }
 
