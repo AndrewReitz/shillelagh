@@ -59,43 +59,25 @@ public final class ShillelaghProcessor extends AbstractProcessor {
       Set<? extends Element> elements = roundEnvironment.getElementsAnnotatedWith(annotation);
       for (Element element : elements) {
         logger.d("Element: " + element.toString());
-        boolean hasId = false;
         TableObject tableObject = createTable(element);
 
         for (Element innerElement : element.getEnclosedElements()) {
           logger.d("Inner Elements: " + innerElement.getSimpleName().toString());
           logger.d(innerElement.getKind().toString());
-
-          // Check if user wants to use an id other than _id
-          Id idAnnotation = innerElement.getAnnotation(Id.class);
-          if (idAnnotation != null) {
-            // TODO Check and make sure this is a numeric type
-            // Id attribute set and continue
-            tableObject.setIdColumnName(innerElement.getSimpleName().toString());
-          }
-
-          Field fieldAnnotation = innerElement.getAnnotation(Field.class);
-          if (fieldAnnotation != null) {
-            String columnName = fieldAnnotation.columnName();
-            String fieldName = Strings.isBlank(columnName) ? innerElement.getSimpleName().toString() : columnName;
-
-            TypeMirror typeMirror = innerElement.asType();
-            SqliteType sqliteType = sqliteTYpeUtils.getSqliteType(typeMirror);
-            logger.d("Element " + innerElement + " Type " + typeMirror.toString());
-
-            tableObject.addColumn(new TableColumn(fieldName, sqliteType));
-          }
+          checkForTableId(tableObject, innerElement);
+          checkForFields(tableObject, innerElement);
         }
 
-        List<? extends TypeMirror> typeMirrors = typeUtils
-                .directSupertypes(element.asType());
+        // TODO Check if multiple supper types are supported
+        // Loop through super types and parse out id/fields
+        List<? extends TypeMirror> typeMirrors = typeUtils.directSupertypes(element.asType());
         for (TypeMirror typeMirror : typeMirrors) {
           logger.d("SuperType: " + typeMirror.toString());
           TypeElement typeElement = elementUtils.getTypeElement(typeMirror.toString());
           List<? extends Element> enclosedElements = typeElement.getEnclosedElements();
           for (Element enclosedElement : enclosedElements) {
-            logger.d("SuperType Elements: " + enclosedElement.toString());
-            logger.d(enclosedElement.getKind().toString());
+            checkForTableId(tableObject, enclosedElement);
+            checkForFields(tableObject, enclosedElement);
           }
         }
 
@@ -109,10 +91,36 @@ public final class ShillelaghProcessor extends AbstractProcessor {
     return SourceVersion.latestSupported();
   }
 
+  /** Create a new table with the elements name or annotation has a value set use that */
   private TableObject createTable(Element element) {
     Table tableAnnotation = element.getAnnotation(Table.class);
-    String tableName = tableAnnotation.value().equals("") ? element.getSimpleName().toString()
-            : tableAnnotation.value();
+    String tableName = tableAnnotation.value().equals("") ? element.getSimpleName().toString() : tableAnnotation.value();
     return new TableObject(tableName);
+  }
+
+  /** Check if the element has the @Id annotation if it does use that for it's id */
+  private void checkForTableId(TableObject tableObject, Element element) {
+    // Check if user wants to use an id other than _id
+    Id idAnnotation = element.getAnnotation(Id.class);
+    if (idAnnotation != null) {
+      // TODO Check and make sure this is a numeric type
+      // Id attribute set and continue
+      tableObject.setIdColumnName(element.getSimpleName().toString());
+    }
+  }
+
+  /** Check if the element has a @Field annotation if it does parse it and add it to the table object */
+  private void checkForFields(TableObject tableObject, Element element) {
+    Field fieldAnnotation = element.getAnnotation(Field.class);
+    if (fieldAnnotation != null) {
+      String columnName = fieldAnnotation.columnName();
+      String fieldName = Strings.isBlank(columnName) ? element.getSimpleName().toString() : columnName;
+
+      TypeMirror typeMirror = element.asType();
+      SqliteType sqliteType = sqliteTYpeUtils.getSqliteType(typeMirror);
+      logger.d("Element " + element + " Type " + typeMirror.toString());
+
+      tableObject.addColumn(new TableColumn(fieldName, sqliteType));
+    }
   }
 }
