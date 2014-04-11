@@ -27,6 +27,10 @@ class TableObject {
     columns.add(column);
   }
 
+  String getTableName() {
+    return tableName;
+  }
+
   @Override public String toString() {
     StringBuilder sb = new StringBuilder();
     Iterator<TableColumn> iterator = columns.iterator();

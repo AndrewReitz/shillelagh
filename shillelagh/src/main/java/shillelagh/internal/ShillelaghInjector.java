@@ -4,6 +4,7 @@ public class ShillelaghInjector {
 
   /** Internal class function to get the sql string */
   public static final String CREATE_TABLE_FUNCTION = "getCreateTableSql";
+  public static final String DROP_TABLE_FUNCTION = "getDropTableSql";
 
   private final String classPackage;
   private final String className;
@@ -33,15 +34,22 @@ public class ShillelaghInjector {
     builder.append("package ").append(classPackage).append(";\n\n");
     builder.append("public class ").append(className).append(" {\n");
     emmitCreateTableSql(builder);
+    builder.append("\n\n");
+    emmitDropTableSql(builder);
     builder.append("}\n");
     return builder.toString();
   }
 
   /** Creates the function for getting the sql string */
   private void emmitCreateTableSql(StringBuilder builder) {
-    builder.append("  public static String " + CREATE_TABLE_FUNCTION + "() {");
+    builder.append("  public static String ").append(CREATE_TABLE_FUNCTION).append("() {");
     builder.append("    return \"").append(tableObject.toString()).append("\";");
     builder.append("  }");
+  }
 
+  private void emmitDropTableSql(StringBuilder builder) {
+    builder.append("  public static String ").append(DROP_TABLE_FUNCTION).append("() {");
+    builder.append("    return \"DROP TABLE IF EXISTS ").append(tableObject.getTableName()).append("\";");
+    builder.append("  }");
   }
 }

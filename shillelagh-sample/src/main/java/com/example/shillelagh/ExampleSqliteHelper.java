@@ -8,7 +8,7 @@ import shillelagh.Shillelagh;
 
 public class ExampleSqliteHelper extends SQLiteOpenHelper {
   private static final String DATABASE_NAME = "shillelagh_example.db";
-  private static final int DATABASE_VERSION = 1;
+  private static final int DATABASE_VERSION = 3;
 
   public ExampleSqliteHelper(Context context) {
     super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -20,6 +20,9 @@ public class ExampleSqliteHelper extends SQLiteOpenHelper {
   }
 
   @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+    // Simplistic solution, you will lose your data though, good for debug builds bad for prod
+    Shillelagh.dropTable(db, Author.class);
+    Shillelagh.dropTable(db, Book.class);
+    onCreate(db);
   }
 }
