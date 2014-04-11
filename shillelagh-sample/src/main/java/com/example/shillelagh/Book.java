@@ -1,0 +1,37 @@
+package com.example.shillelagh;
+
+import java.sql.Date;
+
+import shillelagh.Field;
+import shillelagh.Table;
+
+@Table
+public class Book extends BaseDbModel {
+  @Field String title;
+//  @Field Author author;
+  @Field Date published;
+
+  public String getTitle() {
+    return title;
+  }
+
+  public void setTitle(String title) {
+    this.title = title;
+  }
+
+//  public Author getAuthor() {
+//    return author;
+//  }
+//
+//  public void setAuthor(Author author) {
+//    this.author = author;
+//  }
+
+  public Date getPublished() {
+    return published;
+  }
+
+  public void setPublished(Date published) {
+    this.published = published;
+  }
+}

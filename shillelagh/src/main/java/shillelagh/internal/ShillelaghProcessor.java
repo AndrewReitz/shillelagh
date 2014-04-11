@@ -1,5 +1,7 @@
 package shillelagh.internal;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -14,6 +16,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
+import javax.tools.JavaFileObject;
 
 import shillelagh.Field;
 import shillelagh.Id;
@@ -61,6 +64,14 @@ public final class ShillelaghProcessor extends AbstractProcessor {
         logger.d("Element: " + element.toString());
         TableObject tableObject = createTable(element);
 
+        String targetType = element.toString();
+        String classPackage = getPackageName(element);
+        String className = getClassName((TypeElement) element, classPackage) + SUFFIX;
+        ShillelaghInjector injector = new ShillelaghInjector(classPackage, className, targetType);
+        logger.d("TargetType: " + targetType);
+        logger.d("ClassPackage: " + classPackage);
+        logger.d("ClassName: " + className);
+
         for (Element innerElement : element.getEnclosedElements()) {
           logger.d("Inner Elements: " + innerElement.getSimpleName().toString());
           logger.d(innerElement.getKind().toString());
@@ -82,6 +93,17 @@ public final class ShillelaghProcessor extends AbstractProcessor {
         }
 
         logger.d(tableObject.toString());
+        injector.setTable(tableObject);
+
+        try {
+          JavaFileObject jfo = filer.createSourceFile(injector.getFqcn(), element);
+          Writer writer = jfo.openWriter();
+          writer.write(injector.brewJava());
+          writer.flush();
+          writer.close();
+        } catch (IOException e) {
+          logger.e(String.format("Unable to write injector for type %s: %s", element, e.getMessage()));
+        }
       }
     }
     return true;
@@ -89,6 +111,17 @@ public final class ShillelaghProcessor extends AbstractProcessor {
 
   @Override public SourceVersion getSupportedSourceVersion() {
     return SourceVersion.latestSupported();
+  }
+
+  /** Gets the package the element is */
+  private String getPackageName(Element type) {
+    return elementUtils.getPackageOf(type).getQualifiedName().toString();
+  }
+
+  /** Create the injector fully qualified class name */
+  private String getClassName(TypeElement type, String packageName) {
+    int packageLen = packageName.length() + 1;
+    return type.getQualifiedName().toString().substring(packageLen).replace('.', '$');
   }
 
   /** Create a new table with the elements name or annotation has a value set use that */

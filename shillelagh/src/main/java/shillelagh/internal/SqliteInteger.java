@@ -21,7 +21,8 @@ class SqliteInteger {
           "java.lang.Short",
           "java.lang.Long",
           "java.lang.Boolean",
-          "java.lang.Byte"
+          "java.lang.Byte",
+          "java.sql.Date"
   );
 
   private HashSet<TypeKind> integerKinds = new HashSet<>(INTEGER_KINDS.size());

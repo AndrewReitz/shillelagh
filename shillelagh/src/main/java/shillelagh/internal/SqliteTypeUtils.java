@@ -1,10 +1,5 @@
 package shillelagh.internal;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 import shillelagh.SqliteType;
