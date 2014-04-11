@@ -1,6 +1,6 @@
 package com.example.shillelagh;
 
-import java.sql.Date;
+import java.util.Date;
 
 import shillelagh.Field;
 import shillelagh.Table;

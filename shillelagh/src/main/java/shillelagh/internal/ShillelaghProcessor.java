@@ -67,7 +67,7 @@ public final class ShillelaghProcessor extends AbstractProcessor {
         String targetType = element.toString();
         String classPackage = getPackageName(element);
         String className = getClassName((TypeElement) element, classPackage) + SUFFIX;
-        ShillelaghInjector injector = new ShillelaghInjector(classPackage, className, targetType);
+        ShillelaghInjector injector = new ShillelaghInjector(classPackage, className, targetType, logger);
         logger.d("TargetType: " + targetType);
         logger.d("ClassPackage: " + classPackage);
         logger.d("ClassName: " + className);
@@ -145,15 +145,7 @@ public final class ShillelaghProcessor extends AbstractProcessor {
   /** Check if the element has a @Field annotation if it does parse it and add it to the table object */
   private void checkForFields(TableObject tableObject, Element element) {
     Field fieldAnnotation = element.getAnnotation(Field.class);
-    if (fieldAnnotation != null) {
-      String columnName = fieldAnnotation.columnName();
-      String fieldName = Strings.isBlank(columnName) ? element.getSimpleName().toString() : columnName;
-
-      TypeMirror typeMirror = element.asType();
-      SqliteType sqliteType = sqliteTYpeUtils.getSqliteType(typeMirror);
-      logger.d("Element " + element + " Type " + typeMirror.toString());
-
-      tableObject.addColumn(new TableColumn(fieldName, sqliteType));
-    }
+    if (fieldAnnotation == null) return;
+    tableObject.addColumn(new TableColumn(sqliteTYpeUtils, element, logger));
   }
 }

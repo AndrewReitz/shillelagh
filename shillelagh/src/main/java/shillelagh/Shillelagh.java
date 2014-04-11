@@ -5,11 +5,17 @@ import android.util.Log;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import static shillelagh.internal.ShillelaghInjector.CREATE_TABLE_FUNCTION;
 import static shillelagh.internal.ShillelaghInjector.DROP_TABLE_FUNCTION;
+import static shillelagh.internal.ShillelaghInjector.INSERT_OBJECT_FUNCTION;
 import static shillelagh.internal.ShillelaghProcessor.SUFFIX;
 
 public final class Shillelagh {
@@ -18,6 +24,7 @@ public final class Shillelagh {
     // No instantiation
   }
 
+  // TODO: Cache actual methods
   private static final Map<Class<?>, Class<?>> CACHED_CLASSES = new LinkedHashMap<>();
 
   private static final String TAG = "Shillelagh";
@@ -35,7 +42,7 @@ public final class Shillelagh {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new UnableToCreateTableException("Unable to create table for " + tableObject.getName(), e);
+      throw new UnableToCreateTableException("Unable to create table for " + tableObject.getName(), e); //TODO tableOjbect.getName ! always = to the table name
     }
   }
 
@@ -47,6 +54,17 @@ public final class Shillelagh {
       throw e;
     } catch (Exception e) {
       throw new UnableToCreateTableException("Unable to drop table for " + tableObject.getName(), e);
+    }
+  }
+
+  public static void insert(SQLiteDatabase database, Object tableObject) {
+    try {
+      final Class<?> shillelagh = findShillelaghForClass(tableObject.getClass());
+      getAndExecuteSqlStatement(database, shillelagh, INSERT_OBJECT_FUNCTION, tableObject);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new UnableToCreateTableException("Unable to insert into " + tableObject.getClass().getName(), e);
     }
   }
 
@@ -64,9 +82,16 @@ public final class Shillelagh {
     return shillelagh;
   }
 
-  private static void getAndExecuteSqlStatement(SQLiteDatabase database, Class<?> shillelagh, String methodName) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-    final Method method = shillelagh.getMethod(methodName);
-    String query = (String) method.invoke(null);
+  private static void getAndExecuteSqlStatement(SQLiteDatabase database, Class<?> shillelagh, String methodName, Object... params)
+          throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+
+    Class<?>[] paramTypes = new Class[params.length];
+    for (int i = 0; i < params.length; i++) {
+      paramTypes[i] = params[i].getClass();
+    }
+
+    final Method method = shillelagh.getMethod(methodName, paramTypes);
+    String query = (String) method.invoke(null, params);
     log("Running Query: %s", query);
     database.execSQL(query);
   }

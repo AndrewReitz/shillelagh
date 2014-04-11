@@ -1,18 +1,41 @@
 package shillelagh.internal;
 
+import javax.lang.model.element.Element;
+import javax.lang.model.type.TypeMirror;
+
 import shillelagh.SqliteType;
 
+/** Represents the data for a column in a database and mapping it back to its java counter part */
 class TableColumn {
 
-    private SqliteType type;
-    private String columnName;
+  private final ShillelaghLogger logger;
+  private final SqliteType type;
+  private final String columnName;
+  private final Element element;
 
-    TableColumn(String columnName, SqliteType type) {
-        this.columnName = columnName;
-        this.type = type;
-    }
+  TableColumn(SqliteTypeUtils sqliteTypeUtils, Element element, ShillelaghLogger logger) {
+    this.columnName = element.getSimpleName().toString();
+    this.logger = logger;
+    this.element = element;
 
-    @Override public String toString() {
-        return columnName + " " + type.toString();
-    }
+    TypeMirror typeMirror = element.asType();
+    this.type = sqliteTypeUtils.getSqliteType(typeMirror);
+    logger.d("Element " + element + " Type " + typeMirror.toString());
+  }
+
+  String getColumnName() {
+    return columnName;
+  }
+
+  SqliteType getType() {
+    return type;
+  }
+
+  boolean isDate() {
+    return element.asType().toString().equals("java.util.Date");
+  }
+
+  @Override public String toString() {
+    return columnName + " " + type.toString();
+  }
 }

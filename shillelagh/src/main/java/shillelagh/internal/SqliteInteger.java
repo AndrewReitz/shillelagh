@@ -22,7 +22,7 @@ class SqliteInteger {
           "java.lang.Long",
           "java.lang.Boolean",
           "java.lang.Byte",
-          "java.sql.Date"
+          "java.util.Date"
   );
 
   private HashSet<TypeKind> integerKinds = new HashSet<>(INTEGER_KINDS.size());

@@ -23,6 +23,14 @@ class TableObject {
     this.idColumnName = idColumnName;
   }
 
+  String getIdColumnName() {
+    return idColumnName;
+  }
+
+  List<TableColumn> getColumns() {
+    return columns;
+  }
+
   void addColumn(TableColumn column) {
     columns.add(column);
   }
@@ -31,6 +39,7 @@ class TableObject {
     return tableName;
   }
 
+  /** Prints out the table schema */
   @Override public String toString() {
     StringBuilder sb = new StringBuilder();
     Iterator<TableColumn> iterator = columns.iterator();
