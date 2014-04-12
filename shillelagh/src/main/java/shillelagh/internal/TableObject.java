@@ -40,7 +40,7 @@ class TableObject {
   }
 
   /** Prints out the table schema */
-  @Override public String toString() {
+  String getSchema() {
     StringBuilder sb = new StringBuilder();
     Iterator<TableColumn> iterator = columns.iterator();
     while (iterator.hasNext()) {
@@ -56,5 +56,9 @@ class TableObject {
             idColumnName,
             sb.toString()
     );
+  }
+
+  @Override public String toString() {
+    return getSchema();
   }
 }

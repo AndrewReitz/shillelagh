@@ -52,7 +52,7 @@ public class ShillelaghInjector {
   /** Creates the function for getting the create sql string */
   private void emmitCreateTableSql(StringBuilder builder) {
     builder.append("  public static String ").append(CREATE_TABLE_FUNCTION).append("() {");
-    builder.append("    return \"").append(tableObject.toString()).append("\";");
+    builder.append("    return \"").append(tableObject.getSchema()).append("\";");
     builder.append("  }");
   }
 

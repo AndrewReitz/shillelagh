@@ -20,7 +20,6 @@ import javax.tools.JavaFileObject;
 
 import shillelagh.Field;
 import shillelagh.Id;
-import shillelagh.SqliteType;
 import shillelagh.Table;
 
 public final class ShillelaghProcessor extends AbstractProcessor {
