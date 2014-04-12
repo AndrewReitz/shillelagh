@@ -1,6 +1,7 @@
 package shillelagh;
 
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import java.lang.reflect.InvocationTargetException;
@@ -30,15 +31,21 @@ public final class Shillelagh {
   private static final String TAG = "Shillelagh";
   private static boolean debug = false;
 
+  private static SQLiteOpenHelper sqliteOpenHelper;
+
+  public static void init(SQLiteOpenHelper soh) {
+    sqliteOpenHelper = soh;
+  }
+
   /** Turn on/off debug logging. */
   public static void setDebug(boolean debug) {
     Shillelagh.debug = debug;
   }
 
-  public static void createTable(SQLiteDatabase database, Class<?> tableObject) {
+  public static void createTable(Class<?> tableObject) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableObject);
-      getAndExecuteSqlStatement(database, shillelagh, CREATE_TABLE_FUNCTION);
+      getAndExecuteSqlStatement(sqliteOpenHelper.getWritableDatabase(), shillelagh, CREATE_TABLE_FUNCTION);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -46,10 +53,10 @@ public final class Shillelagh {
     }
   }
 
-  public static void dropTable(SQLiteDatabase database, Class<?> tableObject) {
+  public static void dropTable(Class<?> tableObject) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableObject);
-      getAndExecuteSqlStatement(database, shillelagh, DROP_TABLE_FUNCTION);
+      getAndExecuteSqlStatement(sqliteOpenHelper.getWritableDatabase(), shillelagh, DROP_TABLE_FUNCTION);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -57,10 +64,10 @@ public final class Shillelagh {
     }
   }
 
-  public static void insert(SQLiteDatabase database, Object tableObject) {
+  public static void insert(Object tableObject) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableObject.getClass());
-      getAndExecuteSqlStatement(database, shillelagh, INSERT_OBJECT_FUNCTION, tableObject);
+      getAndExecuteSqlStatement(sqliteOpenHelper.getWritableDatabase(), shillelagh, INSERT_OBJECT_FUNCTION, tableObject);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

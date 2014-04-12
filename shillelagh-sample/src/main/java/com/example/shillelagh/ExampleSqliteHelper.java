@@ -15,14 +15,14 @@ public class ExampleSqliteHelper extends SQLiteOpenHelper {
   }
 
   @Override public void onCreate(SQLiteDatabase db) {
-    Shillelagh.createTable(db, Author.class);
-    Shillelagh.createTable(db, Book.class);
+    Shillelagh.createTable(Author.class);
+    Shillelagh.createTable(Book.class);
   }
 
   @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
     // Simplistic solution, you will lose your data though, good for debug builds bad for prod
-    Shillelagh.dropTable(db, Author.class);
-    Shillelagh.dropTable(db, Book.class);
+    Shillelagh.dropTable(Author.class);
+    Shillelagh.dropTable(Book.class);
     onCreate(db);
   }
 }

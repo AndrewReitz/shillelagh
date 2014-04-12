@@ -13,17 +13,14 @@ public class MainActivity extends Activity {
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    SQLiteOpenHelper sqliteOpenHelper = new ExampleSqliteHelper(this);
-    SQLiteDatabase writableDatabase = sqliteOpenHelper.getWritableDatabase();
-
     Author author = new Author();
     author.setName("Icculus");
 
     Book book = new Book();
     book.setPublished(Calendar.getInstance().getTime());
-    book.setTitle("The Helping Friendly Book");
+    book.setTitle("The Helping Phriendly Book");
 
-    Shillelagh.insert(writableDatabase, author);
-    Shillelagh.insert(writableDatabase, book);
+    Shillelagh.insert(author);
+    Shillelagh.insert(book);
   }
 }
