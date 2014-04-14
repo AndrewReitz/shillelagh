@@ -13,6 +13,7 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -135,7 +136,9 @@ public final class ShillelaghProcessor extends AbstractProcessor {
     // Check if user wants to use an id other than _id
     Id idAnnotation = element.getAnnotation(Id.class);
     if (idAnnotation != null) {
-      // TODO Check and make sure this is a numeric type
+      if (element.asType().getKind() != TypeKind.LONG) {
+        logger.e("@Id must be on a long");
+      }
       // Id attribute set and continue
       tableObject.setIdColumnName(element.getSimpleName().toString());
     }

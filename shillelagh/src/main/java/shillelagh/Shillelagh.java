@@ -2,22 +2,18 @@ package shillelagh;
 
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import static shillelagh.internal.ShillelaghInjector.CREATE_TABLE_FUNCTION;
 import static shillelagh.internal.ShillelaghInjector.DROP_TABLE_FUNCTION;
 import static shillelagh.internal.ShillelaghInjector.INSERT_OBJECT_FUNCTION;
+import static shillelagh.internal.ShillelaghInjector.UPDATE_ID_FUNCTION;
+import static shillelagh.internal.ShillelaghInjector.UPDATE_OBJECT_FUNCTION;
 import static shillelagh.internal.ShillelaghProcessor.SUFFIX;
 
 public final class Shillelagh {
@@ -25,6 +21,12 @@ public final class Shillelagh {
   private Shillelagh() {
     // No instantiation
   }
+
+  /**
+   * SQL statement to select the id of the last inserted row. Does not end with ; in order to be
+   * used with {@link android.database.sqlite.SQLiteDatabase#rawQuery(String, String[])}
+   */
+  private static final String GET_ID_OF_LAST_INSERTED_ROW_SQL = "SELECT ROWID FROM Book ORDER BY ROWID DESC LIMIT 1";
 
   private static final Map<Class<?>, Class<?>> CACHED_CLASSES = new LinkedHashMap<>();
   private static final Map<String, Method> CACHED_METHODS = new LinkedHashMap<>();
@@ -68,11 +70,21 @@ public final class Shillelagh {
   public static void insert(Object tableObject) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableObject.getClass());
-      final Class<?>[] paramTypes = getParamTypes(tableObject);
-      final Method method = findMethodForClass(shillelagh, INSERT_OBJECT_FUNCTION, paramTypes);
-      String sql = (String) method.invoke(null, tableObject);
-      new SQLiteStatement(sqliteOpenHelper.getWritableDatabase(), sql, null);
       getAndExecuteSqlStatement(sqliteOpenHelper.getWritableDatabase(), shillelagh, INSERT_OBJECT_FUNCTION, tableObject);
+      final SQLiteDatabase db = sqliteOpenHelper.getReadableDatabase();
+      final Method method = findMethodForClass(shillelagh, UPDATE_ID_FUNCTION, tableObject, db);
+      method.invoke(null, tableObject, db);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new UnableToCreateTableException("Unable to insert into " + tableObject.getClass().getName(), e);
+    }
+  }
+
+  public static void update(Object tableObject) {
+    try {
+      final Class<?> shillelagh = findShillelaghForClass(tableObject.getClass());
+      getAndExecuteSqlStatement(sqliteOpenHelper.getWritableDatabase(), shillelagh, UPDATE_OBJECT_FUNCTION, tableObject);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -96,8 +108,7 @@ public final class Shillelagh {
 
   private static void getAndExecuteSqlStatement(SQLiteDatabase database, Class<?> shillelagh, String methodName, Object... params)
           throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-    Class<?>[] paramTypes = getParamTypes(params);
-    final Method method = findMethodForClass(shillelagh, methodName, paramTypes);
+    final Method method = findMethodForClass(shillelagh, methodName, params);
     String sql = (String) method.invoke(null, params);
     executeSql(database, sql);
   }
@@ -108,6 +119,11 @@ public final class Shillelagh {
       paramTypes[i] = params[i].getClass();
     }
     return paramTypes;
+  }
+
+  private static Method findMethodForClass(Class<?> shillelagh, String methodName, Object... params) throws NoSuchMethodException {
+    Class<?>[] paramTypes = getParamTypes(params);
+    return findMethodForClass(shillelagh, methodName, paramTypes);
   }
 
   private static Method findMethodForClass(Class<?> shillelagh, String methodName, Class<?>[] paramTypes) throws NoSuchMethodException {

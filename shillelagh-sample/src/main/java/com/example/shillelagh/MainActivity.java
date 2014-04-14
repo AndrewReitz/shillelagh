@@ -22,5 +22,8 @@ public class MainActivity extends Activity {
 
     Shillelagh.insert(author);
     Shillelagh.insert(book);
+
+    author.setName("Wilson");
+    Shillelagh.update(author);
   }
 }
