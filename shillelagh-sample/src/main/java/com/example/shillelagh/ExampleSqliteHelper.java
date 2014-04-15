@@ -4,6 +4,9 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.example.shillelagh.model.Author;
+import com.example.shillelagh.model.Book;
+
 import shillelagh.Shillelagh;
 
 public class ExampleSqliteHelper extends SQLiteOpenHelper {

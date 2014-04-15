@@ -1,8 +1,8 @@
-package com.example.shillelagh;
+package com.example.shillelagh.model;
 
 import shillelagh.Id;
 
-public class BaseDbModel {
+public class Base {
   @Id long id;
 
   public long getId() {

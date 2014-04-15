@@ -1,4 +1,4 @@
-package com.example.shillelagh;
+package com.example.shillelagh.model;
 
 import java.util.Date;
 
@@ -6,7 +6,7 @@ import shillelagh.Field;
 import shillelagh.Table;
 
 @Table
-public class Book extends BaseDbModel {
+public class Book extends Base {
   @Field String title;
 //  @Field Author author;
   @Field Date published;
