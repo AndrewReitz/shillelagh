@@ -14,6 +14,7 @@ import static shillelagh.internal.ShillelaghInjector.DROP_TABLE_FUNCTION;
 import static shillelagh.internal.ShillelaghInjector.INSERT_OBJECT_FUNCTION;
 import static shillelagh.internal.ShillelaghInjector.UPDATE_ID_FUNCTION;
 import static shillelagh.internal.ShillelaghInjector.UPDATE_OBJECT_FUNCTION;
+import static shillelagh.internal.ShillelaghInjector.DELETE_OBJECT_FUNCTION;
 import static shillelagh.internal.ShillelaghProcessor.SUFFIX;
 
 public final class Shillelagh {
@@ -88,7 +89,29 @@ public final class Shillelagh {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new UnableToCreateTableException("Unable to insert into " + tableObject.getClass().getName(), e);
+      throw new UnableToCreateTableException("Unable to update " + tableObject.getClass().getName(), e);
+    }
+  }
+
+  public static void delete(Object tableObject) {
+    try {
+      final Class<?> shillelagh = findShillelaghForClass(tableObject.getClass());
+      getAndExecuteSqlStatement(sqliteOpenHelper.getWritableDatabase(), shillelagh, DELETE_OBJECT_FUNCTION, tableObject);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new UnableToCreateTableException("Unable to update " + tableObject.getClass().getName(), e);
+    }
+  }
+
+  public static void delete(Class<?> tableObject, long id) {
+    try {
+      final Class<?> shillelagh = findShillelaghForClass(tableObject);
+      getAndExecuteSqlStatement(sqliteOpenHelper.getWritableDatabase(), shillelagh, DELETE_OBJECT_FUNCTION, id);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new UnableToCreateTableException("Unable to update " + tableObject.getName(), e);
     }
   }
 

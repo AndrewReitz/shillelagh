@@ -14,6 +14,7 @@ public class ShillelaghInjector {
   public static final String INSERT_OBJECT_FUNCTION = "getInsertSql";
   public static final String UPDATE_OBJECT_FUNCTION = "getUpdateSql";
   public static final String UPDATE_ID_FUNCTION = "updateColumnId";
+  public static final String DELETE_OBJECT_FUNCTION = "getDeleteSql";
 
   /**
    * SQL statement to select the id of the last inserted row. Does not end with ; in order to be
@@ -56,11 +57,15 @@ public class ShillelaghInjector {
     builder.append("\n");
     emmitDropTableSql(builder);
     builder.append("\n");
-    emmitInsertObject(builder);
+    emmitInsertSql(builder);
     builder.append("\n");
-    emmitUpdateObject(builder);
+    emmitUpdateSql(builder);
     builder.append("\n");
     emmitUpdateColumnId(builder);
+    builder.append("\n");
+    emmitDeleteSqlWithId(builder);
+    builder.append("\n");
+    emmitDeleteSqlWithObject(builder);
     builder.append("}\n");
     return builder.toString();
   }
@@ -80,7 +85,7 @@ public class ShillelaghInjector {
   }
 
   /** Creates the function for getting the insert sql string to insert a new value into the database */
-  private void emmitInsertObject(StringBuilder builder) {
+  private void emmitInsertSql(StringBuilder builder) {
     builder.append("  public static String ").append(INSERT_OBJECT_FUNCTION).append("(").append(targetClass).append(" element) {\n");
     builder.append("    return \"INSERT INTO ").append(tableObject.getTableName());
     builder.append(" (");
@@ -122,7 +127,7 @@ public class ShillelaghInjector {
   }
 
   /** Creates the function for getting the update sql statement */
-  private void emmitUpdateObject(StringBuilder builder) {
+  private void emmitUpdateSql(StringBuilder builder) {
     builder.append("  public static String ").append(UPDATE_OBJECT_FUNCTION).append("(").append(targetClass).append(" element) {\n");
     builder.append("    return \"UPDATE ").append(tableObject.getTableName()).append(" SET ");
 
@@ -145,6 +150,20 @@ public class ShillelaghInjector {
     builder.append(columnUpdates.toString());
     builder.append(" WHERE ").append(tableObject.getIdColumnName()).append(" = \" + element.").append(tableObject.getIdColumnName()).append(" + \"");
     builder.append("\";\n");
+    builder.append("  }\n");
+  }
+
+  /** Creates the function for getting the delete sql statement */
+  private void emmitDeleteSqlWithObject(StringBuilder builder) {
+    builder.append("  public static String ").append(DELETE_OBJECT_FUNCTION).append("(").append(targetClass).append(" element) {\n");
+    builder.append("    return ").append(DELETE_OBJECT_FUNCTION).append("(element.").append(tableObject.getIdColumnName()).append(");");
+    builder.append("  }\n");
+  }
+
+  /** Creates the function for getting the delete sql statement */
+  private void emmitDeleteSqlWithId(StringBuilder builder) {
+    builder.append("  public static String ").append(DELETE_OBJECT_FUNCTION).append("(Long id) {\n");
+    builder.append("    return \"DELETE FROM ").append(tableObject.getTableName()).append(" WHERE id = \" + id;");
     builder.append("  }\n");
   }
 }

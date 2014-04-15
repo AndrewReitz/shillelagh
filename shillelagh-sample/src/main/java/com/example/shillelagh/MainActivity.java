@@ -26,5 +26,8 @@ public class MainActivity extends Activity {
 
     author.setName("Wilson");
     Shillelagh.update(author);
+
+    Shillelagh.delete(author);
+    Shillelagh.delete(Book.class, book.getId());
   }
 }
