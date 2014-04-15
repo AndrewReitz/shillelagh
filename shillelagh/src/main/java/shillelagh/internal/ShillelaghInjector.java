@@ -92,7 +92,6 @@ public class ShillelaghInjector {
       TableColumn column = iterator.next();
       columns.append(column.getColumnName());
       if (column.getType() == SqliteType.TEXT) {
-        // TODO Checks to make sure elements are accessible
         values.append("'\" + element.").append(column.getColumnName()).append(" + \"'");
       } else if (column.isDate()) {
         values.append("\" + element.").append(column.getColumnName()).append(".getTime() + \"");
@@ -131,7 +130,13 @@ public class ShillelaghInjector {
     Iterator<TableColumn> iterator = tableObject.getColumns().iterator();
     while (iterator.hasNext()) {
       TableColumn column = iterator.next();
-      columnUpdates.append(column.getColumnName()).append(" = \" + element.").append(column.getColumnName()).append(" + \"");
+      if (column.getType() == SqliteType.TEXT) {
+        columnUpdates.append(column.getColumnName()).append(" = \'\" + element.").append(column.getColumnName()).append(" + \"\'");
+      } else if (column.isDate()) {
+        columnUpdates.append(column.getColumnName()).append(" = \" + element.").append(column.getColumnName()).append(".getTime() + \"");
+      } else {
+        columnUpdates.append(column.getColumnName()).append(" = \" + element.").append(column.getColumnName()).append(" + \"");
+      }
       if (iterator.hasNext()) {
         columnUpdates.append(", ");
       }
