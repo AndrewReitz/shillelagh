@@ -1,5 +1,6 @@
 package shillelagh;
 
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
@@ -7,14 +8,16 @@ import android.util.Log;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import static shillelagh.internal.ShillelaghInjector.CREATE_TABLE_FUNCTION;
+import static shillelagh.internal.ShillelaghInjector.DELETE_OBJECT_FUNCTION;
 import static shillelagh.internal.ShillelaghInjector.DROP_TABLE_FUNCTION;
 import static shillelagh.internal.ShillelaghInjector.INSERT_OBJECT_FUNCTION;
+import static shillelagh.internal.ShillelaghInjector.MAP_OBJECT_FUNCTION;
 import static shillelagh.internal.ShillelaghInjector.UPDATE_ID_FUNCTION;
 import static shillelagh.internal.ShillelaghInjector.UPDATE_OBJECT_FUNCTION;
-import static shillelagh.internal.ShillelaghInjector.DELETE_OBJECT_FUNCTION;
 import static shillelagh.internal.ShillelaghProcessor.SUFFIX;
 
 public final class Shillelagh {
@@ -110,9 +113,47 @@ public final class Shillelagh {
       getAndExecuteSqlStatement(sqliteOpenHelper.getWritableDatabase(), shillelagh, DELETE_OBJECT_FUNCTION, id);
     } catch (RuntimeException e) {
       throw e;
-    } catch (Exception e) {
+    } catch (Exception e) { // TODO FIX ALL THESE EXCEPTIONS
       throw new UnableToCreateTableException("Unable to update " + tableObject.getName(), e);
     }
+  }
+
+  public static <T extends List> T map(Class<?> tableObject, Cursor cursor) {
+    try {
+      final Class<?> shillelagh = findShillelaghForClass(tableObject);
+      final Method mapMethod = findMethodForClass(shillelagh, MAP_OBJECT_FUNCTION, cursor);
+      return (T) mapMethod.invoke(null, cursor);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e); // TODO Actually create an exception type...
+    }
+  }
+
+  public static Cursor query(boolean distinct, String table, String[] columns,
+                             String selection, String[] selectionArgs, String groupBy,
+                             String having, String orderBy, String limit) {
+    return sqliteOpenHelper.getReadableDatabase()
+            .query(distinct, table, columns, selection, selectionArgs,
+                    groupBy, having, orderBy, limit);
+  }
+
+  public static Cursor query(String table, String[] columns, String selection,
+                             String[] selectionArgs, String groupBy, String having,
+                             String orderBy) {
+    return sqliteOpenHelper.getReadableDatabase().query(table, columns, selection, selectionArgs, groupBy, having, orderBy);
+  }
+
+  public static Cursor query(String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit) {
+    return sqliteOpenHelper.getReadableDatabase().query(table, columns, selection, selectionArgs, groupBy, having, orderBy, limit);
+  }
+
+  public static Cursor rawQuery(String sql) {
+    return sqliteOpenHelper.getReadableDatabase().rawQuery(sql, null);
+  }
+
+  public static Cursor rawQuery(String sql, String[] selectionArgs) {
+    return sqliteOpenHelper.getReadableDatabase().rawQuery(sql, selectionArgs);
   }
 
   private static Class<?> findShillelaghForClass(Class<?> clazz) throws ClassNotFoundException {
@@ -172,7 +213,7 @@ public final class Shillelagh {
     if (debug) Log.d(TAG, String.format(format, args));
   }
 
-  public static final class UnableToCreateTableException extends RuntimeException {
+  static final class UnableToCreateTableException extends RuntimeException {
     UnableToCreateTableException(String message, Throwable cause) {
       super(message, cause);
     }

@@ -1,8 +1,6 @@
 package com.example.shillelagh;
 
 import android.app.Application;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import shillelagh.Shillelagh;

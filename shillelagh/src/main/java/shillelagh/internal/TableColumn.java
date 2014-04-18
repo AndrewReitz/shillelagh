@@ -1,6 +1,7 @@
 package shillelagh.internal;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.type.TypeMirror;
 
 import shillelagh.SqliteType;
@@ -27,8 +28,12 @@ class TableColumn {
     return columnName;
   }
 
-  SqliteType getType() {
+  SqliteType getSqlType() {
     return type;
+  }
+
+  String getType()  {
+    return element.asType().toString();
   }
 
   boolean isDate() {

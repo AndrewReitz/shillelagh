@@ -15,6 +15,8 @@ public class ShillelaghInjector {
   public static final String UPDATE_OBJECT_FUNCTION = "getUpdateSql";
   public static final String UPDATE_ID_FUNCTION = "updateColumnId";
   public static final String DELETE_OBJECT_FUNCTION = "getDeleteSql";
+  public static final String SELECT_OBJECT_FUNCTION = "select";
+  public static final String MAP_OBJECT_FUNCTION = "map";
 
   /**
    * SQL statement to select the id of the last inserted row. Does not end with ; in order to be
@@ -51,7 +53,11 @@ public class ShillelaghInjector {
     builder.append("// Generated code from Shillelagh. Do not modify!\n");
     builder.append("package ").append(classPackage).append(";\n\n");
     builder.append("import android.database.Cursor;\n");
+    builder.append("import android.database.DatabaseUtils;\n");
     builder.append("import android.database.sqlite.SQLiteDatabase;\n\n");
+    builder.append("import java.util.ArrayList;\n");
+    builder.append("import java.util.Date;\n");
+    builder.append("import java.util.List;\n\n");
     builder.append("public class ").append(className).append(" {\n");
     emmitCreateTableSql(builder);
     builder.append("\n");
@@ -66,6 +72,8 @@ public class ShillelaghInjector {
     emmitDeleteSqlWithId(builder);
     builder.append("\n");
     emmitDeleteSqlWithObject(builder);
+    builder.append("\n");
+    emmitMapCursorToObject(builder);
     builder.append("}\n");
     return builder.toString();
   }
@@ -96,7 +104,7 @@ public class ShillelaghInjector {
     while (iterator.hasNext()) {
       TableColumn column = iterator.next();
       columns.append(column.getColumnName());
-      if (column.getType() == SqliteType.TEXT) {
+      if (column.getSqlType() == SqliteType.TEXT) {
         values.append("'\" + element.").append(column.getColumnName()).append(" + \"'");
       } else if (column.isDate()) {
         values.append("\" + element.").append(column.getColumnName()).append(".getTime() + \"");
@@ -119,9 +127,7 @@ public class ShillelaghInjector {
   private void emmitUpdateColumnId(StringBuilder builder) {
     // Updates the column id for the last inserted row
     builder.append("  public static void ").append(UPDATE_ID_FUNCTION).append("(").append(targetClass).append(" element, SQLiteDatabase db) {\n");
-    builder.append("    final Cursor cursor = db.rawQuery(\"").append(String.format(GET_ID_OF_LAST_INSERTED_ROW_SQL, tableObject.getTableName())).append("\", null);\n");
-    builder.append("    cursor.moveToFirst();\n");
-    builder.append("    long id = cursor.getLong(0);\n");
+    builder.append("    long id = DatabaseUtils.longForQuery(db, \"").append(String.format(GET_ID_OF_LAST_INSERTED_ROW_SQL, tableObject.getTableName())).append("\", null);\n");
     builder.append("    element.").append(tableObject.getIdColumnName()).append(" = id;\n");
     builder.append("  }\n");
   }
@@ -135,7 +141,7 @@ public class ShillelaghInjector {
     Iterator<TableColumn> iterator = tableObject.getColumns().iterator();
     while (iterator.hasNext()) {
       TableColumn column = iterator.next();
-      if (column.getType() == SqliteType.TEXT) {
+      if (column.getSqlType() == SqliteType.TEXT) {
         columnUpdates.append(column.getColumnName()).append(" = \'\" + element.").append(column.getColumnName()).append(" + \"\'");
       } else if (column.isDate()) {
         columnUpdates.append(column.getColumnName()).append(" = \" + element.").append(column.getColumnName()).append(".getTime() + \"");
@@ -156,7 +162,7 @@ public class ShillelaghInjector {
   /** Creates the function for getting the delete sql statement */
   private void emmitDeleteSqlWithObject(StringBuilder builder) {
     builder.append("  public static String ").append(DELETE_OBJECT_FUNCTION).append("(").append(targetClass).append(" element) {\n");
-    builder.append("    return ").append(DELETE_OBJECT_FUNCTION).append("(element.").append(tableObject.getIdColumnName()).append(");");
+    builder.append("    return ").append(DELETE_OBJECT_FUNCTION).append("(element.").append(tableObject.getIdColumnName()).append(");\n");
     builder.append("  }\n");
   }
 
@@ -165,5 +171,54 @@ public class ShillelaghInjector {
     builder.append("  public static String ").append(DELETE_OBJECT_FUNCTION).append("(Long id) {\n");
     builder.append("    return \"DELETE FROM ").append(tableObject.getTableName()).append(" WHERE id = \" + id;");
     builder.append("  }\n");
+  }
+
+  /** Creates the function for mapping a cursor to the object after executing a sql statement */
+  private void emmitMapCursorToObject(StringBuilder builder) {
+    final String idColumnName = tableObject.getIdColumnName();
+
+    builder.append("  public static List<").append(targetClass).append(">").append(MAP_OBJECT_FUNCTION).append("(Cursor cursor) {\n");
+    builder.append("    List<").append(targetClass).append("> tableObjects = new ArrayList<>();\n");
+    builder.append("    if (cursor.moveToFirst()) {\n");
+    builder.append("      for(;cursor.moveToNext();) {\n");
+    builder.append("        ").append(targetClass).append(" tableObject = new ").append(targetClass).append("();\n");
+    builder.append("        tableObject.").append(idColumnName).append(" = cursor.getLong(cursor.getColumnIndex(\"").append(idColumnName).append("\"));\n");
+    for (TableColumn column : tableObject.getColumns()) {
+      String columnName = column.getColumnName();
+      if (column.isDate()) {
+        builder.append("        tableObject.").append(columnName).append(" = new Date(cursor.").append(getCursorCommand("long")).append("(cursor.getColumnIndex(\"").append(columnName).append("\")));\n");
+      } else {
+        builder.append("        tableObject.").append(columnName).append(" = cursor.").append(getCursorCommand(column.getType())).append("(cursor.getColumnIndex(\"").append(columnName).append("\"));\n");
+      }
+    }
+    builder.append("        tableObjects.add(tableObject);\n");
+    builder.append("      }\n");
+    builder.append("    }\n");
+    builder.append("  return tableObjects;");
+    builder.append("  }\n");
+  }
+
+  /**
+   * Maps a type to the corresponding Cursor get function. For mapping objects between the database
+   * and java
+   */
+  private String getCursorCommand(String type) {
+    logger.d("getCursorCommand: type = " + type);
+    switch (type) {
+      case "int":
+        return "getInt";
+      case "double":
+        return "getDouble";
+      case "float":
+        return "getFloat";
+      case "long":
+        return "getLong";
+      case "short":
+        return "getShort";
+      case "java.lang.String":
+        return "getString";
+      default:
+        return "getBlob";
+    }
   }
 }
