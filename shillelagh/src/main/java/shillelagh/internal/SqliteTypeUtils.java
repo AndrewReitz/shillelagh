@@ -2,8 +2,6 @@ package shillelagh.internal;
 
 import javax.lang.model.type.TypeMirror;
 
-import shillelagh.SqliteType;
-
 class SqliteTypeUtils {
 
   private ShillelaghLogger logger;

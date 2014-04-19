@@ -1,4 +1,4 @@
-package shillelagh;
+package shillelagh.internal;
 
 /** Sqlite3 Types */
 public enum SqliteType {

@@ -2,8 +2,6 @@ package shillelagh.internal;
 
 import java.util.Iterator;
 
-import shillelagh.SqliteType;
-
 public class ShillelaghInjector {
 
   /**
