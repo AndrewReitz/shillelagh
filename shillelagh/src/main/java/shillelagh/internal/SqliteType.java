@@ -1,7 +1,7 @@
 package shillelagh.internal;
 
 /** Sqlite3 Types */
-public enum SqliteType {
+enum SqliteType {
     NULL,
     INTEGER,
     REAL,

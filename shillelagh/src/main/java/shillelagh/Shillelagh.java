@@ -23,26 +23,16 @@ import static shillelagh.internal.ShillelaghProcessor.SUFFIX;
 
 public final class Shillelagh {
 
-  private Shillelagh() {
-    // No instantiation
-  }
-
-  /**
-   * SQL statement to select the id of the last inserted row. Does not end with ; in order to be
-   * used with {@link android.database.sqlite.SQLiteDatabase#rawQuery(String, String[])}
-   */
-  private static final String GET_ID_OF_LAST_INSERTED_ROW_SQL = "SELECT ROWID FROM Book ORDER BY ROWID DESC LIMIT 1";
-
   private static final Map<Class<?>, Class<?>> CACHED_CLASSES = new LinkedHashMap<>();
   private static final Map<String, Method> CACHED_METHODS = new LinkedHashMap<>();
 
   private static final String TAG = "Shillelagh";
   private static boolean debug = false;
 
-  private static SQLiteOpenHelper sqliteOpenHelper;
+  private final SQLiteOpenHelper sqliteOpenHelper;
 
-  public static void init(SQLiteOpenHelper soh) {
-    sqliteOpenHelper = soh;
+  public Shillelagh(SQLiteOpenHelper sqliteOpenHelper) {
+    this.sqliteOpenHelper = sqliteOpenHelper;
   }
 
   /** Turn on/off debug logging. */
@@ -50,7 +40,7 @@ public final class Shillelagh {
     Shillelagh.debug = debug;
   }
 
-  /** Creates the table from the object. The DB must be passed in from the SqliteHelper otherwise an illegal state exception will occur */ // TODO Figure out better solution
+  /** Creates the table from the object. The DB must be passed in from the SqliteHelper otherwise an illegal state exception will occur */
   public static void createTable(SQLiteDatabase db, Class<?> tableObject) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableObject);
@@ -58,7 +48,7 @@ public final class Shillelagh {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new UnableToCreateTableException("Unable to create table for " + tableObject.getName(), e); //TODO tableOjbect.getName ! always = to the table name
+      throw new RuntimeException("Unable to create table for " + tableObject.getName(), e);
     }
   }
 
@@ -70,11 +60,11 @@ public final class Shillelagh {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new UnableToCreateTableException("Unable to drop table for " + tableObject.getName(), e);
+      throw new RuntimeException("Unable to drop table for " + tableObject.getName(), e);
     }
   }
 
-  public static void insert(Object tableObject) {
+  public void insert(Object tableObject) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableObject.getClass());
       getAndExecuteSqlStatement(sqliteOpenHelper.getWritableDatabase(), shillelagh, INSERT_OBJECT_FUNCTION, tableObject);
@@ -84,40 +74,40 @@ public final class Shillelagh {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new UnableToCreateTableException("Unable to insert into " + tableObject.getClass().getName(), e);
+      throw new RuntimeException("Unable to insert into " + tableObject.getClass().getName(), e);
     }
   }
 
-  public static void update(Object tableObject) {
+  public void update(Object tableObject) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableObject.getClass());
       getAndExecuteSqlStatement(sqliteOpenHelper.getWritableDatabase(), shillelagh, UPDATE_OBJECT_FUNCTION, tableObject);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new UnableToCreateTableException("Unable to update " + tableObject.getClass().getName(), e);
+      throw new RuntimeException("Unable to update " + tableObject.getClass().getName(), e);
     }
   }
 
-  public static void delete(Object tableObject) {
+  public void delete(Object tableObject) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableObject.getClass());
       getAndExecuteSqlStatement(sqliteOpenHelper.getWritableDatabase(), shillelagh, DELETE_OBJECT_FUNCTION, tableObject);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new UnableToCreateTableException("Unable to update " + tableObject.getClass().getName(), e);
+      throw new RuntimeException("Unable to update " + tableObject.getClass().getName(), e);
     }
   }
 
-  public static void delete(Class<?> tableObject, long id) {
+  public void delete(final Class<?> tableObject, final long id) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableObject);
       getAndExecuteSqlStatement(sqliteOpenHelper.getWritableDatabase(), shillelagh, DELETE_OBJECT_FUNCTION, id);
     } catch (RuntimeException e) {
       throw e;
-    } catch (Exception e) { // TODO FIX ALL THESE EXCEPTIONS
-      throw new UnableToCreateTableException("Unable to update " + tableObject.getName(), e);
+    } catch (Exception e) {
+      throw new RuntimeException("Unable to delete from " + tableObject.getName() + " with id = " + id, e);
     }
   }
 
@@ -133,7 +123,7 @@ public final class Shillelagh {
     }
   }
 
-  public static Cursor query(boolean distinct, String table, String[] columns,
+  public Cursor query(boolean distinct, String table, String[] columns,
                              String selection, String[] selectionArgs, String groupBy,
                              String having, String orderBy, String limit) {
     return sqliteOpenHelper.getReadableDatabase()
@@ -141,36 +131,31 @@ public final class Shillelagh {
                     groupBy, having, orderBy, limit);
   }
 
-  public static Cursor query(boolean distinct, String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit, CancellationSignal cancellationSignal) {
+  public Cursor query(boolean distinct, String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit, CancellationSignal cancellationSignal) {
     return sqliteOpenHelper.getReadableDatabase().query(distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy, limit, cancellationSignal);
   }
 
-  public static Cursor query(String table, String[] columns, String selection,
+  public Cursor query(String table, String[] columns, String selection,
                              String[] selectionArgs, String groupBy, String having,
                              String orderBy) {
     return sqliteOpenHelper.getReadableDatabase().query(table, columns, selection, selectionArgs, groupBy, having, orderBy);
   }
 
-  public static Cursor query(String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit) {
+  public Cursor query(String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit) {
     return sqliteOpenHelper.getReadableDatabase().query(table, columns, selection, selectionArgs, groupBy, having, orderBy, limit);
   }
 
-  public static Cursor rawQuery(String sql) {
+  public Cursor rawQuery(String sql) {
     return sqliteOpenHelper.getReadableDatabase().rawQuery(sql, null);
   }
 
-  public static Cursor rawQuery(String sql, String[] selectionArgs) {
+  public Cursor rawQuery(String sql, String[] selectionArgs) {
     return sqliteOpenHelper.getReadableDatabase().rawQuery(sql, selectionArgs);
   }
 
-  public static Cursor rawQuery(String sql, String[] selectionArgs,
+  public Cursor rawQuery(String sql, String[] selectionArgs,
                                 CancellationSignal cancellationSignal) {
     return sqliteOpenHelper.getReadableDatabase().rawQuery(sql, selectionArgs, cancellationSignal);
-  }
-
-  // TODO REMOVE FROM PROD
-  public static SQLiteDatabase getReadableDatabase() {
-    return sqliteOpenHelper.getReadableDatabase();
   }
 
   private static Class<?> findShillelaghForClass(Class<?> clazz) throws ClassNotFoundException {
@@ -228,11 +213,5 @@ public final class Shillelagh {
 
   private static void log(String format, Object... args) {
     if (debug) Log.d(TAG, String.format(format, args));
-  }
-
-  static final class UnableToCreateTableException extends RuntimeException {
-    UnableToCreateTableException(String message, Throwable cause) {
-      super(message, cause);
-    }
   }
 }

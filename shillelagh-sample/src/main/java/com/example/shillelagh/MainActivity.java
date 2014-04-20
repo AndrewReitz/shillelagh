@@ -22,6 +22,9 @@ public class MainActivity extends Activity {
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
+    ShillelaghApp shillelaghApp = ShillelaghApp.get(this);
+    Shillelagh shillelagh = shillelaghApp.getShillelagh();
+
     Author author = new Author();
     author.setName("Icculus");
 
@@ -32,21 +35,30 @@ public class MainActivity extends Activity {
     book.setPublished(Calendar.getInstance().getTime());
     book.setTitle("The Helping Phriendly Book");
 
-    Shillelagh.insert(author);
-    Shillelagh.insert(author2);
-    Shillelagh.insert(book);
+    shillelagh.insert(author);
+    shillelagh.insert(author2);
+    shillelagh.insert(book);
 
     author.setName("Wilson");
-    Shillelagh.update(author);
+    shillelagh.update(author);
 
-    Cursor cursor = Shillelagh.rawQuery("SELECT * FROM Author"); //id, name
+    Cursor cursor = shillelagh.rawQuery("SELECT * FROM Author");
     List<Author> authors = Shillelagh.map(Author.class, cursor);
-    Log.d(TAG, String.format("Author List Size: %d", authors.size()));
     for(Author a : authors) {
       Log.d(TAG, String.format("Author: %s", a.getName()));
     }
 
-    Shillelagh.delete(author);
-    Shillelagh.delete(Book.class, book.getId());
+    Cursor bookCurson = shillelagh.rawQuery("SELECT * FROM Book");
+    List<Book> books = Shillelagh.map(Book.class, bookCurson);
+    for(Book b : books) {
+      Log.d(TAG, String.format("Book: %s", book));
+    }
+
+
+    shillelagh.delete(Book.class, book.getId());
+
+    for (Author author1 : authors) {
+      shillelagh.delete(author1);
+    }
   }
 }
