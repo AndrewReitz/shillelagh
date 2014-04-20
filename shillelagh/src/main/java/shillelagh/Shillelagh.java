@@ -40,7 +40,7 @@ public final class Shillelagh {
     Shillelagh.debug = debug;
   }
 
-  /** Creates the table from the object. The DB must be passed in from the SqliteHelper otherwise an illegal state exception will occur */
+  /** Creates the table from the object. The DB must be passed in from the SQLiteOpenHelper otherwise an illegal state exception will occur */
   public static void createTable(SQLiteDatabase db, Class<?> tableObject) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableObject);
@@ -48,11 +48,11 @@ public final class Shillelagh {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new RuntimeException("Unable to create table for " + tableObject.getName(), e);
+      throw new RuntimeException("Unable to create table for " + tableObject, e);
     }
   }
 
-  /** Drops the table created from the table object. The DB must be passed in from the SqliteHelper otherwise an illegal state exception will occur */
+  /** Drops the table created from the table object. The DB must be passed in from the SQLiteOpenHelper otherwise an illegal state exception will occur */
   public static void dropTable(SQLiteDatabase db, Class<?> tableObject) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableObject);
@@ -60,102 +60,22 @@ public final class Shillelagh {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new RuntimeException("Unable to drop table for " + tableObject.getName(), e);
-    }
-  }
-
-  public void insert(Object tableObject) {
-    try {
-      final Class<?> shillelagh = findShillelaghForClass(tableObject.getClass());
-      getAndExecuteSqlStatement(sqliteOpenHelper.getWritableDatabase(), shillelagh, INSERT_OBJECT_FUNCTION, tableObject);
-      final SQLiteDatabase db = sqliteOpenHelper.getReadableDatabase();
-      final Method method = findMethodForClass(shillelagh, UPDATE_ID_FUNCTION, tableObject, db);
-      method.invoke(null, tableObject, db);
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new RuntimeException("Unable to insert into " + tableObject.getClass().getName(), e);
-    }
-  }
-
-  public void update(Object tableObject) {
-    try {
-      final Class<?> shillelagh = findShillelaghForClass(tableObject.getClass());
-      getAndExecuteSqlStatement(sqliteOpenHelper.getWritableDatabase(), shillelagh, UPDATE_OBJECT_FUNCTION, tableObject);
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new RuntimeException("Unable to update " + tableObject.getClass().getName(), e);
-    }
-  }
-
-  public void delete(Object tableObject) {
-    try {
-      final Class<?> shillelagh = findShillelaghForClass(tableObject.getClass());
-      getAndExecuteSqlStatement(sqliteOpenHelper.getWritableDatabase(), shillelagh, DELETE_OBJECT_FUNCTION, tableObject);
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new RuntimeException("Unable to update " + tableObject.getClass().getName(), e);
-    }
-  }
-
-  public void delete(final Class<?> tableObject, final long id) {
-    try {
-      final Class<?> shillelagh = findShillelaghForClass(tableObject);
-      getAndExecuteSqlStatement(sqliteOpenHelper.getWritableDatabase(), shillelagh, DELETE_OBJECT_FUNCTION, id);
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new RuntimeException("Unable to delete from " + tableObject.getName() + " with id = " + id, e);
+      throw new RuntimeException("Unable to drop table for " + tableObject, e);
     }
   }
 
   public static <T extends List> T map(Class<?> tableObject, Cursor cursor) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableObject);
-      final Method mapMethod = findMethodForClass(shillelagh, MAP_OBJECT_FUNCTION, new Class<?>[] {Cursor.class});
+      final Method mapMethod = findMethodForClass(shillelagh, MAP_OBJECT_FUNCTION,
+          new Class<?>[]{Cursor.class});
+      //noinspection unchecked
       return (T) mapMethod.invoke(null, cursor);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new RuntimeException(e); // TODO Actually create an exception type...
+      throw new RuntimeException("Unable to map cursor to " + tableObject, e);
     }
-  }
-
-  public Cursor query(boolean distinct, String table, String[] columns,
-                             String selection, String[] selectionArgs, String groupBy,
-                             String having, String orderBy, String limit) {
-    return sqliteOpenHelper.getReadableDatabase()
-            .query(distinct, table, columns, selection, selectionArgs,
-                    groupBy, having, orderBy, limit);
-  }
-
-  public Cursor query(boolean distinct, String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit, CancellationSignal cancellationSignal) {
-    return sqliteOpenHelper.getReadableDatabase().query(distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy, limit, cancellationSignal);
-  }
-
-  public Cursor query(String table, String[] columns, String selection,
-                             String[] selectionArgs, String groupBy, String having,
-                             String orderBy) {
-    return sqliteOpenHelper.getReadableDatabase().query(table, columns, selection, selectionArgs, groupBy, having, orderBy);
-  }
-
-  public Cursor query(String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit) {
-    return sqliteOpenHelper.getReadableDatabase().query(table, columns, selection, selectionArgs, groupBy, having, orderBy, limit);
-  }
-
-  public Cursor rawQuery(String sql) {
-    return sqliteOpenHelper.getReadableDatabase().rawQuery(sql, null);
-  }
-
-  public Cursor rawQuery(String sql, String[] selectionArgs) {
-    return sqliteOpenHelper.getReadableDatabase().rawQuery(sql, selectionArgs);
-  }
-
-  public Cursor rawQuery(String sql, String[] selectionArgs,
-                                CancellationSignal cancellationSignal) {
-    return sqliteOpenHelper.getReadableDatabase().rawQuery(sql, selectionArgs, cancellationSignal);
   }
 
   private static Class<?> findShillelaghForClass(Class<?> clazz) throws ClassNotFoundException {
@@ -172,8 +92,11 @@ public final class Shillelagh {
     return shillelagh;
   }
 
-  private static void getAndExecuteSqlStatement(SQLiteDatabase database, Class<?> shillelagh, String methodName, Object... params)
-          throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+  private static void getAndExecuteSqlStatement(SQLiteDatabase database,
+                                                Class<?> shillelagh,
+                                                String methodName,
+                                                Object... params
+  ) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
     final Method method = findMethodForClass(shillelagh, methodName, params);
     String sql = (String) method.invoke(null, params);
     executeSql(database, sql);
@@ -187,12 +110,15 @@ public final class Shillelagh {
     return paramTypes;
   }
 
-  private static Method findMethodForClass(Class<?> shillelagh, String methodName, Object... params) throws NoSuchMethodException {
+  private static Method findMethodForClass(Class<?> shillelagh,
+                                           String methodName, Object... params
+  ) throws NoSuchMethodException {
     Class<?>[] paramTypes = getParamTypes(params);
     return findMethodForClass(shillelagh, methodName, paramTypes);
   }
 
-  private static Method findMethodForClass(Class<?> shillelagh, String methodName, Class<?>[] paramTypes) throws NoSuchMethodException {
+  private static Method findMethodForClass(Class<?> shillelagh, String methodName,
+                                           Class<?>[] paramTypes) throws NoSuchMethodException {
     String fqMethodName = shillelagh.getCanonicalName() + "#" + methodName;
     Method method = CACHED_METHODS.get(fqMethodName);
     if (method != null) {
@@ -213,5 +139,100 @@ public final class Shillelagh {
 
   private static void log(String format, Object... args) {
     if (debug) Log.d(TAG, String.format(format, args));
+  }
+
+  /** Insert the object into the table */
+  public void insert(Object tableObject) {
+    try {
+      final Class<?> shillelagh = findShillelaghForClass(tableObject.getClass());
+      getAndExecuteSqlStatement(sqliteOpenHelper.getWritableDatabase(), shillelagh,
+          INSERT_OBJECT_FUNCTION, tableObject);
+      final SQLiteDatabase db = sqliteOpenHelper.getReadableDatabase();
+      final Method method = findMethodForClass(shillelagh, UPDATE_ID_FUNCTION, tableObject, db);
+      method.invoke(null, tableObject, db);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException("Unable to insert into " + tableObject, e);
+    }
+  }
+
+  public void update(Object tableObject) {
+    try {
+      final Class<?> shillelagh = findShillelaghForClass(tableObject.getClass());
+      getAndExecuteSqlStatement(sqliteOpenHelper.getWritableDatabase(), shillelagh,
+          UPDATE_OBJECT_FUNCTION, tableObject);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException("Unable to update " + tableObject, e);
+    }
+  }
+
+  public void delete(Object tableObject) {
+    try {
+      final Class<?> shillelagh = findShillelaghForClass(tableObject.getClass());
+      getAndExecuteSqlStatement(sqliteOpenHelper.getWritableDatabase(), shillelagh,
+          DELETE_OBJECT_FUNCTION, tableObject);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException("Unable to update " + tableObject.getClass().getName(), e);
+    }
+  }
+
+  public void delete(final Class<?> tableObject, final long id) {
+    try {
+      final Class<?> shillelagh = findShillelaghForClass(tableObject);
+      getAndExecuteSqlStatement(sqliteOpenHelper.getWritableDatabase(), shillelagh,
+          DELETE_OBJECT_FUNCTION, id);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException("Unable to delete from " + tableObject + " with id = " + id, e);
+    }
+  }
+
+  public Cursor query(boolean distinct, String table, String[] columns,
+                      String selection, String[] selectionArgs, String groupBy,
+                      String having, String orderBy, String limit) {
+    return sqliteOpenHelper.getReadableDatabase()
+        .query(distinct, table, columns, selection, selectionArgs,
+            groupBy, having, orderBy, limit);
+  }
+
+  public Cursor query(boolean distinct, String table, String[] columns,
+                      String selection, String[] selectionArgs, String groupBy,
+                      String having, String orderBy, String limit,
+                      CancellationSignal cancellationSignal) {
+    return sqliteOpenHelper.getReadableDatabase()
+        .query(distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy,
+            limit, cancellationSignal);
+  }
+
+  public Cursor query(String table, String[] columns, String selection,
+                      String[] selectionArgs, String groupBy, String having,
+                      String orderBy) {
+    return sqliteOpenHelper.getReadableDatabase().query(table, columns, selection,
+        selectionArgs, groupBy, having, orderBy);
+  }
+
+  public Cursor query(String table, String[] columns, String selection, String[] selectionArgs,
+                      String groupBy, String having, String orderBy, String limit) {
+    return sqliteOpenHelper.getReadableDatabase().query(table, columns, selection, selectionArgs,
+        groupBy, having, orderBy, limit);
+  }
+
+  public Cursor rawQuery(String sql) {
+    return sqliteOpenHelper.getReadableDatabase().rawQuery(sql, null);
+  }
+
+  public Cursor rawQuery(String sql, String[] selectionArgs) {
+    return sqliteOpenHelper.getReadableDatabase().rawQuery(sql, selectionArgs);
+  }
+
+  public Cursor rawQuery(String sql, String[] selectionArgs,
+                         CancellationSignal cancellationSignal) {
+    return sqliteOpenHelper.getReadableDatabase().rawQuery(sql, selectionArgs, cancellationSignal);
   }
 }
