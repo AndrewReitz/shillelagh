@@ -3,6 +3,7 @@ package shillelagh;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.CancellationSignal;
 import android.util.Log;
 
 import java.lang.reflect.InvocationTargetException;
@@ -49,10 +50,11 @@ public final class Shillelagh {
     Shillelagh.debug = debug;
   }
 
-  public static void createTable(Class<?> tableObject) {
+  /** Creates the table from the object. The DB must be passed in from the SqliteHelper otherwise an illegal state exception will occur */ // TODO Figure out better solution
+  public static void createTable(SQLiteDatabase db, Class<?> tableObject) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableObject);
-      getAndExecuteSqlStatement(sqliteOpenHelper.getWritableDatabase(), shillelagh, CREATE_TABLE_FUNCTION);
+      getAndExecuteSqlStatement(db, shillelagh, CREATE_TABLE_FUNCTION);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -60,10 +62,11 @@ public final class Shillelagh {
     }
   }
 
-  public static void dropTable(Class<?> tableObject) {
+  /** Drops the table created from the table object. The DB must be passed in from the SqliteHelper otherwise an illegal state exception will occur */
+  public static void dropTable(SQLiteDatabase db, Class<?> tableObject) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableObject);
-      getAndExecuteSqlStatement(sqliteOpenHelper.getWritableDatabase(), shillelagh, DROP_TABLE_FUNCTION);
+      getAndExecuteSqlStatement(db, shillelagh, DROP_TABLE_FUNCTION);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -121,7 +124,7 @@ public final class Shillelagh {
   public static <T extends List> T map(Class<?> tableObject, Cursor cursor) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableObject);
-      final Method mapMethod = findMethodForClass(shillelagh, MAP_OBJECT_FUNCTION, cursor);
+      final Method mapMethod = findMethodForClass(shillelagh, MAP_OBJECT_FUNCTION, new Class<?>[] {Cursor.class});
       return (T) mapMethod.invoke(null, cursor);
     } catch (RuntimeException e) {
       throw e;
@@ -136,6 +139,10 @@ public final class Shillelagh {
     return sqliteOpenHelper.getReadableDatabase()
             .query(distinct, table, columns, selection, selectionArgs,
                     groupBy, having, orderBy, limit);
+  }
+
+  public static Cursor query(boolean distinct, String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit, CancellationSignal cancellationSignal) {
+    return sqliteOpenHelper.getReadableDatabase().query(distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy, limit, cancellationSignal);
   }
 
   public static Cursor query(String table, String[] columns, String selection,
@@ -154,6 +161,16 @@ public final class Shillelagh {
 
   public static Cursor rawQuery(String sql, String[] selectionArgs) {
     return sqliteOpenHelper.getReadableDatabase().rawQuery(sql, selectionArgs);
+  }
+
+  public static Cursor rawQuery(String sql, String[] selectionArgs,
+                                CancellationSignal cancellationSignal) {
+    return sqliteOpenHelper.getReadableDatabase().rawQuery(sql, selectionArgs, cancellationSignal);
+  }
+
+  // TODO REMOVE FROM PROD
+  public static SQLiteDatabase getReadableDatabase() {
+    return sqliteOpenHelper.getReadableDatabase();
   }
 
   private static Class<?> findShillelaghForClass(Class<?> clazz) throws ClassNotFoundException {

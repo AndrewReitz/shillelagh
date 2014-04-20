@@ -1,4 +1,4 @@
-<!-- From: file:/home/areitz/Projects/Shillelagh/shillelagh-sample/src/main/AndroidManifest.xml --><manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" android:versionName="1.0.0" package="com.example.shillelagh">
+<!-- From: file:/home/areitz/Projects/shillelagh/shillelagh-sample/src/main/AndroidManifest.xml --><manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" android:versionName="1.0.0" package="com.example.shillelagh">
     <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="19"/>
 
     <application android:label="@string/app_name" android:name="com.example.shillelagh.ShillelaghApp">

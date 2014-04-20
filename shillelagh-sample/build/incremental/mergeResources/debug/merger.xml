@@ -2,19 +2,19 @@
 <merger>
 
     <dataSet config="main" >
-        <source path="/home/areitz/Projects/Shillelagh/shillelagh-sample/src/main/res" >
+        <source path="/home/areitz/Projects/shillelagh/shillelagh-sample/src/main/res" >
             <file
-                path="/home/areitz/Projects/Shillelagh/shillelagh-sample/src/main/res/values/strings.xml"
+                path="/home/areitz/Projects/shillelagh/shillelagh-sample/src/main/res/values/strings.xml"
                 qualifiers="" >
                 <string name="app_name" >Shillelagh
                 </string>
             </file>
         </source>
-        <source path="/home/areitz/Projects/Shillelagh/shillelagh-sample/build/res/rs/debug" />
-        <source path="/home/areitz/Projects/Shillelagh/shillelagh-sample/build/res/generated/debug" />
+        <source path="/home/areitz/Projects/shillelagh/shillelagh-sample/build/res/rs/debug" />
+        <source path="/home/areitz/Projects/shillelagh/shillelagh-sample/build/res/generated/debug" />
     </dataSet>
     <dataSet config="debug" >
-        <source path="/home/areitz/Projects/Shillelagh/shillelagh-sample/src/debug/res" />
+        <source path="/home/areitz/Projects/shillelagh/shillelagh-sample/src/debug/res" />
     </dataSet>
 
 </merger>
