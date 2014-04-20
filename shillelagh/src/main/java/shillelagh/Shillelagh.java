@@ -201,6 +201,16 @@ public final class Shillelagh {
             groupBy, having, orderBy, limit);
   }
 
+  public <T extends List> T query(Class<?> tableObject, boolean distinct, String table, String[] columns,
+                      String selection, String[] selectionArgs, String groupBy,
+                      String having, String orderBy, String limit) {
+    Cursor results = sqliteOpenHelper.getReadableDatabase()
+        .query(distinct, table, columns, selection, selectionArgs,
+            groupBy, having, orderBy, limit);
+
+    return map(tableObject, results);
+  }
+
   public Cursor query(boolean distinct, String table, String[] columns,
                       String selection, String[] selectionArgs, String groupBy,
                       String having, String orderBy, String limit,
@@ -210,11 +220,29 @@ public final class Shillelagh {
             limit, cancellationSignal);
   }
 
+  public <T extends List> T query(Class<?> tableObject, boolean distinct, String table, String[] columns,
+                                  String selection, String[] selectionArgs, String groupBy,
+                                  String having, String orderBy, String limit,
+                                  CancellationSignal cancellationSignal) {
+    Cursor results = sqliteOpenHelper.getReadableDatabase()
+        .query(distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy,
+            limit, cancellationSignal);
+    return map(tableObject, results);
+  }
+
   public Cursor query(String table, String[] columns, String selection,
                       String[] selectionArgs, String groupBy, String having,
                       String orderBy) {
     return sqliteOpenHelper.getReadableDatabase().query(table, columns, selection,
         selectionArgs, groupBy, having, orderBy);
+  }
+
+  public <T extends List> T query(Class<?> tableObject, String table, String[] columns, String selection,
+                      String[] selectionArgs, String groupBy, String having,
+                      String orderBy) {
+    final Cursor results = sqliteOpenHelper.getReadableDatabase().query(table, columns, selection,
+        selectionArgs, groupBy, having, orderBy);
+    return map(tableObject, results);
   }
 
   public Cursor query(String table, String[] columns, String selection, String[] selectionArgs,
@@ -223,16 +251,39 @@ public final class Shillelagh {
         groupBy, having, orderBy, limit);
   }
 
+  public <T extends List> T query(Class<?> tableObject, String table, String[] columns, String selection, String[] selectionArgs,
+                      String groupBy, String having, String orderBy, String limit) {
+    final Cursor results = sqliteOpenHelper.getReadableDatabase().query(table, columns, selection, selectionArgs,
+        groupBy, having, orderBy, limit);
+
+    return map(tableObject, results);
+  }
+
   public Cursor rawQuery(String sql) {
     return sqliteOpenHelper.getReadableDatabase().rawQuery(sql, null);
+  }
+
+  public <T extends List> T rawQuery(Class<?> tableObject, String sql) {
+    return this.rawQuery(tableObject, sql, null);
   }
 
   public Cursor rawQuery(String sql, String[] selectionArgs) {
     return sqliteOpenHelper.getReadableDatabase().rawQuery(sql, selectionArgs);
   }
 
+  public <T extends List> T rawQuery(Class<?> tableObject, String sql, String[] selectionArgs) {
+    final Cursor result = sqliteOpenHelper.getReadableDatabase().rawQuery(sql, selectionArgs);
+    return map(tableObject, result);
+  }
+
   public Cursor rawQuery(String sql, String[] selectionArgs,
                          CancellationSignal cancellationSignal) {
     return sqliteOpenHelper.getReadableDatabase().rawQuery(sql, selectionArgs, cancellationSignal);
   }
+  public <T extends List> T rawQuery(Class<?> tableObject, String sql, String[] selectionArgs,
+                         CancellationSignal cancellationSignal) {
+    final Cursor results = sqliteOpenHelper.getReadableDatabase().rawQuery(sql, selectionArgs, cancellationSignal);
+    return map(tableObject, results);
+  }
+
 }
