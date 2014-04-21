@@ -3,8 +3,6 @@ package shillelagh.internal;
 import javax.lang.model.element.Element;
 import javax.lang.model.type.TypeMirror;
 
-import shillelagh.SqliteType;
-
 /** Represents the data for a column in a database and mapping it back to its java counter part */
 class TableColumn {
 
@@ -27,8 +25,12 @@ class TableColumn {
     return columnName;
   }
 
-  SqliteType getType() {
+  SqliteType getSqlType() {
     return type;
+  }
+
+  String getType()  {
+    return element.asType().toString();
   }
 
   boolean isDate() {

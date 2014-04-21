@@ -5,7 +5,6 @@ import java.lang.annotation.Target;
 
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
-import static shillelagh.SqliteType.NULL;
 
 /**
  * All Database fields must be marked with this annotation.  This is to allow member variables,

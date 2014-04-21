@@ -34,4 +34,8 @@ public class Book extends Base {
   public void setPublished(Date published) {
     this.published = published;
   }
+
+  @Override public String toString() {
+    return String.format("Title: %s, Published: %s", title, published);
+  }
 }
