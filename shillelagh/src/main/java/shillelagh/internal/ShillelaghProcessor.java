@@ -127,7 +127,7 @@ public final class ShillelaghProcessor extends AbstractProcessor {
   /** Create a new table with the elements name or annotation has a value set use that */
   private TableObject createTable(Element element) {
     Table tableAnnotation = element.getAnnotation(Table.class);
-    String tableName = tableAnnotation.value().equals("") ? element.getSimpleName().toString() : tableAnnotation.value();
+    String tableName = element.getSimpleName().toString();
     return new TableObject(tableName);
   }
 

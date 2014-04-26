@@ -18,12 +18,12 @@ public class TestBoxedPrimitivesTable {
   @Field Short aShort;
   @Field String aString;
 
-  public Long get_id() {
+  public Long getId() {
     return _id;
   }
 
-  public void set_id(Long _id) {
-    this._id = _id;
+  public void setId(Long id) {
+    this._id = id;
   }
 
   public Boolean getaBoolean() {
