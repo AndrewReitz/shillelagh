@@ -32,11 +32,8 @@ enum SqliteType {
       Float.class.getName(),
       Number.class.getName()
   ))),
-  TEXT(new HashSet<TypeKind>(Arrays.asList(
-      TypeKind.CHAR
-  )),new HashSet<String>(Arrays.asList(
-      String.class.getName(),
-      Character.class.getName()
+  TEXT(Collections.<TypeKind>emptySet(), new HashSet<String>(Arrays.asList(
+      String.class.getName()
   ))),
   BLOB(Collections.<TypeKind>emptySet(), Collections.<String>emptySet()), // Saved for a later date
   // signals an unknown type probably should be a key into another table

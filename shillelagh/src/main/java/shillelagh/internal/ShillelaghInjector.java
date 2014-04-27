@@ -1,5 +1,6 @@
 package shillelagh.internal;
 
+import java.util.HashMap;
 import java.util.Iterator;
 
 public class ShillelaghInjector {
@@ -21,12 +22,35 @@ public class ShillelaghInjector {
    * used with {@link android.database.sqlite.SQLiteDatabase#rawQuery(String, String[])}
    */
   private static final String GET_ID_OF_LAST_INSERTED_ROW_SQL = "SELECT ROWID FROM %s ORDER BY ROWID DESC LIMIT 1";
+  private static final HashMap<String, String> SUPPORTED_CURSOR_METHODS = new HashMap<>();
+
+  static {
+    final String cursorFunctionInt = "getInt";
+    final String cursorFunctionDouble = "getDouble";
+    final String cursorFunctionFloat = "getFloat";
+    final String cursorFunctionLong = "getLong";
+    final String cursorFunctionShort = "getShort";
+    final String cursorFunctionString = "getString";
+
+    SUPPORTED_CURSOR_METHODS.put(int.class.getName(), cursorFunctionInt);
+    SUPPORTED_CURSOR_METHODS.put(Integer.class.getName(), cursorFunctionInt);
+    SUPPORTED_CURSOR_METHODS.put(boolean.class.getName(), cursorFunctionInt);
+    SUPPORTED_CURSOR_METHODS.put(Boolean.class.getName(), cursorFunctionInt);
+    SUPPORTED_CURSOR_METHODS.put(double.class.getName(), cursorFunctionDouble);
+    SUPPORTED_CURSOR_METHODS.put(Double.class.getName(), cursorFunctionDouble);
+    SUPPORTED_CURSOR_METHODS.put(float.class.getName(), cursorFunctionFloat);
+    SUPPORTED_CURSOR_METHODS.put(Float.class.getName(), cursorFunctionFloat);
+    SUPPORTED_CURSOR_METHODS.put(long.class.getName(), cursorFunctionLong);
+    SUPPORTED_CURSOR_METHODS.put(Long.class.getName(), cursorFunctionLong);
+    SUPPORTED_CURSOR_METHODS.put(short.class.getName(), cursorFunctionShort);
+    SUPPORTED_CURSOR_METHODS.put(Short.class.getName(), cursorFunctionShort);
+    SUPPORTED_CURSOR_METHODS.put(String.class.getName(), cursorFunctionString);
+  }
 
   private final String classPackage;
   private final String className;
   private final String targetClass;
   private final ShillelaghLogger logger;
-
   private TableObject tableObject;
 
   ShillelaghInjector(String classPackage, String className, String targetClass, ShillelaghLogger logger) {
@@ -184,7 +208,9 @@ public class ShillelaghInjector {
     for (TableColumn column : tableObject.getColumns()) {
       String columnName = column.getColumnName();
       if (column.isDate()) {
-        builder.append("        tableObject.").append(columnName).append(" = new Date(cursor.").append(getCursorCommand("long")).append("(cursor.getColumnIndex(\"").append(columnName).append("\")));\n");
+        builder.append("        tableObject.").append(columnName).append(" = new Date(cursor.").append(getCursorCommand(long.class.getName())).append("(cursor.getColumnIndex(\"").append(columnName).append("\")));\n");
+      } else if (column.getType().equals(boolean.class.getName()) || column.getType().equals(Boolean.class.getName())) {
+        builder.append("        tableObject.").append(columnName).append(" = cursor.").append(getCursorCommand(column.getType())).append("(cursor.getColumnIndex(\"").append(columnName).append("\")) == 0 ? true : false;\n");
       } else {
         builder.append("        tableObject.").append(columnName).append(" = cursor.").append(getCursorCommand(column.getType())).append("(cursor.getColumnIndex(\"").append(columnName).append("\"));\n");
       }
@@ -198,25 +224,12 @@ public class ShillelaghInjector {
 
   /**
    * Maps a type to the corresponding Cursor get function. For mapping objects between the database
-   * and java
+   * and java.
    */
   private String getCursorCommand(String type) {
     logger.d("getCursorCommand: type = " + type);
-    switch (type) {
-      case "int":
-        return "getInt";
-      case "double":
-        return "getDouble";
-      case "float":
-        return "getFloat";
-      case "long":
-        return "getLong";
-      case "short":
-        return "getShort";
-      case "java.lang.String":
-        return "getString";
-      default:
-        return "getBlob";
-    }
+
+    final String returnValue = SUPPORTED_CURSOR_METHODS.get(type);
+    return returnValue != null ? returnValue : "getBlob"; // all others are blobs
   }
 }

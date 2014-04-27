@@ -9,8 +9,6 @@ public class TestBoxedPrimitivesTable {
   @Id Long _id;
 
   @Field Boolean aBoolean;
-  @Field Byte aByte;
-  @Field Character aCharacter;
   @Field Double aDouble;
   @Field Float aFloat;
   @Field Integer anInteger;
@@ -32,22 +30,6 @@ public class TestBoxedPrimitivesTable {
 
   public void setaBoolean(Boolean aBoolean) {
     this.aBoolean = aBoolean;
-  }
-
-  public Byte getaByte() {
-    return aByte;
-  }
-
-  public void setaByte(Byte aByte) {
-    this.aByte = aByte;
-  }
-
-  public Character getaCharacter() {
-    return aCharacter;
-  }
-
-  public void setaCharacter(Character aCharacter) {
-    this.aCharacter = aCharacter;
   }
 
   public Double getaDouble() {

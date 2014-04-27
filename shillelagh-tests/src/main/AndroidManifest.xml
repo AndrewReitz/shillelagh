@@ -3,8 +3,7 @@
           package="com.example.shillelagh">
 
     <application
-        android:label="@string/app_name"
-        android:name=".ShillelaghApp">
+        android:label="@string/app_name">
 
     </application>
 </manifest>

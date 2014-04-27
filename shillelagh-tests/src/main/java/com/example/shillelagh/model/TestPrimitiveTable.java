@@ -8,14 +8,11 @@ import shillelagh.Table;
 public class TestPrimitiveTable {
   @Id long id;
 
-  @Field byte aByte;
   @Field short aShort;
   @Field int anInt;
   @Field long aLong;
   @Field float aFloat;
   @Field double aDouble;
-  @Field boolean aBoolean;
-  @Field char aChar;
 
   public long getId() {
     return id;
@@ -23,14 +20,6 @@ public class TestPrimitiveTable {
 
   public void setId(long id) {
     this.id = id;
-  }
-
-  public byte getaByte() {
-    return aByte;
-  }
-
-  public void setaByte(byte aByte) {
-    this.aByte = aByte;
   }
 
   public short getaShort() {
@@ -71,21 +60,5 @@ public class TestPrimitiveTable {
 
   public void setaDouble(double aDouble) {
     this.aDouble = aDouble;
-  }
-
-  public boolean isaBoolean() {
-    return aBoolean;
-  }
-
-  public void setaBoolean(boolean aBoolean) {
-    this.aBoolean = aBoolean;
-  }
-
-  public char getaChar() {
-    return aChar;
-  }
-
-  public void setaChar(char aChar) {
-    this.aChar = aChar;
   }
 }
