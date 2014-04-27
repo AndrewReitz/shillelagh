@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.example.shillelagh.model.TestBoxedPrimitivesTable;
+import com.example.shillelagh.model.TestJavaObjectsTable;
 import com.example.shillelagh.model.TestPrimitiveTable;
 
 import shillelagh.Shillelagh;
@@ -20,6 +21,7 @@ public class TestSQLiteOpenHelper extends SQLiteOpenHelper {
   @Override public void onCreate(SQLiteDatabase db) {
     Shillelagh.createTable(db, TestBoxedPrimitivesTable.class);
     Shillelagh.createTable(db, TestPrimitiveTable.class);
+    Shillelagh.createTable(db, TestJavaObjectsTable.class);
   }
 
   @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {

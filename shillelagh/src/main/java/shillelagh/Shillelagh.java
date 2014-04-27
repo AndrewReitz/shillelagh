@@ -286,4 +286,11 @@ public final class Shillelagh {
     return map(tableObject, results);
   }
 
+  public SQLiteDatabase getReadableDatabase() {
+    return sqliteOpenHelper.getReadableDatabase();
+  }
+
+  public SQLiteDatabase getWritableDatabase() {
+    return sqliteOpenHelper.getWritableDatabase();
+  }
 }

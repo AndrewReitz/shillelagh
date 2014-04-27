@@ -16,7 +16,7 @@ import shillelagh.Shillelagh;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
-public class ShillelaghCreateTableTest extends AndroidTestCase {
+public class CreateTableTest extends AndroidTestCase {
 
   private static final int CURRENT_DATABASE_VERSION = 1;
   private SQLiteDatabase database;
