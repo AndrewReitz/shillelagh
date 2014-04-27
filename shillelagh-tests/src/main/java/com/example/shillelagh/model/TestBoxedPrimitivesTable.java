@@ -14,7 +14,6 @@ public class TestBoxedPrimitivesTable {
   @Field Integer anInteger;
   @Field Long aLong;
   @Field Short aShort;
-  @Field String aString;
 
   public Long getId() {
     return _id;
@@ -70,13 +69,5 @@ public class TestBoxedPrimitivesTable {
 
   public void setaShort(Short aShort) {
     this.aShort = aShort;
-  }
-
-  public String getaString() {
-    return aString;
-  }
-
-  public void setaString(String aString) {
-    this.aString = aString;
   }
 }

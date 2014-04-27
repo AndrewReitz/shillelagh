@@ -5,7 +5,7 @@ import shillelagh.Id;
 import shillelagh.Table;
 
 @Table
-public class TestPrimitiveTable {
+public class  TestPrimitiveTable {
   @Id long id;
 
   @Field short aShort;
@@ -13,6 +13,7 @@ public class TestPrimitiveTable {
   @Field long aLong;
   @Field float aFloat;
   @Field double aDouble;
+  @Field boolean aBoolean;
 
   public long getId() {
     return id;
@@ -60,5 +61,13 @@ public class TestPrimitiveTable {
 
   public void setaDouble(double aDouble) {
     this.aDouble = aDouble;
+  }
+
+  public boolean isaBoolean() {
+    return aBoolean;
+  }
+
+  public void setaBoolean(boolean aBoolean) {
+    this.aBoolean = aBoolean;
   }
 }
