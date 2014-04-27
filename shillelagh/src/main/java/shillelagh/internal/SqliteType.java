@@ -16,14 +16,12 @@ enum SqliteType {
       TypeKind.INT,
       TypeKind.SHORT,
       TypeKind.LONG,
-      TypeKind.BYTE, // true false types
       TypeKind.BOOLEAN // true false types
   )), new HashSet<String>(Arrays.asList(
       Integer.class.getName(),
       Short.class.getName(),
       Long.class.getName(),
       Boolean.class.getName(), // true false types
-      Byte.class.getName(), // true false types
       Date.class.getName()
   ))),
   REAL(new HashSet<TypeKind>(Arrays.asList(
