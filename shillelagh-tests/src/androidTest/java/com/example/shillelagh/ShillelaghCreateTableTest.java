@@ -166,4 +166,37 @@ public class ShillelaghCreateTableTest extends AndroidTestCase {
     assertThat(cursor.moveToNext()).isFalse();
     cursor.close();
   }
+
+  public void testShouldCreateJavaObjectTable() {
+    // Arrange
+
+    // Act
+    Shillelagh.createTable(database, TestJavaObjectsTable.class);
+    final Cursor cursor = database.rawQuery("PRAGMA table_info(" +
+        TestJavaObjectsTable.class.getSimpleName() + ")", null);
+
+    // Assert
+    assertThat(cursor.getCount()).isEqualTo(3);
+
+    assertThat(cursor.moveToNext()).isTrue();
+    assertThat(cursor.getString(TABLE_INFO_NAME_COLUMN)).isEqualTo("id");
+    assertThat(cursor.getString(TABLE_INFO_TYPE_COLUMN)).isEqualTo(SQL_INTEGER);
+    assertThat(cursor.getString(TABLE_INFO_NULLABLE_COLUMN)).isEqualTo("0");
+    assertThat(cursor.getString(TABLE_INFO_PRIMARAY_KEY_COLUMN)).isEqualTo("1");
+
+    assertThat(cursor.moveToNext()).isTrue();
+    assertThat(cursor.getString(TABLE_INFO_NAME_COLUMN)).isEqualTo("aString");
+    assertThat(cursor.getString(TABLE_INFO_TYPE_COLUMN)).isEqualTo(SQL_TEXT);
+    assertThat(cursor.getString(TABLE_INFO_NULLABLE_COLUMN)).isEqualTo("0");
+    assertThat(cursor.getString(TABLE_INFO_PRIMARAY_KEY_COLUMN)).isEqualTo("0");
+
+    assertThat(cursor.moveToNext()).isTrue();
+    assertThat(cursor.getString(TABLE_INFO_NAME_COLUMN)).isEqualTo("aDate");
+    assertThat(cursor.getString(TABLE_INFO_TYPE_COLUMN)).isEqualTo(SQL_INTEGER);
+    assertThat(cursor.getString(TABLE_INFO_NULLABLE_COLUMN)).isEqualTo("0");
+    assertThat(cursor.getString(TABLE_INFO_PRIMARAY_KEY_COLUMN)).isEqualTo("0");
+
+    assertThat(cursor.moveToNext()).isFalse();
+    cursor.close();
+  }
 }
