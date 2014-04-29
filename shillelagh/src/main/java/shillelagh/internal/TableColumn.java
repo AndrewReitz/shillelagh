@@ -36,7 +36,12 @@ class TableColumn {
   }
 
   boolean isDate() {
-    return element.asType().toString().equals(Date.class.getName());
+    return getType().equals(Date.class.getName());
+  }
+
+  boolean isBoolean() {
+    final String typeString = getType();
+    return typeString.equals(boolean.class.getName()) || typeString.equals(Boolean.class.getName());
   }
 
   @Override public String toString() {

@@ -130,6 +130,8 @@ public class ShillelaghInjector {
         values.append("'\" + element.").append(column.getColumnName()).append(" + \"'");
       } else if (column.isDate()) {
         values.append("\" + element.").append(column.getColumnName()).append(".getTime() + \"");
+      }  else if (column.isBoolean()) {
+        values.append("\" + (element.").append(column.getColumnName()).append(" ? \"1\" : \"0\") + \"");
       } else {
         values.append("\" + element.").append(column.getColumnName()).append(" + \"");
       }
@@ -167,6 +169,8 @@ public class ShillelaghInjector {
         columnUpdates.append(column.getColumnName()).append(" = \'\" + element.").append(column.getColumnName()).append(" + \"\'");
       } else if (column.isDate()) {
         columnUpdates.append(column.getColumnName()).append(" = \" + element.").append(column.getColumnName()).append(".getTime() + \"");
+      } else if (column.isBoolean()) {
+        columnUpdates.append(column.getColumnName()).append(" = \" + (element.").append(column.getColumnName()).append(" ? \"1\" : \"0\") + \"");
       } else {
         columnUpdates.append(column.getColumnName()).append(" = \" + element.").append(column.getColumnName()).append(" + \"");
       }
@@ -209,7 +213,7 @@ public class ShillelaghInjector {
       String columnName = column.getColumnName();
       if (column.isDate()) {
         builder.append("        tableObject.").append(columnName).append(" = new Date(cursor.").append(getCursorCommand(long.class.getName())).append("(cursor.getColumnIndex(\"").append(columnName).append("\")));\n");
-      } else if (column.getType().equals(boolean.class.getName()) || column.getType().equals(Boolean.class.getName())) {
+      } else if (column.isBoolean()) {
         builder.append("        tableObject.").append(columnName).append(" = cursor.").append(getCursorCommand(column.getType())).append("(cursor.getColumnIndex(\"").append(columnName).append("\")) == 0 ? true : false;\n");
       } else {
         builder.append("        tableObject.").append(columnName).append(" = cursor.").append(getCursorCommand(column.getType())).append("(cursor.getColumnIndex(\"").append(columnName).append("\"));\n");
