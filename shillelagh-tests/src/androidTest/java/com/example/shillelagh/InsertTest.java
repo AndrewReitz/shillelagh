@@ -135,4 +135,6 @@ public class InsertTest extends AndroidTestCase {
     assertThat(cursor.moveToNext()).isFalse();
     cursor.close();
   }
+
+  // TODO Make Insert Error Tests
 }
