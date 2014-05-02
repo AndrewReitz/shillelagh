@@ -8,8 +8,8 @@ import com.example.shillelagh.model.TestBoxedPrimitivesTable;
 import com.example.shillelagh.model.TestJavaObjectsTable;
 import com.example.shillelagh.model.TestPrimitiveTable;
 
-import java.util.Calendar;
 import java.util.Date;
+import java.util.Random;
 
 import shillelagh.Shillelagh;
 
@@ -27,15 +27,27 @@ public class InsertTest extends AndroidTestCase {
     shillelagh = new Shillelagh(sqliteOpenHelper);
   }
 
+  @Override protected void tearDown() throws Exception {
+    getContext().deleteDatabase(sqliteOpenHelper.getDatabaseName());
+    super.tearDown();
+  }
+
   public void testInsertPrimitives() {
     // Arrange
+    Random rand = new Random();
+    double expectedDouble = rand.nextDouble();
+    float expectedFloat = rand.nextFloat();
+    long expectedlong = rand.nextLong();
+    int expectedInt = rand.nextInt();
+    short expectedShort = (short) rand.nextInt(Short.MAX_VALUE);
+
     TestPrimitiveTable row = new TestPrimitiveTable();
     row.setaBoolean(true);
-    row.setaDouble(10);
-    row.setaFloat(15f);
-    row.setaLong(4);
-    row.setAnInt(9);
-    row.setaShort((short) 6);
+    row.setaDouble(expectedDouble);
+    row.setaFloat(expectedFloat);
+    row.setaLong(expectedlong);
+    row.setAnInt(expectedInt);
+    row.setaShort(expectedShort);
 
     // Act
     shillelagh.insert(row);
@@ -48,12 +60,12 @@ public class InsertTest extends AndroidTestCase {
 
     assertThat(cursor.moveToFirst()).isTrue();
     assertThat(cursor.getLong(0)).isEqualTo(1); // id column
-    assertThat(cursor.getShort(1)).isEqualTo((short) 6); // aShort
-    assertThat(cursor.getInt(2)).isEqualTo(9); // anInt
-    assertThat(cursor.getLong(3)).isEqualTo(4); // aLong
-    assertThat(cursor.getFloat(4)).isEqualTo(15f); // aFloat
-    assertThat(cursor.getDouble(5)).isEqualTo(10); // aDouble
-    assertThat(cursor.getInt(6)).isEqualTo(1); // aBoolean
+    assertThat(cursor.getShort(1)).isEqualTo(expectedShort); // aShort
+    assertThat(cursor.getInt(2)).isEqualTo(expectedInt); // anInt
+    assertThat(cursor.getLong(3)).isEqualTo(expectedlong); // aLong
+    assertThat(cursor.getFloat(4)).isEqualTo(expectedFloat); // aFloat
+    assertThat(cursor.getDouble(5)).isEqualTo(expectedDouble); // aDouble
+    assertThat(cursor.getInt(6)).isEqualTo(1); // aBoolean, true maps to 1
 
     assertThat(cursor.moveToNext()).isFalse();
     cursor.close();
@@ -61,13 +73,20 @@ public class InsertTest extends AndroidTestCase {
 
   public void testInsertBoxedPrimitives() {
     // Arrange
+    Random rand = new Random();
+    double expectedDouble = rand.nextDouble();
+    float expectedFloat = rand.nextFloat();
+    long expectedlong = rand.nextLong();
+    int expectedInt = rand.nextInt();
+    short expectedShort = (short) rand.nextInt(Short.MAX_VALUE);
+
     TestBoxedPrimitivesTable row = new TestBoxedPrimitivesTable();
     row.setaBoolean(false);
-    row.setaDouble(Double.MAX_VALUE);
-    row.setaFloat(Float.MAX_VALUE);
-    row.setAnInteger(Integer.MAX_VALUE);
-    row.setaLong(Long.MAX_VALUE);
-    row.setaShort(Short.MAX_VALUE);
+    row.setaDouble(expectedDouble);
+    row.setaFloat(expectedFloat);
+    row.setAnInteger(expectedInt);
+    row.setaLong(expectedlong);
+    row.setaShort(expectedShort);
 
     // Act
     shillelagh.insert(row);
@@ -81,11 +100,11 @@ public class InsertTest extends AndroidTestCase {
     assertThat(cursor.moveToFirst()).isTrue();
     assertThat(cursor.getLong(0)).isEqualTo(1); // id column
     assertThat(cursor.getInt(1)).isEqualTo(0); // aBoolean
-    assertThat(cursor.getDouble(2)).isEqualTo(Double.MAX_VALUE); // aDouble
-    assertThat(cursor.getFloat(3)).isEqualTo(Float.MAX_VALUE); // aFloat
-    assertThat(cursor.getInt(4)).isEqualTo(Integer.MAX_VALUE); // anInteger
-    assertThat(cursor.getLong(5)).isEqualTo(Long.MAX_VALUE); // aLong
-    assertThat(cursor.getShort(6)).isEqualTo(Short.MAX_VALUE); // aShort
+    assertThat(cursor.getDouble(2)).isEqualTo(expectedDouble); // aDouble
+    assertThat(cursor.getFloat(3)).isEqualTo(expectedFloat); // aFloat
+    assertThat(cursor.getInt(4)).isEqualTo(expectedInt); // anInteger
+    assertThat(cursor.getLong(5)).isEqualTo(expectedlong); // aLong
+    assertThat(cursor.getShort(6)).isEqualTo(expectedShort); // aShort
 
     assertThat(cursor.moveToNext()).isFalse();
     cursor.close();
@@ -104,7 +123,7 @@ public class InsertTest extends AndroidTestCase {
 
     // Assert
     Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
-        "SELECT * FROM " + TestJavaObjectsTable.class.getName(), null);
+        "SELECT * FROM " + TestJavaObjectsTable.class.getSimpleName(), null);
 
     assertThat(cursor.getCount()).isEqualTo(1);
 
