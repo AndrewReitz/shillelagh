@@ -37,7 +37,7 @@ public class InsertTest extends AndroidTestCase {
     Random rand = new Random();
     double expectedDouble = rand.nextDouble();
     float expectedFloat = rand.nextFloat();
-    long expectedlong = rand.nextLong();
+    long expectedLong = rand.nextLong();
     int expectedInt = rand.nextInt();
     short expectedShort = (short) rand.nextInt(Short.MAX_VALUE);
 
@@ -45,7 +45,7 @@ public class InsertTest extends AndroidTestCase {
     row.setaBoolean(true);
     row.setaDouble(expectedDouble);
     row.setaFloat(expectedFloat);
-    row.setaLong(expectedlong);
+    row.setaLong(expectedLong);
     row.setAnInt(expectedInt);
     row.setaShort(expectedShort);
 
@@ -62,7 +62,7 @@ public class InsertTest extends AndroidTestCase {
     assertThat(cursor.getLong(0)).isEqualTo(1); // id column
     assertThat(cursor.getShort(1)).isEqualTo(expectedShort); // aShort
     assertThat(cursor.getInt(2)).isEqualTo(expectedInt); // anInt
-    assertThat(cursor.getLong(3)).isEqualTo(expectedlong); // aLong
+    assertThat(cursor.getLong(3)).isEqualTo(expectedLong); // aLong
     assertThat(cursor.getFloat(4)).isEqualTo(expectedFloat); // aFloat
     assertThat(cursor.getDouble(5)).isEqualTo(expectedDouble); // aDouble
     assertThat(cursor.getInt(6)).isEqualTo(1); // aBoolean, true maps to 1
@@ -76,7 +76,7 @@ public class InsertTest extends AndroidTestCase {
     Random rand = new Random();
     double expectedDouble = rand.nextDouble();
     float expectedFloat = rand.nextFloat();
-    long expectedlong = rand.nextLong();
+    long expectedLong = rand.nextLong();
     int expectedInt = rand.nextInt();
     short expectedShort = (short) rand.nextInt(Short.MAX_VALUE);
 
@@ -85,7 +85,7 @@ public class InsertTest extends AndroidTestCase {
     row.setaDouble(expectedDouble);
     row.setaFloat(expectedFloat);
     row.setAnInteger(expectedInt);
-    row.setaLong(expectedlong);
+    row.setaLong(expectedLong);
     row.setaShort(expectedShort);
 
     // Act
@@ -103,7 +103,7 @@ public class InsertTest extends AndroidTestCase {
     assertThat(cursor.getDouble(2)).isEqualTo(expectedDouble); // aDouble
     assertThat(cursor.getFloat(3)).isEqualTo(expectedFloat); // aFloat
     assertThat(cursor.getInt(4)).isEqualTo(expectedInt); // anInteger
-    assertThat(cursor.getLong(5)).isEqualTo(expectedlong); // aLong
+    assertThat(cursor.getLong(5)).isEqualTo(expectedLong); // aLong
     assertThat(cursor.getShort(6)).isEqualTo(expectedShort); // aShort
 
     assertThat(cursor.moveToNext()).isFalse();
