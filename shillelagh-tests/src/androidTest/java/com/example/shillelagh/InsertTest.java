@@ -9,7 +9,6 @@ import com.example.shillelagh.model.TestJavaObjectsTable;
 import com.example.shillelagh.model.TestPrimitiveTable;
 
 import java.util.Date;
-import java.util.Random;
 
 import shillelagh.Shillelagh;
 
@@ -34,12 +33,11 @@ public class InsertTest extends AndroidTestCase {
 
   public void testInsertPrimitives() {
     // Arrange
-    Random rand = new Random();
-    double expectedDouble = rand.nextDouble();
-    float expectedFloat = rand.nextFloat();
-    long expectedLong = rand.nextLong();
-    int expectedInt = rand.nextInt();
-    short expectedShort = (short) rand.nextInt(Short.MAX_VALUE);
+    double expectedDouble = 2342342.2323;
+    float expectedFloat = 4.0f;
+    long expectedLong = 10000;
+    int expectedInt = 23;
+    short expectedShort = 234;
 
     TestPrimitiveTable row = new TestPrimitiveTable();
     row.setaBoolean(true);
@@ -73,12 +71,11 @@ public class InsertTest extends AndroidTestCase {
 
   public void testInsertBoxedPrimitives() {
     // Arrange
-    Random rand = new Random();
-    double expectedDouble = rand.nextDouble();
-    float expectedFloat = rand.nextFloat();
-    long expectedLong = rand.nextLong();
-    int expectedInt = rand.nextInt();
-    short expectedShort = (short) rand.nextInt(Short.MAX_VALUE);
+    double expectedDouble = 10000.55;
+    float expectedFloat = 2.0f;
+    long expectedLong = 200000;
+    int expectedInt = 42;
+    short expectedShort = 2;
 
     TestBoxedPrimitivesTable row = new TestBoxedPrimitivesTable();
     row.setaBoolean(false);
