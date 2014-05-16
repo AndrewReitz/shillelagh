@@ -64,7 +64,7 @@ public final class Shillelagh {
     }
   }
 
-  public static <T extends List> T map(Class<?> tableObject, Cursor cursor) {
+  public static <T extends List<A>, A> T map(Class<? extends A> tableObject, Cursor cursor) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableObject);
       final Method mapMethod = findMethodForClass(shillelagh, MAP_OBJECT_FUNCTION,

@@ -7,8 +7,10 @@ import android.database.sqlite.SQLiteStatement;
 import android.test.AndroidTestCase;
 
 import com.example.shillelagh.model.TestBoxedPrimitivesTable;
+import com.example.shillelagh.model.TestJavaObjectsTable;
 import com.example.shillelagh.model.TestPrimitiveTable;
 
+import java.util.Date;
 import java.util.List;
 
 import shillelagh.Shillelagh;
@@ -28,9 +30,7 @@ public class MapTest extends AndroidTestCase {
     shillelagh = new Shillelagh(sqliteOpenHelper);
   }
 
-  public void testMapCursorToPrimitives() {
-
-
+  public void testMapCursorToBoxedPrimitives() {
     // Arrange
     int expectedBoolean = 0;
     double expectedDouble = 100000;
@@ -39,30 +39,80 @@ public class MapTest extends AndroidTestCase {
     int expectedInt = 100;
     short expectedShort = 1;
 
-    String testBoxedPrimitivesTest = String.format("INSERT INTO %s (aBoolean, aDouble, aFloat, anInteger, " +
+    String testBoxedPrimitivesInsert = String.format("INSERT INTO %s (aBoolean, aDouble, aFloat, anInteger, " +
         "aLong, aShort) VALUES (%s, %s, %s, %s, %s, %s);", TestBoxedPrimitivesTable.class.getSimpleName(),
         expectedBoolean, expectedDouble, expectedFloat, expectedInt, expectedLong, expectedShort);
 
-    String tmp2 = "INSERT INTO TestJavaObjectsTable (aString, aDate) VALUES ('TestString', 1398996896871);";
-    String tmp3 = "INSERT INTO TestPrimitiveTable (aShort, anInt, aLong, aFloat, aDouble, aBoolean) VALUES (29909, -1402799165, 336640275481577743, 0.44336712, 0.28459932805244603, 1);";
-
     // Act
-    sqliteOpenHelper.getWritableDatabase().execSQL(testBoxedPrimitivesTest);
+    sqliteOpenHelper.getWritableDatabase().execSQL(testBoxedPrimitivesInsert);
     Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
         "SELECT * FROM " + TestBoxedPrimitivesTable.class.getSimpleName(), null);
-
-    assertThat(cursor.getCount()).isGreaterThanOrEqualTo(1);
 
     List<TestBoxedPrimitivesTable> result = Shillelagh.map(TestBoxedPrimitivesTable.class, cursor);
 
     // Assert
     assertThat(result.size()).isEqualTo(1);
-    TestBoxedPrimitivesTable testBoxedPrimitivesTable = result.get(0);
-    assertThat(testBoxedPrimitivesTable.getId()).isEqualTo(1);
-    assertThat(testBoxedPrimitivesTable.getaShort()).isEqualTo(expectedShort);
-    assertThat(testBoxedPrimitivesTable.getAnInteger()).isEqualTo(expectedInt);
-    assertThat(testBoxedPrimitivesTable.getaLong()).isEqualTo(expectedLong);
-    assertThat(testBoxedPrimitivesTable.getaDouble()).isEqualTo(expectedDouble);
-    assertThat(testBoxedPrimitivesTable.getaBoolean()).isFalse();
+    TestBoxedPrimitivesTable resultRow = result.get(0);
+    assertThat(resultRow.getId()).isEqualTo(1);
+    assertThat(resultRow.getaShort()).isEqualTo(expectedShort);
+    assertThat(resultRow.getAnInteger()).isEqualTo(expectedInt);
+    assertThat(resultRow.getaLong()).isEqualTo(expectedLong);
+    assertThat(resultRow.getaDouble()).isEqualTo(expectedDouble);
+    assertThat(resultRow.getaBoolean()).isFalse();
+  }
+
+  public void testPrimitivesInsert() {
+    // Arrange
+    int expectedBoolean = 1;
+    double expectedDouble = 2900;
+    float expectedFloat = -3.5f;
+    long expectedLong = 3000000;
+    int expectedInt = -100;
+    short expectedShort = 23;
+
+    String testPrimitiveInsert = String.format("INSERT INTO %s (aShort, anInt," +
+        "aLong, aFloat, aDouble, aBoolean) VALUES (%s, %s, %s, %s, %s, %s);",
+        TestPrimitiveTable.class.getSimpleName(), expectedShort, expectedInt,
+        expectedLong, expectedFloat, expectedDouble, expectedBoolean);
+
+    // Act
+    sqliteOpenHelper.getWritableDatabase().execSQL(testPrimitiveInsert);
+    Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
+        "SELECT * FROM " + TestPrimitiveTable.class.getSimpleName(), null);
+    List<TestPrimitiveTable> result = Shillelagh.map(TestPrimitiveTable.class, cursor);
+
+    // Assert
+    assertThat(result.size()).isEqualTo(1);
+    TestPrimitiveTable resultRow = result.get(0);
+    assertThat(resultRow.getId()).isEqualTo(1);
+    assertThat(resultRow.getaDouble()).isEqualTo(expectedDouble);
+    assertThat(resultRow.getaFloat()).isEqualTo(expectedFloat);
+    assertThat(resultRow.getaLong()).isEqualTo(expectedLong);
+    assertThat(resultRow.getAnInt()).isEqualTo(expectedInt);
+    assertThat(resultRow.getaShort()).isEqualTo(expectedShort);
+    assertThat(resultRow.isaBoolean()).isTrue();
+
+  }
+
+  public void testMapToJavaObjects() {
+    // Arrange
+    String expectedString = "TestString";
+    Date expectedDate = new Date();
+    String testJavaObjectsInsert = String.format("INSERT INTO %s (aString, aDate)" +
+        " VALUES ('%s', %s);", TestJavaObjectsTable.class.getSimpleName(), expectedString, expectedDate.getTime());
+
+    // Act
+    sqliteOpenHelper.getWritableDatabase().execSQL(testJavaObjectsInsert);
+    Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
+        "SELECT * FROM " + TestJavaObjectsTable.class.getSimpleName(), null);
+
+    List<TestJavaObjectsTable> result = Shillelagh.map(TestJavaObjectsTable.class, cursor);
+
+    // Assert
+    assertThat(result.size()).isEqualTo(1);
+    TestJavaObjectsTable resultRow = result.get(0);
+    assertThat(resultRow.getId()).isEqualTo(1);
+    assertThat(resultRow.getaDate()).isEqualTo(expectedDate);
+    assertThat(resultRow.getaString()).isEqualTo(expectedString);
   }
 }
