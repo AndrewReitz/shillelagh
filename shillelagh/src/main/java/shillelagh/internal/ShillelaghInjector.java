@@ -3,7 +3,10 @@ package shillelagh.internal;
 import java.util.HashMap;
 import java.util.Iterator;
 
+/** Class in charge of creating all the code injected into other classes */
 public class ShillelaghInjector {
+
+  // I'm not really happy with the code in here, but then again, I'm writing Java in Strings...
 
   /**
    * Internal class function names
@@ -76,6 +79,7 @@ public class ShillelaghInjector {
     builder.append("package ").append(classPackage).append(";\n\n");
     builder.append("import android.database.Cursor;\n");
     builder.append("import android.database.DatabaseUtils;\n");
+    builder.append("import android.util.Log;\n");
     builder.append("import android.database.sqlite.SQLiteDatabase;\n\n");
     builder.append("import java.util.ArrayList;\n");
     builder.append("import java.util.Date;\n");
@@ -205,8 +209,8 @@ public class ShillelaghInjector {
 
     builder.append("  public static List<").append(targetClass).append(">").append(MAP_OBJECT_FUNCTION).append("(Cursor cursor) {\n");
     builder.append("    List<").append(targetClass).append("> tableObjects = new ArrayList<>();\n");
-    builder.append("    if (cursor.moveToFirst()) {\n");
-    builder.append("      for(;cursor.moveToNext();) {\n");
+    builder.append("    if (cursor.moveToFirst()) {\n"); // can't assume the cursor is already at the front
+    builder.append("       while (!cursor.isAfterLast()) {\n");
     builder.append("        ").append(targetClass).append(" tableObject = new ").append(targetClass).append("();\n");
     builder.append("        tableObject.").append(idColumnName).append(" = cursor.getLong(cursor.getColumnIndex(\"").append(idColumnName).append("\"));\n");
     for (TableColumn column : tableObject.getColumns()) {
@@ -214,12 +218,13 @@ public class ShillelaghInjector {
       if (column.isDate()) {
         builder.append("        tableObject.").append(columnName).append(" = new Date(cursor.").append(getCursorCommand(long.class.getName())).append("(cursor.getColumnIndex(\"").append(columnName).append("\")));\n");
       } else if (column.isBoolean()) {
-        builder.append("        tableObject.").append(columnName).append(" = cursor.").append(getCursorCommand(column.getType())).append("(cursor.getColumnIndex(\"").append(columnName).append("\")) == 0 ? true : false;\n");
+        builder.append("        tableObject.").append(columnName).append(" = cursor.").append(getCursorCommand(column.getType())).append("(cursor.getColumnIndex(\"").append(columnName).append("\")) == 1;\n");
       } else {
         builder.append("        tableObject.").append(columnName).append(" = cursor.").append(getCursorCommand(column.getType())).append("(cursor.getColumnIndex(\"").append(columnName).append("\"));\n");
       }
     }
     builder.append("        tableObjects.add(tableObject);\n");
+    builder.append("        cursor.moveToNext();\n");
     builder.append("      }\n");
     builder.append("    }\n");
     builder.append("  return tableObjects;");
