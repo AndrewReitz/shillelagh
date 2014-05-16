@@ -1,31 +1,18 @@
 ext {
     MIN_SDK_VERSION = 14
     TARGET_SDK_VERSION = 19
-    GROUP = hasProperty("group") ? getProperty("group") : "com.inkapplications"
-    VERSION = '1.0.0'
+    GROUP = "com.andrewreitz"
+    VERSION = '1.0.0' // TODO Move these to gradle.properties
     VERSION_CODE = 1
-    SONATYPE_URL = ""
     IS_DEV_BUILD = false
     IS_RELEASE_BUILD = false
 }
-
-//set build variables based on build type (release, continuous integration, development)
-if (hasProperty("release")) {
-    IS_RELEASE_BUILD = true
-    SONATYPE_URL = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-} else if (hasProperty("snapshot")) {
-    VERSION += "-SNAPSHOT"
-    SONATYPE_URL = "https://oss.sonatype.org/content/repositories/snapshots/"
-} else {
-    IS_DEV_BUILD = true
-}
-
 buildscript {
     repositories {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.9.+'
+        classpath 'com.android.tools.build:gradle:0.10.+'
     }
 }
 
