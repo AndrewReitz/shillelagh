@@ -8,6 +8,7 @@ import android.test.AndroidTestCase;
 
 import com.example.shillelagh.model.TestBoxedPrimitivesTable;
 import com.example.shillelagh.model.TestJavaObjectsTable;
+import com.example.shillelagh.model.TestNotTableObject;
 import com.example.shillelagh.model.TestPrimitiveTable;
 
 import java.io.File;
@@ -200,5 +201,15 @@ public class CreateTableTest extends AndroidTestCase {
     cursor.close();
   }
 
-  // TODO Create Failure Cases
+  public void testShouldFailOnNonAnnotatedClass() {
+    try {
+      Shillelagh.createTable(database, TestNotTableObject.class);
+    } catch (RuntimeException e) {
+      assertThat(e.getMessage()).isEqualTo("Unable to create table for class com.example.shillelagh" +
+          ".model.TestNotTableObject. Are you missing @Table annotation?");
+      return;
+    }
+
+    throw new AssertionError("Expected Exception Not Thrown");
+  }
 }
