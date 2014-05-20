@@ -21,13 +21,11 @@ import static org.fest.assertions.api.Assertions.assertThat;
 public class MapTest extends AndroidTestCase {
 
   private SQLiteOpenHelper sqliteOpenHelper;
-  private Shillelagh shillelagh;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
 
     sqliteOpenHelper = new TestSQLiteOpenHelper(getContext());
-    shillelagh = new Shillelagh(sqliteOpenHelper);
   }
 
   public void testMapCursorToBoxedPrimitives() {
