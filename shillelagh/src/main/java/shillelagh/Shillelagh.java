@@ -221,6 +221,7 @@ public final class Shillelagh {
     return map(tableObject, results);
   }
 
+  @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
   public Cursor query(boolean distinct, String table, String[] columns,
                       String selection, String[] selectionArgs, String groupBy,
                       String having, String orderBy, String limit,
@@ -230,6 +231,7 @@ public final class Shillelagh {
             limit, cancellationSignal);
   }
 
+  @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
   public <T extends List<M>, M> T query(Class<? extends M> tableObject, boolean distinct, String table, String[] columns,
                                         String selection, String[] selectionArgs, String groupBy,
                                         String having, String orderBy, String limit,
@@ -286,6 +288,7 @@ public final class Shillelagh {
     return map(tableObject, result);
   }
 
+  @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
   public Cursor rawQuery(String sql, String[] selectionArgs,
                          CancellationSignal cancellationSignal) {
     return sqliteOpenHelper.getReadableDatabase().rawQuery(sql, selectionArgs, cancellationSignal);
