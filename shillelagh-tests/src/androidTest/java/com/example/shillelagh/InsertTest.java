@@ -6,6 +6,7 @@ import android.test.AndroidTestCase;
 
 import com.example.shillelagh.model.TestBoxedPrimitivesTable;
 import com.example.shillelagh.model.TestJavaObjectsTable;
+import com.example.shillelagh.model.TestNotTableObject;
 import com.example.shillelagh.model.TestPrimitiveTable;
 
 import java.util.Date;
@@ -133,5 +134,23 @@ public class InsertTest extends AndroidTestCase {
     cursor.close();
   }
 
-  // TODO Make Insert Error Tests
+  public void testInsertShouldFailWhenNotAnnotated() {
+    // Arrange
+    TestNotTableObject row = new TestNotTableObject();
+    row.setName("some text");
+    row.setValue(6);
+
+    // Act
+    try {
+      shillelagh.insert(row);
+    } catch (RuntimeException e) {
+      assertThat(e.getMessage()).isEqualTo("Unable to insert into com.example.shillelagh.model." +
+          "TestNotTableObject. Are you missing @Table annotation?");
+    }
+
+    // Assert
+    throw new AssertionError("Expected Exception Not Thrown");
+  }
+
+  // TODO Tests for null values
 }

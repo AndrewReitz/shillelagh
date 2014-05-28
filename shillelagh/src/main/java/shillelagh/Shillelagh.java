@@ -28,7 +28,7 @@ public final class Shillelagh {
   private static final Map<Class<?>, Class<?>> CACHED_CLASSES = new LinkedHashMap<>();
   private static final Map<String, Method> CACHED_METHODS = new LinkedHashMap<>();
 
-  private static final String TAG = "Shillelagh";
+  private static final String TAG = Shillelagh.class.getSimpleName();
   private static boolean debug = false;
 
   private final SQLiteOpenHelper sqliteOpenHelper;
@@ -88,69 +88,6 @@ public final class Shillelagh {
     }
   }
 
-  private static Class<?> findShillelaghForClass(Class<?> clazz) throws ClassNotFoundException {
-    Class<?> shillelagh = CACHED_CLASSES.get(clazz);
-    if (shillelagh != null) {
-      log("Class Cash Hit!");
-      return shillelagh;
-    }
-
-    log("Class Cash Miss");
-    final String className = clazz.getName();
-    shillelagh = Class.forName(className + SUFFIX);
-    CACHED_CLASSES.put(clazz, shillelagh);
-    return shillelagh;
-  }
-
-  private static void getAndExecuteSqlStatement(SQLiteDatabase database,
-                                                Class<?> shillelagh,
-                                                String methodName,
-                                                Object... params
-  ) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-    final Method method = findMethodForClass(shillelagh, methodName, params);
-    String sql = (String) method.invoke(null, params);
-    executeSql(database, sql);
-  }
-
-  private static Class<?>[] getParamTypes(Object... params) {
-    Class<?>[] paramTypes = new Class[params.length];
-    for (int i = 0; i < params.length; i++) {
-      paramTypes[i] = params[i].getClass();
-    }
-    return paramTypes;
-  }
-
-  private static Method findMethodForClass(Class<?> shillelagh,
-                                           String methodName, Object... params
-  ) throws NoSuchMethodException {
-    Class<?>[] paramTypes = getParamTypes(params);
-    return findMethodForClass(shillelagh, methodName, paramTypes);
-  }
-
-  private static Method findMethodForClass(Class<?> shillelagh, String methodName,
-                                           Class<?>[] paramTypes) throws NoSuchMethodException {
-    String fqMethodName = shillelagh.getCanonicalName() + "#" + methodName;
-    Method method = CACHED_METHODS.get(fqMethodName);
-    if (method != null) {
-      log("Method Cache Hit!");
-      return method;
-    }
-
-    log("Method Cache Miss");
-    method = shillelagh.getMethod(methodName, paramTypes);
-    CACHED_METHODS.put(fqMethodName, method);
-    return method;
-  }
-
-  private static void executeSql(SQLiteDatabase database, String query) {
-    log("Running SQL: %s", query);
-    database.execSQL(query);
-  }
-
-  private static void log(String format, Object... args) {
-    if (debug) Log.d(TAG, String.format(format, args));
-  }
-
   /** Insert the object into the table */
   public void insert(Object tableObject) {
     try {
@@ -163,7 +100,8 @@ public final class Shillelagh {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new RuntimeException("Unable to insert into " + tableObject, e);
+      throw new RuntimeException("Unable to insert into " + tableObject.getClass().getName() +
+          ". Are you missing @Table annotation?", e);
     }
   }
 
@@ -307,5 +245,68 @@ public final class Shillelagh {
 
   public SQLiteDatabase getWritableDatabase() {
     return sqliteOpenHelper.getWritableDatabase();
+  }
+
+  private static Class<?> findShillelaghForClass(Class<?> clazz) throws ClassNotFoundException {
+    Class<?> shillelagh = CACHED_CLASSES.get(clazz);
+    if (shillelagh != null) {
+      log("Class Cash Hit!");
+      return shillelagh;
+    }
+
+    log("Class Cash Miss");
+    final String className = clazz.getName();
+    shillelagh = Class.forName(className + SUFFIX);
+    CACHED_CLASSES.put(clazz, shillelagh);
+    return shillelagh;
+  }
+
+  private static void getAndExecuteSqlStatement(SQLiteDatabase database,
+                                                Class<?> shillelagh,
+                                                String methodName,
+                                                Object... params
+  ) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    final Method method = findMethodForClass(shillelagh, methodName, params);
+    String sql = (String) method.invoke(null, params);
+    executeSql(database, sql);
+  }
+
+  private static Class<?>[] getParamTypes(Object... params) {
+    Class<?>[] paramTypes = new Class[params.length];
+    for (int i = 0; i < params.length; i++) {
+      paramTypes[i] = params[i].getClass();
+    }
+    return paramTypes;
+  }
+
+  private static Method findMethodForClass(Class<?> shillelagh,
+                                           String methodName, Object... params
+  ) throws NoSuchMethodException {
+    Class<?>[] paramTypes = getParamTypes(params);
+    return findMethodForClass(shillelagh, methodName, paramTypes);
+  }
+
+  private static Method findMethodForClass(Class<?> shillelagh, String methodName,
+                                           Class<?>[] paramTypes) throws NoSuchMethodException {
+    String fqMethodName = shillelagh.getCanonicalName() + "#" + methodName;
+    Method method = CACHED_METHODS.get(fqMethodName);
+    if (method != null) {
+      log("Method Cache Hit!");
+      return method;
+    }
+
+    log("Method Cache Miss");
+    method = shillelagh.getMethod(methodName, paramTypes);
+    CACHED_METHODS.put(fqMethodName, method);
+    return method;
+  }
+
+  private static void executeSql(SQLiteDatabase database, String query) {
+    log("Running SQL: %s", query);
+    database.execSQL(query);
+  }
+
+  private static void log(String format, Object... args) {
+    if (debug) Log.d(TAG, String.format(format, args));
   }
 }
