@@ -113,7 +113,8 @@ public final class Shillelagh {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new RuntimeException("Unable to update " + tableObject, e);
+      throw new RuntimeException("Unable to update " + tableObject.getClass().getName()
+          + ". Are you missing @Table annotation?", e);
     }
   }
 

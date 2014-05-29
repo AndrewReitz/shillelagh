@@ -15,14 +15,13 @@ import shillelagh.Shillelagh;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
-public class InsertTest extends AndroidTestCase {
+public class UpdateTest extends AndroidTestCase {
 
   private SQLiteOpenHelper sqliteOpenHelper;
   private Shillelagh shillelagh;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
-
     sqliteOpenHelper = new TestSQLiteOpenHelper(getContext());
     shillelagh = new Shillelagh(sqliteOpenHelper);
   }
@@ -37,19 +36,30 @@ public class InsertTest extends AndroidTestCase {
     double expectedDouble = 2342342.2323;
     float expectedFloat = 4.0f;
     long expectedLong = 10000;
-    int expectedInt = 23;
-    short expectedShort = 234;
+    int expectedInt = 25;
+    short expectedShort = 1920;
 
-    TestPrimitiveTable row = new TestPrimitiveTable();
-    row.setaBoolean(true);
-    row.setaDouble(expectedDouble);
-    row.setaFloat(expectedFloat);
-    row.setaLong(expectedLong);
-    row.setAnInt(expectedInt);
-    row.setaShort(expectedShort);
+    TestPrimitiveTable insertRow = new TestPrimitiveTable();
+    insertRow.setaBoolean(true);
+    insertRow.setaDouble(12345);
+    insertRow.setaFloat(19.95f);
+    insertRow.setaLong(234234);
+    insertRow.setAnInt(23);
+    insertRow.setaShort((short) 234);
 
     // Act
-    shillelagh.insert(row);
+    shillelagh.insert(insertRow);
+
+    TestPrimitiveTable updateRow = new TestPrimitiveTable();
+    updateRow.setId(insertRow.getId());
+    updateRow.setaBoolean(false);
+    updateRow.setaDouble(expectedDouble);
+    updateRow.setaFloat(expectedFloat);
+    updateRow.setaLong(expectedLong);
+    updateRow.setAnInt(expectedInt);
+    updateRow.setaShort(expectedShort);
+
+    shillelagh.update(updateRow);
 
     // Assert
     Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
@@ -64,7 +74,7 @@ public class InsertTest extends AndroidTestCase {
     assertThat(cursor.getLong(3)).isEqualTo(expectedLong); // aLong
     assertThat(cursor.getFloat(4)).isEqualTo(expectedFloat); // aFloat
     assertThat(cursor.getDouble(5)).isEqualTo(expectedDouble); // aDouble
-    assertThat(cursor.getInt(6)).isEqualTo(1); // aBoolean, true maps to 1
+    assertThat(cursor.getInt(6)).isEqualTo(0); // aBoolean, false maps to 0
 
     assertThat(cursor.moveToNext()).isFalse();
     cursor.close();
@@ -78,16 +88,27 @@ public class InsertTest extends AndroidTestCase {
     int expectedInt = 42;
     short expectedShort = 2;
 
-    TestBoxedPrimitivesTable row = new TestBoxedPrimitivesTable();
-    row.setaBoolean(false);
-    row.setaDouble(expectedDouble);
-    row.setaFloat(expectedFloat);
-    row.setAnInteger(expectedInt);
-    row.setaLong(expectedLong);
-    row.setaShort(expectedShort);
+    TestBoxedPrimitivesTable insertRow = new TestBoxedPrimitivesTable();
+    insertRow.setaBoolean(true);
+    insertRow.setaDouble((double) 23422123);
+    insertRow.setaFloat(2934f);
+    insertRow.setAnInteger(12);
+    insertRow.setaLong((long) 21342);
+    insertRow.setaShort((short) 234);
 
     // Act
-    shillelagh.insert(row);
+    shillelagh.insert(insertRow);
+
+    TestBoxedPrimitivesTable updateRow = new TestBoxedPrimitivesTable();
+    updateRow.setId(insertRow.getId());
+    updateRow.setaBoolean(false);
+    updateRow.setaDouble(expectedDouble);
+    updateRow.setaFloat(expectedFloat);
+    updateRow.setAnInteger(expectedInt);
+    updateRow.setaLong(expectedLong);
+    updateRow.setaShort(expectedShort);
+
+    shillelagh.update(updateRow);
 
     // Assert
     Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
@@ -112,12 +133,19 @@ public class InsertTest extends AndroidTestCase {
     // Arrange
     final Date now = new Date();
     final String expected = "TestString";
-    TestJavaObjectsTable row = new TestJavaObjectsTable();
-    row.setaDate(now);
-    row.setaString(expected);
+    TestJavaObjectsTable insertRow = new TestJavaObjectsTable();
+    insertRow.setaDate(new Date(2342342));
+    insertRow.setaString("NotATestString");
 
     // Act
-    shillelagh.insert(row);
+    shillelagh.insert(insertRow);
+
+    TestJavaObjectsTable updateRow = new TestJavaObjectsTable();
+    updateRow.setId(insertRow.getId());
+    updateRow.setaDate(now);
+    updateRow.setaString(expected);
+
+    shillelagh.update(updateRow);
 
     // Assert
     Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
@@ -142,9 +170,9 @@ public class InsertTest extends AndroidTestCase {
 
     // Act
     try {
-      shillelagh.insert(row);
+      shillelagh.update(row);
     } catch (RuntimeException e) {
-      assertThat(e.getMessage()).isEqualTo("Unable to insert into com.example.shillelagh.model." +
+      assertThat(e.getMessage()).isEqualTo("Unable to update com.example.shillelagh.model." +
           "TestNotTableObject. Are you missing @Table annotation?");
       return;
     }
