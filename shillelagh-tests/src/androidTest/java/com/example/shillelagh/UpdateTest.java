@@ -180,14 +180,4 @@ public class UpdateTest extends AndroidTestCase {
     // Assert
     throw new AssertionError("Expected Exception Not Thrown");
   }
-
-  public void testNullUpdate() {
-    TestJavaObjectsTable insertRow = new TestJavaObjectsTable();
-    insertRow.setaDate(new Date(2342342));
-    insertRow.setaString("NotATestString");
-
-    shillelagh.update(insertRow);
-  }
-
-  // TODO Tests for null values
 }
