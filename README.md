@@ -14,10 +14,20 @@ String
 Date
 Boolean
 
-Developed By
+Download
 ============
 
- * [Andrew Reitz](https://github.com/pieces029)
+Download the latest JAR or grab via Maven:
+
+  <dependency>
+    <groupId>com.andrewreitz</groupId>
+    <artifactId>shillelagh</artifactId>
+    <version>0.1.0</version>
+  </dependency>
+  
+or Gradle:
+
+  compile 'com.andrewreitz:shillelagh:0.1.0'
 
 License
 =======
