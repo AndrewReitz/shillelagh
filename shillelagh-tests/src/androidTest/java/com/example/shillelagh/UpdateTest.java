@@ -31,7 +31,7 @@ public class UpdateTest extends AndroidTestCase {
     super.tearDown();
   }
 
-  public void testInsertPrimitives() {
+  public void testUpdatePrimitives() {
     // Arrange
     double expectedDouble = 2342342.2323;
     float expectedFloat = 4.0f;
@@ -80,7 +80,7 @@ public class UpdateTest extends AndroidTestCase {
     cursor.close();
   }
 
-  public void testInsertBoxedPrimitives() {
+  public void testUpdateBoxedPrimitives() {
     // Arrange
     double expectedDouble = 10000.55;
     float expectedFloat = 2.0f;
@@ -129,7 +129,7 @@ public class UpdateTest extends AndroidTestCase {
     cursor.close();
   }
 
-  public void testInsertJavaObjects() {
+  public void testUpdateJavaObjects() {
     // Arrange
     final Date now = new Date();
     final String expected = "TestString";
@@ -179,6 +179,14 @@ public class UpdateTest extends AndroidTestCase {
 
     // Assert
     throw new AssertionError("Expected Exception Not Thrown");
+  }
+
+  public void testNullUpdate() {
+    TestJavaObjectsTable insertRow = new TestJavaObjectsTable();
+    insertRow.setaDate(new Date(2342342));
+    insertRow.setaString("NotATestString");
+
+    shillelagh.update(insertRow);
   }
 
   // TODO Tests for null values
