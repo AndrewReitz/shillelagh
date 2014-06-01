@@ -12,6 +12,7 @@ apply plugin: 'propdeps'
 apply plugin: 'propdeps-maven'
 apply plugin: 'propdeps-idea'
 apply plugin: 'propdeps-eclipse'
+apply from: file('./deploy.gradle')
 
 targetCompatibility = JavaVersion.VERSION_1_7
 sourceCompatibility = JavaVersion.VERSION_1_7

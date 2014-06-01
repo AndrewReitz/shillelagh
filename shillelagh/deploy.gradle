@@ -1,6 +1,23 @@
 apply plugin: 'maven'
 apply plugin: 'signing'
 
+ext {
+  SONATYPE_URL = ""
+  IS_DEV_BUILD = false
+  IS_RELEASE_BUILD = false
+}
+
+//set build variables based on build type (release, continuous integration, development)
+if (hasProperty("release")) {
+  IS_RELEASE_BUILD = true
+  SONATYPE_URL = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+} else if (hasProperty("snapshot")) {
+  VERSION += "-SNAPSHOT"
+  SONATYPE_URL = "https://oss.sonatype.org/content/repositories/snapshots/"
+} else {
+  IS_DEV_BUILD = true
+}
+
 afterEvaluate { project ->
     uploadArchives {
         repositories {
@@ -17,16 +34,16 @@ afterEvaluate { project ->
                     pom.project {
                         name 'Shillelagh'
                         packaging 'jar'
-                        description 'Android library'
+                        description 'Shillelagh Sqlite Android library'
                         artifactId = 'shillelagh'
                         groupId GROUP
                         version VERSION
-                        url 'https://github.com/InkApplications/shillelagh'
+                        url 'https://github.com/pieces029/shillelagh'
 
                         scm {
-                            url 'scm:https://github.com/InkApplications/shillelagh'
-                            connection 'scm:git:git@github.com:InkApplications/shillelagh.git'
-                            developerConnection 'scm:git:git@github.com:InkApplications/shillelagh.git'
+                            url 'scm:https://github.com/pieces029/shillelagh'
+                            connection 'scm:git:git@github.com:pieces029/shillelagh.git'
+                            developerConnection 'scm:git:git@github.com:pieces029/shillelagh.git'
                         }
 
                         licenses {
@@ -39,7 +56,7 @@ afterEvaluate { project ->
 
                         developers {
                             developer {
-                                id 'pieces029'
+                                id 'areitz'
                                 name 'Andrew Reitz'
                                 url "http://andrewreitz.com"
                             }

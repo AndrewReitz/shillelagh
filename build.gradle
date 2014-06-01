@@ -1,12 +1,11 @@
 ext {
     MIN_SDK_VERSION = 14
     TARGET_SDK_VERSION = 19
-    GROUP = "com.andrewreitz"
-    VERSION = '1.0.0' // TODO Move these to gradle.properties
     VERSION_CODE = 1
-    IS_DEV_BUILD = false
-    IS_RELEASE_BUILD = false
 }
+version = VERSION
+group = GROUP
+
 buildscript {
     repositories {
         mavenCentral()
