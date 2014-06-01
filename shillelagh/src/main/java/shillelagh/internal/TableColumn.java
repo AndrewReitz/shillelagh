@@ -1,5 +1,7 @@
 package shillelagh.internal;
 
+import java.util.Date;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.type.TypeMirror;
 
@@ -11,13 +13,13 @@ class TableColumn {
   private final String columnName;
   private final Element element;
 
-  TableColumn(SqliteTypeUtils sqliteTypeUtils, Element element, ShillelaghLogger logger) {
+  TableColumn(Element element, ShillelaghLogger logger) {
     this.columnName = element.getSimpleName().toString();
     this.logger = logger;
     this.element = element;
 
     TypeMirror typeMirror = element.asType();
-    this.type = sqliteTypeUtils.getSqliteType(typeMirror);
+    this.type = SqliteType.from(typeMirror);
     logger.d("Element " + element + " Type " + typeMirror.toString());
   }
 
@@ -34,7 +36,12 @@ class TableColumn {
   }
 
   boolean isDate() {
-    return element.asType().toString().equals("java.util.Date");
+    return getType().equals(Date.class.getName());
+  }
+
+  boolean isBoolean() {
+    final String typeString = getType();
+    return typeString.equals(boolean.class.getName()) || typeString.equals(Boolean.class.getName());
   }
 
   @Override public String toString() {

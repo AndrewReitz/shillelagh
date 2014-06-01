@@ -3,6 +3,17 @@ Shillelagh
 
 Currently a work in progress
 
+Supported Types (and corresponding primitives)
+
+Integer
+Double
+Float
+Long
+Short
+String
+Date
+Boolean
+
 Developed By
 ============
 

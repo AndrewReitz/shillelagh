@@ -34,7 +34,6 @@ public final class ShillelaghProcessor extends AbstractProcessor {
   private Elements elementUtils;
   private Types typeUtils;
   private Filer filer;
-  private SqliteTypeUtils sqliteTYpeUtils;
 
   @Override public synchronized void init(ProcessingEnvironment processingEnv) {
     super.init(processingEnv);
@@ -43,8 +42,6 @@ public final class ShillelaghProcessor extends AbstractProcessor {
     elementUtils = processingEnv.getElementUtils();
     typeUtils = processingEnv.getTypeUtils();
     filer = processingEnv.getFiler();
-
-    sqliteTYpeUtils = new SqliteTypeUtils(logger);
   }
 
   @Override public Set<String> getSupportedAnnotationTypes() {
@@ -127,7 +124,7 @@ public final class ShillelaghProcessor extends AbstractProcessor {
   /** Create a new table with the elements name or annotation has a value set use that */
   private TableObject createTable(Element element) {
     Table tableAnnotation = element.getAnnotation(Table.class);
-    String tableName = tableAnnotation.value().equals("") ? element.getSimpleName().toString() : tableAnnotation.value();
+    String tableName = element.getSimpleName().toString();
     return new TableObject(tableName);
   }
 
@@ -136,7 +133,8 @@ public final class ShillelaghProcessor extends AbstractProcessor {
     // Check if user wants to use an id other than _id
     Id idAnnotation = element.getAnnotation(Id.class);
     if (idAnnotation != null) {
-      if (element.asType().getKind() != TypeKind.LONG) {
+      if (element.asType().getKind() != TypeKind.LONG &&
+          !("java.lang.Long".equals(element.asType().toString()))) {
         logger.e("@Id must be on a long");
       }
       // Id attribute set and continue
@@ -148,6 +146,6 @@ public final class ShillelaghProcessor extends AbstractProcessor {
   private void checkForFields(TableObject tableObject, Element element) {
     Field fieldAnnotation = element.getAnnotation(Field.class);
     if (fieldAnnotation == null) return;
-    tableObject.addColumn(new TableColumn(sqliteTYpeUtils, element, logger));
+    tableObject.addColumn(new TableColumn(element, logger));
   }
 }

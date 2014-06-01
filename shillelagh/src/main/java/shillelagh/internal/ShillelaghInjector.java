@@ -1,8 +1,12 @@
 package shillelagh.internal;
 
+import java.util.HashMap;
 import java.util.Iterator;
 
+/** Class in charge of creating all the code injected into other classes */
 public class ShillelaghInjector {
+
+  // I'm not really happy with the code in here, but then again, I'm writing Java in Strings...
 
   /**
    * Internal class function names
@@ -21,12 +25,35 @@ public class ShillelaghInjector {
    * used with {@link android.database.sqlite.SQLiteDatabase#rawQuery(String, String[])}
    */
   private static final String GET_ID_OF_LAST_INSERTED_ROW_SQL = "SELECT ROWID FROM %s ORDER BY ROWID DESC LIMIT 1";
+  private static final HashMap<String, String> SUPPORTED_CURSOR_METHODS = new HashMap<>();
+
+  static {
+    final String cursorFunctionInt = "getInt";
+    final String cursorFunctionDouble = "getDouble";
+    final String cursorFunctionFloat = "getFloat";
+    final String cursorFunctionLong = "getLong";
+    final String cursorFunctionShort = "getShort";
+    final String cursorFunctionString = "getString";
+
+    SUPPORTED_CURSOR_METHODS.put(int.class.getName(), cursorFunctionInt);
+    SUPPORTED_CURSOR_METHODS.put(Integer.class.getName(), cursorFunctionInt);
+    SUPPORTED_CURSOR_METHODS.put(boolean.class.getName(), cursorFunctionInt);
+    SUPPORTED_CURSOR_METHODS.put(Boolean.class.getName(), cursorFunctionInt);
+    SUPPORTED_CURSOR_METHODS.put(double.class.getName(), cursorFunctionDouble);
+    SUPPORTED_CURSOR_METHODS.put(Double.class.getName(), cursorFunctionDouble);
+    SUPPORTED_CURSOR_METHODS.put(float.class.getName(), cursorFunctionFloat);
+    SUPPORTED_CURSOR_METHODS.put(Float.class.getName(), cursorFunctionFloat);
+    SUPPORTED_CURSOR_METHODS.put(long.class.getName(), cursorFunctionLong);
+    SUPPORTED_CURSOR_METHODS.put(Long.class.getName(), cursorFunctionLong);
+    SUPPORTED_CURSOR_METHODS.put(short.class.getName(), cursorFunctionShort);
+    SUPPORTED_CURSOR_METHODS.put(Short.class.getName(), cursorFunctionShort);
+    SUPPORTED_CURSOR_METHODS.put(String.class.getName(), cursorFunctionString);
+  }
 
   private final String classPackage;
   private final String className;
   private final String targetClass;
   private final ShillelaghLogger logger;
-
   private TableObject tableObject;
 
   ShillelaghInjector(String classPackage, String className, String targetClass, ShillelaghLogger logger) {
@@ -52,6 +79,7 @@ public class ShillelaghInjector {
     builder.append("package ").append(classPackage).append(";\n\n");
     builder.append("import android.database.Cursor;\n");
     builder.append("import android.database.DatabaseUtils;\n");
+    builder.append("import android.util.Log;\n");
     builder.append("import android.database.sqlite.SQLiteDatabase;\n\n");
     builder.append("import java.util.ArrayList;\n");
     builder.append("import java.util.Date;\n");
@@ -106,6 +134,8 @@ public class ShillelaghInjector {
         values.append("'\" + element.").append(column.getColumnName()).append(" + \"'");
       } else if (column.isDate()) {
         values.append("\" + element.").append(column.getColumnName()).append(".getTime() + \"");
+      }  else if (column.isBoolean()) {
+        values.append("\" + (element.").append(column.getColumnName()).append(" ? \"1\" : \"0\") + \"");
       } else {
         values.append("\" + element.").append(column.getColumnName()).append(" + \"");
       }
@@ -143,6 +173,8 @@ public class ShillelaghInjector {
         columnUpdates.append(column.getColumnName()).append(" = \'\" + element.").append(column.getColumnName()).append(" + \"\'");
       } else if (column.isDate()) {
         columnUpdates.append(column.getColumnName()).append(" = \" + element.").append(column.getColumnName()).append(".getTime() + \"");
+      } else if (column.isBoolean()) {
+        columnUpdates.append(column.getColumnName()).append(" = \" + (element.").append(column.getColumnName()).append(" ? \"1\" : \"0\") + \"");
       } else {
         columnUpdates.append(column.getColumnName()).append(" = \" + element.").append(column.getColumnName()).append(" + \"");
       }
@@ -177,19 +209,22 @@ public class ShillelaghInjector {
 
     builder.append("  public static List<").append(targetClass).append(">").append(MAP_OBJECT_FUNCTION).append("(Cursor cursor) {\n");
     builder.append("    List<").append(targetClass).append("> tableObjects = new ArrayList<>();\n");
-    builder.append("    if (cursor.moveToFirst()) {\n");
-    builder.append("      for(;cursor.moveToNext();) {\n");
+    builder.append("    if (cursor.moveToFirst()) {\n"); // can't assume the cursor is already at the front
+    builder.append("       while (!cursor.isAfterLast()) {\n");
     builder.append("        ").append(targetClass).append(" tableObject = new ").append(targetClass).append("();\n");
     builder.append("        tableObject.").append(idColumnName).append(" = cursor.getLong(cursor.getColumnIndex(\"").append(idColumnName).append("\"));\n");
     for (TableColumn column : tableObject.getColumns()) {
       String columnName = column.getColumnName();
       if (column.isDate()) {
-        builder.append("        tableObject.").append(columnName).append(" = new Date(cursor.").append(getCursorCommand("long")).append("(cursor.getColumnIndex(\"").append(columnName).append("\")));\n");
+        builder.append("        tableObject.").append(columnName).append(" = new Date(cursor.").append(getCursorCommand(long.class.getName())).append("(cursor.getColumnIndex(\"").append(columnName).append("\")));\n");
+      } else if (column.isBoolean()) {
+        builder.append("        tableObject.").append(columnName).append(" = cursor.").append(getCursorCommand(column.getType())).append("(cursor.getColumnIndex(\"").append(columnName).append("\")) == 1;\n");
       } else {
         builder.append("        tableObject.").append(columnName).append(" = cursor.").append(getCursorCommand(column.getType())).append("(cursor.getColumnIndex(\"").append(columnName).append("\"));\n");
       }
     }
     builder.append("        tableObjects.add(tableObject);\n");
+    builder.append("        cursor.moveToNext();\n");
     builder.append("      }\n");
     builder.append("    }\n");
     builder.append("  return tableObjects;");
@@ -198,25 +233,12 @@ public class ShillelaghInjector {
 
   /**
    * Maps a type to the corresponding Cursor get function. For mapping objects between the database
-   * and java
+   * and java.
    */
   private String getCursorCommand(String type) {
     logger.d("getCursorCommand: type = " + type);
-    switch (type) {
-      case "int":
-        return "getInt";
-      case "double":
-        return "getDouble";
-      case "float":
-        return "getFloat";
-      case "long":
-        return "getLong";
-      case "short":
-        return "getShort";
-      case "java.lang.String":
-        return "getString";
-      default:
-        return "getBlob";
-    }
+
+    final String returnValue = SUPPORTED_CURSOR_METHODS.get(type);
+    return returnValue != null ? returnValue : "getBlob"; // all others are blobs
   }
 }
