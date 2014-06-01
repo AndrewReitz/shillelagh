@@ -1,10 +1,10 @@
 buildscript {
-    repositories {
-        maven { url 'http://repo.springsource.org/plugins-release' }
-    }
-    dependencies {
-        classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.+'
-    }
+  repositories {
+    maven { url 'http://repo.springsource.org/plugins-release' }
+  }
+  dependencies {
+    classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.+'
+  }
 }
 
 apply plugin: 'java'
@@ -18,5 +18,5 @@ targetCompatibility = JavaVersion.VERSION_1_7
 sourceCompatibility = JavaVersion.VERSION_1_7
 
 dependencies {
-    provided 'com.google.android:android:4.1.1.4'
+  provided 'com.google.android:android:4.1.1.4'
 }
