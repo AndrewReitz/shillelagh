@@ -1,7 +1,11 @@
-Shillelagh
-==========
+# Shillelagh
 
-Currently a work in progress
+** Currently a work in progress. Please submit any feature requests **
+
+Shillelagh is an sqlite library. It was build to make your life easier. The entire library 
+was build around making life easier in Android when using sqlite. 
+
+For how to use see the [example](). 
 
 Supported Types (and corresponding primitives)
 
@@ -14,23 +18,22 @@ String
 Date
 Boolean
 
-Download
-============
+# Download
 
-Download the latest JAR or grab via Maven:
-
+Download [the latest JAR](http://repository.sonatype.org/service/local/artifact/maven/redirect?r=central-proxy&g=com.andrewreitz&a=shillelagh&v=LATEST) or grab via Maven:
+```xml
   <dependency>
     <groupId>com.andrewreitz</groupId>
     <artifactId>shillelagh</artifactId>
     <version>0.1.0</version>
   </dependency>
-  
+```
 or Gradle:
-
+```groovy
   compile 'com.andrewreitz:shillelagh:0.1.0'
+```
 
-License
-=======
+# License
 
     Copyright 2014 Andrew Reitz
 
