@@ -1,4 +1,4 @@
-# Shillelagh
+# Shillelagh ![Library Icon][AndroidShillelagh.svg]
 
 ** Currently a work in progress. Please submit any feature requests **
 
