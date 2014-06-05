@@ -1,4 +1,6 @@
-# Shillelagh ![Library Icon](AndroidShillelagh.svg)
+# Shillelagh
+
+![Library Icon](AndroidShillelagh.png)
 
 ** Currently a work in progress. Please submit any feature requests **
 
