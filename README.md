@@ -29,6 +29,8 @@ Supported Types (and corresponding primitives)
 ## TODO
 - Relationship Support
 - Constraint Support
+- More Unit Tests
+- Documentation
 
 # Download
 
