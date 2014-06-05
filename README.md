@@ -15,7 +15,6 @@ Quick and dirty.
 For how to use see the [example](https://github.com/pieces029/shillelagh/tree/master/shillelagh-sample). 
 
 Supported Types (and corresponding primitives)
-
 - Integer
 - Double
 - Float
