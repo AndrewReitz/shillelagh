@@ -13,7 +13,7 @@ class TableObject {
   private final String tableName;
   private String idColumnName = "_id"; // default to _id if one isn't provided
 
-  private final List<TableColumn> columns = new LinkedList<>();
+  private final List<TableColumn> columns = new LinkedList<TableColumn>();
 
   TableObject(String tableName) {
     this.tableName = tableName;

@@ -25,8 +25,8 @@ import static shillelagh.internal.ShillelaghProcessor.SUFFIX;
 
 public final class Shillelagh {
 
-  private static final Map<Class<?>, Class<?>> CACHED_CLASSES = new LinkedHashMap<>();
-  private static final Map<String, Method> CACHED_METHODS = new LinkedHashMap<>();
+  private static final Map<Class<?>, Class<?>> CACHED_CLASSES = new LinkedHashMap<Class<?>, Class<?>>();
+  private static final Map<String, Method> CACHED_METHODS = new LinkedHashMap<String, Method>();
 
   private static final String TAG = Shillelagh.class.getSimpleName();
   private static boolean debug = false;

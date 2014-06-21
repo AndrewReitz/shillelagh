@@ -27,7 +27,7 @@ public final class ShillelaghProcessor extends AbstractProcessor {
 
   public static final String SUFFIX = "$$ShillelaghInjector";
 
-  static final boolean DEBUG = true;
+  static final boolean DEBUG = false;
 
   private ShillelaghLogger logger;
 
@@ -45,7 +45,7 @@ public final class ShillelaghProcessor extends AbstractProcessor {
   }
 
   @Override public Set<String> getSupportedAnnotationTypes() {
-    Set<String> supportTypes = new LinkedHashSet<>();
+    Set<String> supportTypes = new LinkedHashSet<String>();
     supportTypes.add(Table.class.getCanonicalName());
 
     return supportTypes;
