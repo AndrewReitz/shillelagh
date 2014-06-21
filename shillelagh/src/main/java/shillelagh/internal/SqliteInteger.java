@@ -25,8 +25,8 @@ class SqliteInteger {
           "java.util.Date"
   );
 
-  private HashSet<TypeKind> integerKinds = new HashSet<>(INTEGER_KINDS.size());
-  private HashSet<String> integerObjects = new HashSet<>(INTEGER_OBJECTS.size());
+  private HashSet<TypeKind> integerKinds = new HashSet<TypeKind>(INTEGER_KINDS.size());
+  private HashSet<String> integerObjects = new HashSet<String>(INTEGER_OBJECTS.size());
 
   SqliteInteger() {
     integerKinds.addAll(INTEGER_KINDS);

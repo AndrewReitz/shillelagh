@@ -1,22 +1,26 @@
-ext {
-    MIN_SDK_VERSION = 14
-    TARGET_SDK_VERSION = 19
-    VERSION_CODE = 1
-}
-version = VERSION
-group = GROUP
-
 buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:0.10.+'
-    }
+  repositories {
+    mavenCentral()
+    jcenter()
+    maven { url 'http://repo.springsource.org/plugins-release' }
+  }
+  dependencies {
+    classpath 'com.android.tools.build:gradle:0.11.+'
+    classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.7'
+    classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.1'
+  }
 }
 
 allprojects {
-    repositories {
-        mavenCentral()
-    }
+  repositories {
+    mavenCentral()
+  }
+
+  version = '0.0.2-SNAPSHOT'
+  group = 'com.andrewreitz'
+  ext {
+    minSdkVersion = 14
+    targetSdkVersion = 19
+    versionCode = 1
+  }
 }

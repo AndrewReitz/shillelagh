@@ -1,22 +1,44 @@
-buildscript {
-  repositories {
-    maven { url 'http://repo.springsource.org/plugins-release' }
-  }
-  dependencies {
-    classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.+'
-  }
-}
-
 apply plugin: 'java'
 apply plugin: 'propdeps'
-apply plugin: 'propdeps-maven'
-apply plugin: 'propdeps-idea'
-apply plugin: 'propdeps-eclipse'
-apply from: file('./deploy.gradle')
+apply plugin: 'nexus'
 
-targetCompatibility = JavaVersion.VERSION_1_7
-sourceCompatibility = JavaVersion.VERSION_1_7
+targetCompatibility = JavaVersion.VERSION_1_6
+sourceCompatibility = JavaVersion.VERSION_1_6
 
 dependencies {
   provided 'com.google.android:android:4.1.1.4'
+}
+
+modifyPom {
+  project {
+    name 'Shillelagh'
+    packaging 'jar'
+    description 'Shillelagh Sqlite Android library'
+    artifactId = 'shillelagh'
+    groupId group
+    version version
+    url 'https://github.com/pieces029/shillelagh'
+
+    scm {
+      url 'scm:https://github.com/pieces029/shillelagh'
+      connection 'scm:git:git@github.com:pieces029/shillelagh.git'
+      developerConnection 'scm:git:git@github.com:pieces029/shillelagh.git'
+    }
+
+    licenses {
+      license {
+        name 'The Apache Software License, Version 2.0'
+        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+        distribution 'repo'
+      }
+    }
+
+    developers {
+      developer {
+        id 'areitz'
+        name 'Andrew Reitz'
+        url "http://andrewreitz.com"
+      }
+    }
+  }
 }

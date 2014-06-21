@@ -25,7 +25,7 @@ public class ShillelaghInjector {
    * used with {@link android.database.sqlite.SQLiteDatabase#rawQuery(String, String[])}
    */
   private static final String GET_ID_OF_LAST_INSERTED_ROW_SQL = "SELECT ROWID FROM %s ORDER BY ROWID DESC LIMIT 1";
-  private static final HashMap<String, String> SUPPORTED_CURSOR_METHODS = new HashMap<>();
+  private static final HashMap<String, String> SUPPORTED_CURSOR_METHODS = new HashMap<String, String>();
 
   static {
     final String cursorFunctionInt = "getInt";

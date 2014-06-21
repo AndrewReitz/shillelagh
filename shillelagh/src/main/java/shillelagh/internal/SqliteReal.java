@@ -19,8 +19,8 @@ class SqliteReal {
           "java.lang.Number"
   );
 
-  private HashSet<TypeKind> realKinds = new HashSet<>(REAL_KINDS);
-  private HashSet<String> realObjects = new HashSet<>(REAL_OBJECTS);
+  private HashSet<TypeKind> realKinds = new HashSet<TypeKind>(REAL_KINDS);
+  private HashSet<String> realObjects = new HashSet<String>(REAL_OBJECTS);
 
   SqliteReal() {
     realKinds.addAll(REAL_KINDS);
