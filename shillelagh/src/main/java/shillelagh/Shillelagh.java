@@ -46,14 +46,14 @@ public final class Shillelagh {
    * Creates the table from the object. The DB must be passed in from the SQLiteOpenHelper
    * otherwise an illegal state exception will occur
    */
-  public static void createTable(SQLiteDatabase db, Class<?> tableObject) {
+  public static void createTable(SQLiteDatabase db, Class<?> tableClass) {
     try {
-      final Class<?> shillelagh = findShillelaghForClass(tableObject);
+      final Class<?> shillelagh = findShillelaghForClass(tableClass);
       getAndExecuteSqlStatement(db, shillelagh, CREATE_TABLE_FUNCTION);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new RuntimeException("Unable to create table for " + tableObject +
+      throw new RuntimeException("Unable to create table for " + tableClass +
           ". Are you missing @Table annotation?", e);
     }
   }
@@ -62,21 +62,29 @@ public final class Shillelagh {
    * Drops the table created from the table object. The DB must be passed in from
    * the SQLiteOpenHelper otherwise an illegal state exception will occur
    */
-  public static void dropTable(SQLiteDatabase db, Class<?> tableObject) {
+  public static void dropTable(SQLiteDatabase db, Class<?> tableClass) {
     try {
-      final Class<?> shillelagh = findShillelaghForClass(tableObject);
+      final Class<?> shillelagh = findShillelaghForClass(tableClass);
       getAndExecuteSqlStatement(db, shillelagh, DROP_TABLE_FUNCTION);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new RuntimeException("Unable to drop table for " + tableObject +
+      throw new RuntimeException("Unable to drop table for " + tableClass +
           ". Are you missing @Table annotation?", e);
     }
   }
 
-  public static <T extends List<M>, M> T map(Class<? extends M> tableObject, Cursor cursor) {
+  /**
+   * Maps data from the cursor to it's corresponding model object.
+   *
+   * @param tableClass Class the data from the cursor should be mapped to. This class must have the
+   *                   @see shillelagh.Table annotation on it
+   * @param cursor Cursor of data pulled from the tableClass's generated table.
+   * @return List of tableClass objects mapped from the cursor.
+   */
+  public static <T extends List<M>, M> T map(Class<? extends M> tableClass, Cursor cursor) {
     try {
-      final Class<?> shillelagh = findShillelaghForClass(tableObject);
+      final Class<?> shillelagh = findShillelaghForClass(tableClass);
       final Method mapMethod = findMethodForClass(shillelagh, MAP_OBJECT_FUNCTION,
           new Class<?>[]{Cursor.class});
       //noinspection unchecked
@@ -84,7 +92,7 @@ public final class Shillelagh {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new RuntimeException("Unable to map cursor to " + tableObject, e);
+      throw new RuntimeException("Unable to map cursor to " + tableClass, e);
     }
   }
 
@@ -105,6 +113,12 @@ public final class Shillelagh {
     }
   }
 
+  /**
+   * Updates an Object. This object MUST have it's id field populated
+   * with the id of the row you are trying to update.
+   *
+   * @param tableObject The object that will update a row in the table
+   */
   public void update(Object tableObject) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableObject.getClass());
@@ -118,6 +132,14 @@ public final class Shillelagh {
     }
   }
 
+  /**
+   * TODO: Write unit test for this method
+   *
+   * Deletes the object from the table in which it resides. This does the look up based off of
+   * the ID of the object. Passing in an object with out and ID will not delete other rows.
+   *
+   * @param tableObject table object with ID field populated.
+   */
   public void delete(Object tableObject) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableObject.getClass());
@@ -130,18 +152,28 @@ public final class Shillelagh {
     }
   }
 
-  public void delete(final Class<?> tableObject, final long id) {
+  /**
+   * TODO: Write unit test
+   *
+   * Deletes a row in the table with the corresponding ID.
+   *
+   * @param tableClass The class which was used to generate the table that
+   *                   you want to delete the corresponding row out of.
+   * @param id the id of the row you want to match
+   */
+  public void delete(final Class<?> tableClass, final long id) {
     try {
-      final Class<?> shillelagh = findShillelaghForClass(tableObject);
+      final Class<?> shillelagh = findShillelaghForClass(tableClass);
       getAndExecuteSqlStatement(sqliteOpenHelper.getWritableDatabase(), shillelagh,
           DELETE_OBJECT_FUNCTION, id);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new RuntimeException("Unable to delete from " + tableObject + " with id = " + id, e);
+      throw new RuntimeException("Unable to delete from " + tableClass + " with id = " + id, e);
     }
   }
 
+  /** Equivalent to calling {@link SQLiteDatabase#query(boolean, String, String[], String, String[], String, String, String, String)} */
   public Cursor query(boolean distinct, String table, String[] columns,
                       String selection, String[] selectionArgs, String groupBy,
                       String having, String orderBy, String limit) {
@@ -150,16 +182,27 @@ public final class Shillelagh {
             groupBy, having, orderBy, limit);
   }
 
-  public <T extends List<M>, M> T query(Class<? extends M> tableObject, boolean distinct, String table, String[] columns,
+  /**
+   * Equivalent to calling
+   * {@link SQLiteDatabase#query(boolean, String, String[], String, String[], String, String, String, String)}
+   * then passing the result to {@link Shillelagh#map(Class, android.database.Cursor)}
+   */
+  public <T extends List<M>, M> T query(Class<? extends M> tableClass, boolean distinct, String table, String[] columns,
                                         String selection, String[] selectionArgs, String groupBy,
                                         String having, String orderBy, String limit) {
     Cursor results = sqliteOpenHelper.getReadableDatabase()
         .query(distinct, table, columns, selection, selectionArgs,
             groupBy, having, orderBy, limit);
 
-    return map(tableObject, results);
+    return map(tableClass, results);
   }
 
+  /**
+   * The equivalent of calling
+   * {@link SQLiteDatabase#query#query(boolean, String, String[], String, String[], String, String, String, String, android.os.CancellationSignal)}
+   *
+   * Only available for API 16+
+   */
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
   public Cursor query(boolean distinct, String table, String[] columns,
                       String selection, String[] selectionArgs, String groupBy,
@@ -170,6 +213,13 @@ public final class Shillelagh {
             limit, cancellationSignal);
   }
 
+  /**
+   * The equivalent of calling
+   * {@link SQLiteDatabase#query#query(boolean, String, String[], String, String[], String, String, String, String, android.os.CancellationSignal)}
+   * and then calling {@link Shillelagh#map(Class, android.database.Cursor)} on the result
+   *
+   * Only available for API 16+
+   */
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
   public <T extends List<M>, M> T query(Class<? extends M> tableObject, boolean distinct, String table, String[] columns,
                                         String selection, String[] selectionArgs, String groupBy,
@@ -181,6 +231,7 @@ public final class Shillelagh {
     return map(tableObject, results);
   }
 
+  /** Equivalent to calling {@link SQLiteDatabase#query(String, String[], String, String[], String, String, String} */
   public Cursor query(String table, String[] columns, String selection,
                       String[] selectionArgs, String groupBy, String having,
                       String orderBy) {
@@ -188,6 +239,10 @@ public final class Shillelagh {
         selectionArgs, groupBy, having, orderBy);
   }
 
+  /**
+   * Equivalent to calling {@link SQLiteDatabase#query(String, String[], String, String[], String, String, String)}
+   * and then calling {@link Shillelagh#map(Class, android.database.Cursor)} on the result.
+   */
   public <T extends List<M>, M> T query(Class<? extends M> tableObject, String table, String[] columns, String selection,
                                         String[] selectionArgs, String groupBy, String having,
                                         String orderBy) {
