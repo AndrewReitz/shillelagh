@@ -251,12 +251,17 @@ public final class Shillelagh {
     return map(tableObject, results);
   }
 
+  /** Equivalent to calling {@link SQLiteDatabase#query(String, String[], String, String[], String, String, String, String)} */
   public Cursor query(String table, String[] columns, String selection, String[] selectionArgs,
                       String groupBy, String having, String orderBy, String limit) {
     return sqliteOpenHelper.getReadableDatabase().query(table, columns, selection, selectionArgs,
         groupBy, having, orderBy, limit);
   }
 
+  /**
+   * Equivalent to calling {@link SQLiteDatabase#query(String, String[], String, String[], String, String, String, String)}
+   * and then calling {@link Shillelagh#map(Class, android.database.Cursor)} on the result.
+   */
   public <T extends List<M>, M> T query(Class<? extends M> tableObject, String table, String[] columns, String selection, String[] selectionArgs,
                                         String groupBy, String having, String orderBy, String limit) {
     final Cursor results = sqliteOpenHelper.getReadableDatabase().query(table, columns, selection, selectionArgs,
@@ -265,29 +270,50 @@ public final class Shillelagh {
     return map(tableObject, results);
   }
 
+  /** Equivalent to calling {@link SQLiteDatabase#rawQuery(String, String[])} where the selection args are null. */
   public Cursor rawQuery(String sql) {
     return sqliteOpenHelper.getReadableDatabase().rawQuery(sql, null);
   }
 
+  /**
+   * Equivalent to calling {@link SQLiteDatabase#rawQuery(String, String[])} where the selection args are null
+   * and then passing the result to {@link Shillelagh#map(Class, android.database.Cursor)}
+   */
   public <T extends List<M>, M> T rawQuery(Class<? extends M> tableObject, String sql) {
     return this.rawQuery(tableObject, sql, null);
   }
 
+  /** Equivalent to calling {@link SQLiteDatabase#rawQuery(String, String[])} */
   public Cursor rawQuery(String sql, String[] selectionArgs) {
     return sqliteOpenHelper.getReadableDatabase().rawQuery(sql, selectionArgs);
   }
 
+  /**
+   * Equivalent to calling {@link SQLiteDatabase#rawQuery(String, String[])}
+   * and then passing the result to {@link Shillelagh#map(Class, android.database.Cursor)}
+   */
   public <T extends List<M>, M> T rawQuery(Class<? extends M> tableObject, String sql, String[] selectionArgs) {
     final Cursor result = sqliteOpenHelper.getReadableDatabase().rawQuery(sql, selectionArgs);
     return map(tableObject, result);
   }
 
+  /**
+   * Equivalent to calling {@link SQLiteDatabase#rawQuery(String, String[], CancellationSignal)}
+   *
+   * Only available for API 16+
+   */
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
   public Cursor rawQuery(String sql, String[] selectionArgs,
                          CancellationSignal cancellationSignal) {
     return sqliteOpenHelper.getReadableDatabase().rawQuery(sql, selectionArgs, cancellationSignal);
   }
 
+  /**
+   * Equivalent to calling {@link SQLiteDatabase#rawQuery(String, String[], CancellationSignal)}
+   * and then passing the result to {@link Shillelagh#map(Class, android.database.Cursor)}
+   *
+   * Only available for API 16+
+   */
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
   public <T extends List<M>, M> T rawQuery(Class<? extends M> tableObject, String sql, String[] selectionArgs,
                                            CancellationSignal cancellationSignal) {
@@ -303,20 +329,22 @@ public final class Shillelagh {
     return sqliteOpenHelper.getWritableDatabase();
   }
 
+  /** Finds the internal Shillelagh class written to the clazz object by ShillelaghInjector */
   private static Class<?> findShillelaghForClass(Class<?> clazz) throws ClassNotFoundException {
     Class<?> shillelagh = CACHED_CLASSES.get(clazz);
     if (shillelagh != null) {
-      log("Class Cash Hit!");
+      log("Class Cache Hit!");
       return shillelagh;
     }
 
-    log("Class Cash Miss");
+    log("Class Cache Miss");
     final String className = clazz.getName();
     shillelagh = Class.forName(className + SUFFIX);
     CACHED_CLASSES.put(clazz, shillelagh);
     return shillelagh;
   }
 
+  /** Gets the SQL statement by calling the internal Shillelagh object and then executes that statement */
   private static void getAndExecuteSqlStatement(SQLiteDatabase database,
                                                 Class<?> shillelagh,
                                                 String methodName,
@@ -327,6 +355,7 @@ public final class Shillelagh {
     executeSql(database, sql);
   }
 
+  /** Gets the Class objects of a list of parameters, this is used for figuring out the parameters types of a method */
   private static Class<?>[] getParamTypes(Object... params) {
     Class<?>[] paramTypes = new Class[params.length];
     for (int i = 0; i < params.length; i++) {
@@ -335,6 +364,7 @@ public final class Shillelagh {
     return paramTypes;
   }
 
+  /** Finds a method in a class using reflection */
   private static Method findMethodForClass(Class<?> shillelagh,
                                            String methodName, Object... params
   ) throws NoSuchMethodException {
@@ -342,6 +372,7 @@ public final class Shillelagh {
     return findMethodForClass(shillelagh, methodName, paramTypes);
   }
 
+  /** Finds a method in a class using reflection */
   private static Method findMethodForClass(Class<?> shillelagh, String methodName,
                                            Class<?>[] paramTypes) throws NoSuchMethodException {
     String fqMethodName = shillelagh.getCanonicalName() + "#" + methodName;
@@ -358,7 +389,7 @@ public final class Shillelagh {
   }
 
   private static void executeSql(SQLiteDatabase database, String query) {
-    log("Running SQL: %s", query);
+    log("Running SQL Statement: %s", query);
     database.execSQL(query);
   }
 
