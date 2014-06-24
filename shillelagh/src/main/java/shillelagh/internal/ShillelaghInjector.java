@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 /** Class in charge of creating all the code injected into other classes */
-public class ShillelaghInjector {
+public final class ShillelaghInjector {
 
   // I'm not really happy with the code in here, but then again, I'm writing Java in Strings...
 
