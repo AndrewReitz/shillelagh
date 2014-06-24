@@ -76,7 +76,7 @@ public final class ShillelaghProcessor extends AbstractProcessor {
           checkForFields(tableObject, innerElement);
         }
 
-        // TODO Check if multiple supper types are supported
+        // TODO Check if multiple super types are supported
         // Loop through super types and parse out id/fields
         List<? extends TypeMirror> typeMirrors = typeUtils.directSupertypes(element.asType());
         for (TypeMirror typeMirror : typeMirrors) {
