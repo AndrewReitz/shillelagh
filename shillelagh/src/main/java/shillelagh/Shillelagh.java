@@ -199,7 +199,7 @@ public final class Shillelagh {
 
   /**
    * The equivalent of calling
-   * {@link SQLiteDatabase#query#query(boolean, String, String[], String, String[], String, String, String, String, android.os.CancellationSignal)}
+   * {@link SQLiteDatabase#query(boolean, String, String[], String, String[], String, String, String, String, android.os.CancellationSignal)}
    *
    * Only available for API 16+
    */
@@ -215,7 +215,7 @@ public final class Shillelagh {
 
   /**
    * The equivalent of calling
-   * {@link SQLiteDatabase#query#query(boolean, String, String[], String, String[], String, String, String, String, android.os.CancellationSignal)}
+   * {@link SQLiteDatabase#query(boolean, String, String[], String, String[], String, String, String, String, android.os.CancellationSignal)}
    * and then calling {@link Shillelagh#map(Class, android.database.Cursor)} on the result
    *
    * Only available for API 16+
