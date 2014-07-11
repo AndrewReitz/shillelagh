@@ -231,7 +231,7 @@ public final class Shillelagh {
     return map(tableObject, results);
   }
 
-  /** Equivalent to calling {@link SQLiteDatabase#query(String, String[], String, String[], String, String, String} */
+  /** Equivalent to calling {@link SQLiteDatabase#query(String, String[], String, String[], String, String, String)} */
   public Cursor query(String table, String[] columns, String selection,
                       String[] selectionArgs, String groupBy, String having,
                       String orderBy) {
