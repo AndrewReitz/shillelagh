@@ -37,6 +37,7 @@ public class MainActivity extends Activity {
     Book book = new Book();
     book.setPublished(Calendar.getInstance().getTime());
     book.setTitle("The Helping Phriendly Book");
+    book.setAuthor(author1);
 
     shillelagh.insert(author1);
     shillelagh.insert(author2);
