@@ -10,4 +10,6 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 @Retention(SOURCE)
 @Target(FIELD)
 public @interface Field {
+  /** Tells if the field should be converted to a byte array and stored as a blob */
+  boolean isBlob() default false;
 }
