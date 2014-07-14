@@ -10,6 +10,8 @@ buildscript {
   }
 }
 
+apply plugin: "idea"
+
 allprojects {
   repositories {
     jcenter()
@@ -17,6 +19,7 @@ allprojects {
 
   version = '0.0.2-SNAPSHOT'
   group = 'com.andrewreitz'
+
   ext {
     minSdkVersion = 14
     targetSdkVersion = 19
