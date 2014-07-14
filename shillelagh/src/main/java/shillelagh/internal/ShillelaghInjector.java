@@ -25,8 +25,10 @@ public final class ShillelaghInjector {
    * used with {@link android.database.sqlite.SQLiteDatabase#rawQuery(String, String[])}
    */
   private static final String GET_ID_OF_LAST_INSERTED_ROW_SQL = "SELECT ROWID FROM %s ORDER BY ROWID DESC LIMIT 1";
-  private static final HashMap<String, String> SUPPORTED_CURSOR_METHODS = new HashMap<String, String>();
 
+  /** Mappings for cursor functions */ // TODO MOVE TO SEPARATE CLASS
+  private static final String BLOB = "blob";
+  private static final HashMap<String, String> SUPPORTED_CURSOR_METHODS = new HashMap<String, String>();
   static {
     final String cursorFunctionInt = "getInt";
     final String cursorFunctionDouble = "getDouble";
@@ -34,6 +36,7 @@ public final class ShillelaghInjector {
     final String cursorFunctionLong = "getLong";
     final String cursorFunctionShort = "getShort";
     final String cursorFunctionString = "getString";
+    final String cursorFunctionBlob = "getBlob";
 
     SUPPORTED_CURSOR_METHODS.put(int.class.getName(), cursorFunctionInt);
     SUPPORTED_CURSOR_METHODS.put(Integer.class.getName(), cursorFunctionInt);
@@ -48,6 +51,7 @@ public final class ShillelaghInjector {
     SUPPORTED_CURSOR_METHODS.put(short.class.getName(), cursorFunctionShort);
     SUPPORTED_CURSOR_METHODS.put(Short.class.getName(), cursorFunctionShort);
     SUPPORTED_CURSOR_METHODS.put(String.class.getName(), cursorFunctionString);
+    SUPPORTED_CURSOR_METHODS.put(BLOB, cursorFunctionBlob);
   }
 
   private final String classPackage;
@@ -239,6 +243,6 @@ public final class ShillelaghInjector {
     logger.d("getCursorCommand: type = " + type);
 
     final String returnValue = SUPPORTED_CURSOR_METHODS.get(type);
-    return returnValue != null ? returnValue : "getBlob"; // all others are blobs
+    return returnValue != null ? returnValue : SUPPORTED_CURSOR_METHODS.get(BLOB); // all others are blobs
   }
 }
