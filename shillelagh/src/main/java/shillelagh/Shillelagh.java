@@ -78,16 +78,16 @@ public final class Shillelagh {
    * Maps data from the cursor to it's corresponding model object.
    *
    * @param tableClass Class the data from the cursor should be mapped to. This class must have the
-   *                   @see shillelagh.Table annotation on it
-   * @param cursor Cursor of data pulled from the tableClass's generated table.
+   * @param cursor     Cursor of data pulled from the tableClass's generated table.
    * @return List of tableClass objects mapped from the cursor.
+   * @see shillelagh.Table annotation on it
    */
+  @SuppressWarnings("unchecked")
   public static <T extends List<M>, M> T map(Class<? extends M> tableClass, Cursor cursor) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableClass);
       final Method mapMethod = findMethodForClass(shillelagh, MAP_OBJECT_FUNCTION,
           new Class<?>[]{Cursor.class});
-      //noinspection unchecked
       return (T) mapMethod.invoke(null, cursor);
     } catch (RuntimeException e) {
       throw e;
