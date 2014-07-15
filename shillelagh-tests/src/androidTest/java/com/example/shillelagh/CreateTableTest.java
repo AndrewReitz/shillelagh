@@ -6,6 +6,7 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
 
+import com.example.shillelagh.model.TestBlobs;
 import com.example.shillelagh.model.TestBoxedPrimitivesTable;
 import com.example.shillelagh.model.TestJavaObjectsTable;
 import com.example.shillelagh.model.TestNotTableObject;
@@ -32,6 +33,7 @@ public class CreateTableTest extends AndroidTestCase {
   private static final String SQL_INTEGER = "INTEGER";
   private static final String SQL_REAL = "REAL";
   private static final String SQL_TEXT = "TEXT";
+  private static final String SQL_BLOB = "BLOB";
 
   @Override
   protected void setUp() throws Exception {
@@ -194,6 +196,39 @@ public class CreateTableTest extends AndroidTestCase {
     assertThat(cursor.moveToNext()).isTrue();
     assertThat(cursor.getString(TABLE_INFO_NAME_COLUMN)).isEqualTo("aDate");
     assertThat(cursor.getString(TABLE_INFO_TYPE_COLUMN)).isEqualTo(SQL_INTEGER);
+    assertThat(cursor.getString(TABLE_INFO_NULLABLE_COLUMN)).isEqualTo("0");
+    assertThat(cursor.getString(TABLE_INFO_PRIMARAY_KEY_COLUMN)).isEqualTo("0");
+
+    assertThat(cursor.moveToNext()).isFalse();
+    cursor.close();
+  }
+
+  public void testShouldCreateBlobObjectsTable() {
+    // Arrange
+
+    // Act
+    Shillelagh.createTable(database, TestBlobs.class);
+    final Cursor cursor = database.rawQuery("PRAGMA table_info(" +
+        TestBlobs.class.getSimpleName() + ")", null);
+
+    // Assert
+    assertThat(cursor.getCount()).isEqualTo(3);
+
+    assertThat(cursor.moveToNext()).isTrue();
+    assertThat(cursor.getString(TABLE_INFO_DEFAULT_VALUE_COLUMN)).isEqualTo("id");
+    assertThat(cursor.getString(TABLE_INFO_TYPE_COLUMN)).isEqualTo(SQL_INTEGER);
+    assertThat(cursor.getString(TABLE_INFO_NULLABLE_COLUMN)).isEqualTo("0");
+    assertThat(cursor.getString(TABLE_INFO_PRIMARAY_KEY_COLUMN)).isEqualTo("1");
+
+    assertThat(cursor.moveToNext()).isTrue();
+    assertThat(cursor.getString(TABLE_INFO_DEFAULT_VALUE_COLUMN)).isEqualTo("aByteArray");
+    assertThat(cursor.getString(TABLE_INFO_TYPE_COLUMN)).isEqualTo(SQL_BLOB);
+    assertThat(cursor.getString(TABLE_INFO_NULLABLE_COLUMN)).isEqualTo("0");
+    assertThat(cursor.getString(TABLE_INFO_PRIMARAY_KEY_COLUMN)).isEqualTo("0");
+
+    assertThat(cursor.moveToNext()).isTrue();
+    assertThat(cursor.getString(TABLE_INFO_NAME_COLUMN)).isEqualTo("anotherByteArray");
+    assertThat(cursor.getString(TABLE_INFO_TYPE_COLUMN)).isEqualTo(SQL_BLOB);
     assertThat(cursor.getString(TABLE_INFO_NULLABLE_COLUMN)).isEqualTo("0");
     assertThat(cursor.getString(TABLE_INFO_PRIMARAY_KEY_COLUMN)).isEqualTo("0");
 

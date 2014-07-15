@@ -17,8 +17,10 @@ public final class ShillelaghInjector {
   public static final String UPDATE_OBJECT_FUNCTION = "getUpdateSql";
   public static final String UPDATE_ID_FUNCTION = "updateColumnId";
   public static final String DELETE_OBJECT_FUNCTION = "getDeleteSql";
-  public static final String SELECT_OBJECT_FUNCTION = "select";
   public static final String MAP_OBJECT_FUNCTION = "map";
+
+  private static final String SERIALIZE_FUNCTION = "serialize";
+  private static final String DESERIALIZE_FUNCTION = "deserialize";
 
   /**
    * SQL statement to select the id of the last inserted row. Does not end with ; in order to be
@@ -29,6 +31,7 @@ public final class ShillelaghInjector {
   /** Mappings for cursor functions */ // TODO MOVE TO SEPARATE CLASS
   private static final String BLOB = "blob";
   private static final HashMap<String, String> SUPPORTED_CURSOR_METHODS = new HashMap<String, String>();
+
   static {
     final String cursorFunctionInt = "getInt";
     final String cursorFunctionDouble = "getDouble";
@@ -85,6 +88,11 @@ public final class ShillelaghInjector {
     builder.append("import android.database.DatabaseUtils;\n");
     builder.append("import android.util.Log;\n");
     builder.append("import android.database.sqlite.SQLiteDatabase;\n\n");
+    builder.append("import java.io.ByteArrayInputStream;\n");
+    builder.append("import java.io.ByteArrayOutputStream;\n");
+    builder.append("import java.io.IOException;\n");
+    builder.append("import java.io.ObjectInputStream;\n");
+    builder.append("import java.io.ObjectOutputStream;\n\n");
     builder.append("import java.util.ArrayList;\n");
     builder.append("import java.util.Date;\n");
     builder.append("import java.util.List;\n\n");
@@ -104,8 +112,34 @@ public final class ShillelaghInjector {
     emmitDeleteSqlWithObject(builder);
     builder.append("\n");
     emmitMapCursorToObject(builder);
+    builder.append("\n");
+    emmitByteArraySerialization(builder);
     builder.append("}\n");
     return builder.toString();
+  }
+
+  private void emmitByteArraySerialization(StringBuilder builder) {
+    builder.append("  public byte[] ").append(SERIALIZE_FUNCTION).append("(").append(tableObject.getTableName()).append(" object) {\n");
+    builder.append("    try {\n");
+    builder.append("      ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();\n");
+    builder.append("      ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);\n");
+    builder.append("      objectOutputStream.writeObject(object);\n");
+    builder.append("      return byteArrayOutputStream.toByteArray();\n");
+    builder.append("    } catch (IOException e) {\n");
+    builder.append("      throw new RuntimeException(e);\n");
+    builder.append("    }\n");
+    builder.append("  }\n\n");
+    builder.append("  public static ").append(tableObject.getTableName()).append(" ").append(DESERIALIZE_FUNCTION).append("(byte[] bytes) {\n");
+    builder.append("    try {\n");
+    builder.append("      ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);\n");
+    builder.append("      ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);\n");
+    builder.append("      return (").append(tableObject.getTableName()).append(") objectInputStream.readObject();");
+    builder.append("    } catch (IOException e) {");
+    builder.append("      throw new RuntimeException(e);");
+    builder.append("    } catch (ClassNotFoundException e) {");
+    builder.append("      throw new RuntimeException(e);");
+    builder.append("    }");
+    builder.append("  }");
   }
 
   /** Creates the function for getting the create sql string */
@@ -136,9 +170,17 @@ public final class ShillelaghInjector {
       columns.append(column.getColumnName());
       if (column.getSqlType() == SqliteType.TEXT) {
         values.append("'\" + element.").append(column.getColumnName()).append(" + \"'");
+      } else if (column.getSqlType() == SqliteType.BLOB) {
+        if (column.isByteArray()) {
+          // we already have a byte array YAY!
+          values.append("\" + element.").append(column.getColumnName()).append(" + \"");
+        } else {
+          // we need to convert to a byte array
+          values.append("\" + ").append(SERIALIZE_FUNCTION).append("(element.").append(column.getColumnName()).append(") + \"");
+        }
       } else if (column.isDate()) {
         values.append("\" + element.").append(column.getColumnName()).append(".getTime() + \"");
-      }  else if (column.isBoolean()) {
+      } else if (column.isBoolean()) {
         values.append("\" + (element.").append(column.getColumnName()).append(" ? \"1\" : \"0\") + \"");
       } else {
         values.append("\" + element.").append(column.getColumnName()).append(" + \"");
@@ -175,6 +217,12 @@ public final class ShillelaghInjector {
       TableColumn column = iterator.next();
       if (column.getSqlType() == SqliteType.TEXT) {
         columnUpdates.append(column.getColumnName()).append(" = \'\" + element.").append(column.getColumnName()).append(" + \"\'");
+      } else if (column.getSqlType() == SqliteType.BLOB) {
+        if (column.isByteArray()) {
+          columnUpdates.append(column.getColumnName()).append(" = \" + element.").append(column.getColumnName()).append(" + \"");
+        } else {
+          columnUpdates.append(column.getColumnName()).append(" = \" + ").append(SERIALIZE_FUNCTION).append("(element.").append(column.getColumnName()).append(") + \"");
+        }
       } else if (column.isDate()) {
         columnUpdates.append(column.getColumnName()).append(" = \" + element.").append(column.getColumnName()).append(".getTime() + \"");
       } else if (column.isBoolean()) {
@@ -223,6 +271,12 @@ public final class ShillelaghInjector {
         builder.append("        tableObject.").append(columnName).append(" = new Date(cursor.").append(getCursorCommand(long.class.getName())).append("(cursor.getColumnIndex(\"").append(columnName).append("\")));\n");
       } else if (column.isBoolean()) {
         builder.append("        tableObject.").append(columnName).append(" = cursor.").append(getCursorCommand(column.getType())).append("(cursor.getColumnIndex(\"").append(columnName).append("\")) == 1;\n");
+      } else if (column.getSqlType() == SqliteType.BLOB) {
+        if (column.isByteArray()) {
+          builder.append("        tableObject.").append(columnName).append(" = cursor.").append(getCursorCommand(column.getType())).append("(cursor.getColumnIndex(\"").append(columnName).append("\"));\n");
+        } else {
+          builder.append("        tableObject.").append(columnName).append(" = ").append(DESERIALIZE_FUNCTION).append("(cursor.").append(getCursorCommand(column.getType())).append("(cursor.getColumnIndex(\"").append(columnName).append("\")));\n");
+        }
       } else {
         builder.append("        tableObject.").append(columnName).append(" = cursor.").append(getCursorCommand(column.getType())).append("(cursor.getColumnIndex(\"").append(columnName).append("\"));\n");
       }

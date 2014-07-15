@@ -4,10 +4,15 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.type.TypeKind;
+import javax.lang.model.element.Element;
 import javax.lang.model.type.TypeMirror;
+
+import shillelagh.Field;
 
 /** Sqlite3 Types */
 enum SqliteType {
@@ -35,7 +40,7 @@ enum SqliteType {
   TEXT(Collections.<TypeKind>emptySet(), new HashSet<String>(Arrays.asList(
       String.class.getName()
   ))),
-  BLOB(Collections.<TypeKind>emptySet(), Collections.<String>emptySet()), // Saved for a later date
+  BLOB(Collections.<TypeKind>emptySet(), Collections.<String>emptySet()),
   // signals an unknown type probably should be a key into another table
   UNKNOWN(Collections.<TypeKind>emptySet(), Collections.<String>emptySet());
 
@@ -51,11 +56,16 @@ enum SqliteType {
     this.objects = objects;
   }
 
-  static SqliteType from(TypeMirror typeMirror) {
-    if (typeMirror == null) {
-      throw new NullPointerException("typeMirror must not be null");
+  static SqliteType from(Element element) {
+    if (element == null) {
+      throw new NullPointerException("element must not be null");
     }
 
+    if (element.getAnnotation(Field.class).isBlob()) {
+      return BLOB;
+    }
+
+    final TypeMirror typeMirror = element.asType();
     for (SqliteType sqliteType : values()) {
       if (sqliteType.kinds.contains(typeMirror.getKind()) ||
           sqliteType.objects.contains(typeMirror.toString())) {

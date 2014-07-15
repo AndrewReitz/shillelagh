@@ -3,24 +3,17 @@ package shillelagh.internal;
 import java.util.Date;
 
 import javax.lang.model.element.Element;
-import javax.lang.model.type.TypeMirror;
 
 /** Represents the data for a column in a database and mapping it back to its java counter part */
 class TableColumn {
-
-  private final ShillelaghLogger logger;
   private final SqliteType type;
   private final String columnName;
   private final Element element;
 
-  TableColumn(Element element, ShillelaghLogger logger) {
+  TableColumn(Element element) {
     this.columnName = element.getSimpleName().toString();
-    this.logger = logger;
     this.element = element;
-
-    TypeMirror typeMirror = element.asType();
-    this.type = SqliteType.from(typeMirror);
-    logger.d("Element " + element + " Type " + typeMirror.toString());
+    this.type = SqliteType.from(element);
   }
 
   String getColumnName() {
@@ -31,7 +24,7 @@ class TableColumn {
     return type;
   }
 
-  String getType()  {
+  String getType() {
     return element.asType().toString();
   }
 
@@ -42,6 +35,11 @@ class TableColumn {
   boolean isBoolean() {
     final String typeString = getType();
     return typeString.equals(boolean.class.getName()) || typeString.equals(Boolean.class.getName());
+  }
+
+  boolean isByteArray() {
+    final String typeString = getType();
+    return typeString.equals("byte[]");
   }
 
   @Override public String toString() {

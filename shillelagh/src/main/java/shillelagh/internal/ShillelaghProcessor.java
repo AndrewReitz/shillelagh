@@ -27,7 +27,7 @@ public final class ShillelaghProcessor extends AbstractProcessor {
 
   public static final String SUFFIX = "$$ShillelaghInjector";
 
-  static final boolean DEBUG = false;
+  static final boolean DEBUG = true;
 
   private ShillelaghLogger logger;
 
@@ -54,7 +54,6 @@ public final class ShillelaghProcessor extends AbstractProcessor {
   @Override
   public boolean process(Set<? extends TypeElement> annotations,
                          RoundEnvironment roundEnvironment) {
-
     for (TypeElement annotation : annotations) {
       Set<? extends Element> elements = roundEnvironment.getElementsAnnotatedWith(annotation);
       for (Element element : elements) {
@@ -121,9 +120,8 @@ public final class ShillelaghProcessor extends AbstractProcessor {
     return type.getQualifiedName().toString().substring(packageLen).replace('.', '$');
   }
 
-  /** Create a new table with the elements name or annotation has a value set use that */
+  /** Create a new table with the elements name */
   private TableObject createTable(Element element) {
-    Table tableAnnotation = element.getAnnotation(Table.class);
     String tableName = element.getSimpleName().toString();
     return new TableObject(tableName);
   }
@@ -146,6 +144,15 @@ public final class ShillelaghProcessor extends AbstractProcessor {
   private void checkForFields(TableObject tableObject, Element element) {
     Field fieldAnnotation = element.getAnnotation(Field.class);
     if (fieldAnnotation == null) return;
-    tableObject.addColumn(new TableColumn(element, logger));
+
+    TableColumn tableColumn = new TableColumn(element);
+    if (tableColumn.getSqlType() == SqliteType.UNKNOWN) {
+      Table annotation = typeUtils.asElement(element.asType()).getAnnotation(Table.class);
+      if (annotation == null) {
+        logger.e(String.format("Class %s referenced in %s needs to be marked as a blob or should be " +
+                "annotated with @Table", element.toString(), element.asType().toString()));
+      }
+    }
+    tableObject.addColumn(tableColumn);
   }
 }
