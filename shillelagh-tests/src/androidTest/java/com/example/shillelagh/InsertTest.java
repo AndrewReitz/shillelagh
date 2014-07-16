@@ -140,7 +140,6 @@ public class InsertTest extends AndroidTestCase {
 
   public void testInsertBlobs() throws IOException, ClassNotFoundException {
     // Arrange
-    final String expectedString = "this is expected string";
     final Byte[] expectedByteArray = new Byte[5];
     for (byte i = 0; i < expectedByteArray.length; i++) {
       expectedByteArray[i] = i;
@@ -150,7 +149,7 @@ public class InsertTest extends AndroidTestCase {
       expectedOtherByteArray[i] = i;
     }
     final TestBlobs.TestBlobObject expectedBlobObject = new TestBlobs.TestBlobObject();
-    expectedBlobObject.testString = expectedString;
+    expectedBlobObject.testString = "this is expected string";
     TestBlobs row = new TestBlobs();
     row.setaByteArray(expectedByteArray);
     row.setAnotherByteArray(expectedOtherByteArray);
@@ -166,11 +165,10 @@ public class InsertTest extends AndroidTestCase {
     assertThat(cursor.getCount()).isEqualTo(1);
     assertThat(cursor.moveToFirst()).isTrue();
     assertThat(cursor.getLong(0)).isEqualTo(1);
-    assertThat(Shillelagh.<Byte[]>deserialize(cursor.getBlob(1))).isEqualTo(expectedByteArray);
+    assertThat(shillelagh.<Byte[]>deserialize(cursor.getBlob(1))).isEqualTo(expectedByteArray);
     assertThat(cursor.getBlob(2)).isEqualTo(expectedOtherByteArray);
-    TestBlobs.TestBlobObject resultBlob = Shillelagh.deserialize(cursor.getBlob(3));
+    TestBlobs.TestBlobObject resultBlob = shillelagh.deserialize(cursor.getBlob(3));
     assertThat(resultBlob).isEqualsToByComparingFields(expectedBlobObject);
-    assertThat(resultBlob.testString).isEqualTo(expectedString);
 
     assertThat(cursor.moveToNext()).isFalse();
     cursor.close();

@@ -1,18 +1,25 @@
 package com.example.shillelagh;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.test.AndroidTestCase;
 
+import com.example.shillelagh.model.TestBlobs;
 import com.example.shillelagh.model.TestBoxedPrimitivesTable;
 import com.example.shillelagh.model.TestJavaObjectsTable;
 import com.example.shillelagh.model.TestPrimitiveTable;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.Date;
 import java.util.List;
 
+import shillelagh.Field;
+import shillelagh.Id;
 import shillelagh.Shillelagh;
 
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -59,7 +66,7 @@ public class MapTest extends AndroidTestCase {
     assertThat(resultRow.getaBoolean()).isFalse();
   }
 
-  public void testPrimitivesInsert() {
+  public void testMapToPrimitives() {
     // Arrange
     int expectedBoolean = 1;
     double expectedDouble = 2900;
@@ -112,5 +119,48 @@ public class MapTest extends AndroidTestCase {
     assertThat(resultRow.getId()).isEqualTo(1);
     assertThat(resultRow.getaDate()).isEqualTo(expectedDate);
     assertThat(resultRow.getaString()).isEqualTo(expectedString);
+  }
+
+  public void testMapToBlobs() throws IOException {
+    // Arrange
+    Byte[] expectedByteArray = new Byte[5];
+    for (int i = 0; i < expectedByteArray.length; i++) {
+      expectedByteArray[i] = (byte) (expectedByteArray.length - i);
+    }
+
+    byte[] expectedOtherByteArray = new byte[100];
+    for (byte i = 0; i < expectedOtherByteArray.length; i++) {
+      expectedOtherByteArray[i] = i;
+    }
+
+    TestBlobs.TestBlobObject expectedTestBlobObject = new TestBlobs.TestBlobObject();
+    expectedTestBlobObject.testString = "hello world!!";
+
+    ContentValues values = new ContentValues();
+    values.put("aByteArray", serialize(expectedByteArray));
+    values.put("anotherByteArray", expectedOtherByteArray);
+    values.put("aTestBlobObject", serialize(expectedTestBlobObject));
+
+    // Act
+    sqliteOpenHelper.getWritableDatabase().insert(TestBlobs.class.getSimpleName(), null, values);
+    Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
+        "SELECT * FROM " + TestBlobs.class.getSimpleName(), null);
+
+    List<TestBlobs> result = Shillelagh.map(TestBlobs.class, cursor);
+
+    // Assert
+    assertThat(result.size()).isEqualTo(1);
+    TestBlobs resultRow = result.get(0);
+    assertThat(resultRow.getId()).isEqualTo(1);
+    assertThat(resultRow.getaByteArray()).isEqualTo(expectedByteArray);
+    assertThat(resultRow.getAnotherByteArray()).isEqualTo(expectedOtherByteArray);
+    assertThat(resultRow.getaTestBlobObject()).isEqualsToByComparingFields(expectedTestBlobObject);
+  }
+
+  public <K> byte[] serialize(K object) throws IOException {
+    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+    ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+    objectOutputStream.writeObject(object);
+    return byteArrayOutputStream.toByteArray();
   }
 }

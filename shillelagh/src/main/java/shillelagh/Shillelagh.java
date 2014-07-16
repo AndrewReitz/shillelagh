@@ -9,8 +9,10 @@ import android.os.CancellationSignal;
 import android.util.Log;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
@@ -97,22 +99,6 @@ public final class Shillelagh {
     } catch (Exception e) {
       throw new RuntimeException("Unable to map cursor to " + tableClass, e);
     }
-  }
-
-  /**
-   * Method for deserialize of byte arrays see {@link shillelagh.Field#isBlob()}
-   *
-   * @param bytes the byte array to be converted back into an object
-   * @param <K>   the object type to be converted back to
-   * @return the deserialized object
-   * @throws IOException
-   * @throws ClassNotFoundException
-   */
-  @SuppressWarnings("unchecked")
-  public static <K> K deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
-    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
-    ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
-    return (K) objectInputStream.readObject();
   }
 
   /** Finds the internal Shillelagh class written to the clazz object by ShillelaghInjector */
@@ -401,6 +387,22 @@ public final class Shillelagh {
                                            CancellationSignal cancellationSignal) {
     final Cursor results = sqliteOpenHelper.getReadableDatabase().rawQuery(sql, selectionArgs, cancellationSignal);
     return map(tableObject, results);
+  }
+
+  /**
+   * Method for deserialize of byte arrays see {@link shillelagh.Field#isBlob()}
+   *
+   * @param bytes the byte array to be converted back into an object
+   * @param <K>   the object type to be converted back to
+   * @return the deserialized object
+   * @throws IOException
+   * @throws ClassNotFoundException
+   */
+  @SuppressWarnings("unchecked")
+  public <K> K deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
+    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+    ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
+    return (K) objectInputStream.readObject();
   }
 
   public SQLiteDatabase getReadableDatabase() {
