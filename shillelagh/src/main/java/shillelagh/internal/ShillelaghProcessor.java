@@ -151,12 +151,11 @@ public final class ShillelaghProcessor extends AbstractProcessor {
 
     TableColumn tableColumn = new TableColumn(element);
     if (tableColumn.getSqlType() == SqliteType.BLOB && !tableColumn.isByteArray()) {
-      // TODO
-//      if (checkForSuperType(element, Serializable.class)) {
-//        logger.e(String.format(
-//            "%s in %s is not Serializable and will not be able to be converted to a byte array",
-//            element.toString(), tableObject.getTableName()));
-//      }
+      if (!checkForSuperType(element, Serializable.class) && !element.asType().toString().equals("java.lang.Byte[]")) {
+        logger.e(String.format(
+            "%s in %s is not Serializable and will not be able to be converted to a byte array",
+            element.toString(), tableObject.getTableName()));
+      }
     } else if (tableColumn.getSqlType() == SqliteType.UNKNOWN) {
       Table annotation = typeUtils.asElement(element.asType()).getAnnotation(Table.class);
       if (annotation == null) {

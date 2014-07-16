@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.example.shillelagh.model.TestBlobs;
 import com.example.shillelagh.model.TestBoxedPrimitivesTable;
 import com.example.shillelagh.model.TestJavaObjectsTable;
 import com.example.shillelagh.model.TestPrimitiveTable;
@@ -11,7 +12,7 @@ import com.example.shillelagh.model.TestPrimitiveTable;
 import shillelagh.Shillelagh;
 
 public class TestSQLiteOpenHelper extends SQLiteOpenHelper {
-  private static final String DATABASE_NAME = "shillelagh_test.db";
+  public static final String DATABASE_NAME = "shillelagh_test.db";
   private static final int DATABASE_VERSION = 1;
 
   public TestSQLiteOpenHelper(Context context) {
@@ -22,6 +23,7 @@ public class TestSQLiteOpenHelper extends SQLiteOpenHelper {
     Shillelagh.createTable(db, TestBoxedPrimitivesTable.class);
     Shillelagh.createTable(db, TestPrimitiveTable.class);
     Shillelagh.createTable(db, TestJavaObjectsTable.class);
+    Shillelagh.createTable(db, TestBlobs.class);
   }
 
   @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {

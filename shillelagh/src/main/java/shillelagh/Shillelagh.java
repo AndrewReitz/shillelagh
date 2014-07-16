@@ -192,7 +192,7 @@ public final class Shillelagh {
       throw e;
     } catch (Exception e) {
       throw new RuntimeException("Unable to insert into " + tableObject.getClass().getName() +
-          ". Are you missing @Table annotation?", e);
+          ". Did you forget to call Shillelagh.createTable or are you missing @Table annotation?", e);
     }
   }
 

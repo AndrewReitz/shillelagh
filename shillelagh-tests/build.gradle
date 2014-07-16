@@ -21,6 +21,5 @@ android {
 dependencies {
     compile project(':shillelagh')
 
-    androidTestCompile 'org.mockito:mockito-core:1.9.5'
     androidTestCompile 'org.easytesting:fest-assert-core:2.0M10'
 }

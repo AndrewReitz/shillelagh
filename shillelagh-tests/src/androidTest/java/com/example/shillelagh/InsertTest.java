@@ -32,7 +32,7 @@ public class InsertTest extends AndroidTestCase {
   }
 
   @Override protected void tearDown() throws Exception {
-    getContext().deleteDatabase(sqliteOpenHelper.getDatabaseName());
+    getContext().deleteDatabase(TestSQLiteOpenHelper.DATABASE_NAME);
     super.tearDown();
   }
 
@@ -166,10 +166,10 @@ public class InsertTest extends AndroidTestCase {
     assertThat(cursor.getCount()).isEqualTo(1);
     assertThat(cursor.moveToFirst()).isTrue();
     assertThat(cursor.getLong(0)).isEqualTo(1);
-    assertThat(Shillelagh.deserialize(cursor.getBlob(1))).isEqualTo(expectedByteArray);
+    assertThat(Shillelagh.<Byte[]>deserialize(cursor.getBlob(1))).isEqualTo(expectedByteArray);
     assertThat(cursor.getBlob(2)).isEqualTo(expectedOtherByteArray);
     TestBlobs.TestBlobObject resultBlob = Shillelagh.deserialize(cursor.getBlob(3));
-    assertThat(resultBlob).isEqualTo(expectedBlobObject);
+    assertThat(resultBlob).isEqualsToByComparingFields(expectedBlobObject);
     assertThat(resultBlob.testString).isEqualTo(expectedString);
 
     assertThat(cursor.moveToNext()).isFalse();
@@ -187,7 +187,8 @@ public class InsertTest extends AndroidTestCase {
       shillelagh.insert(row);
     } catch (RuntimeException e) {
       assertThat(e.getMessage()).isEqualTo("Unable to insert into com.example.shillelagh.model." +
-          "TestNotTableObject. Are you missing @Table annotation?");
+          "TestNotTableObject. Did you forget to call Shillelagh.createTable or are you missing " +
+          "@Table annotation?");
       return;
     }
 
