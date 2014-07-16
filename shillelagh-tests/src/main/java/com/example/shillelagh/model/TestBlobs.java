@@ -8,6 +8,7 @@ import shillelagh.Table;
   @Id long id;
   @Field(isBlob = true) Byte[] aByteArray;
   @Field(isBlob = true) byte[] anotherByteArray;
+  @Field(isBlob = true) TestBlobObject aTestBlobObject;
 
   public long getId() {
     return id;
@@ -31,5 +32,9 @@ import shillelagh.Table;
 
   public void setAnotherByteArray(byte[] anotherByteArray) {
     this.anotherByteArray = anotherByteArray;
+  }
+
+  public static class TestBlobObject {
+    public String testString;
   }
 }

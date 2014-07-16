@@ -212,7 +212,7 @@ public class CreateTableTest extends AndroidTestCase {
         TestBlobs.class.getSimpleName() + ")", null);
 
     // Assert
-    assertThat(cursor.getCount()).isEqualTo(3);
+    assertThat(cursor.getCount()).isEqualTo(4);
 
     assertThat(cursor.moveToNext()).isTrue();
     assertThat(cursor.getString(TABLE_INFO_NAME_COLUMN)).isEqualTo("id");
@@ -228,6 +228,12 @@ public class CreateTableTest extends AndroidTestCase {
 
     assertThat(cursor.moveToNext()).isTrue();
     assertThat(cursor.getString(TABLE_INFO_NAME_COLUMN)).isEqualTo("anotherByteArray");
+    assertThat(cursor.getString(TABLE_INFO_TYPE_COLUMN)).isEqualTo(SQL_BLOB);
+    assertThat(cursor.getString(TABLE_INFO_NULLABLE_COLUMN)).isEqualTo("0");
+    assertThat(cursor.getString(TABLE_INFO_PRIMARAY_KEY_COLUMN)).isEqualTo("0");
+
+    assertThat(cursor.moveToNext()).isTrue();
+    assertThat(cursor.getString(TABLE_INFO_NAME_COLUMN)).isEqualTo("aTestBlobObject");
     assertThat(cursor.getString(TABLE_INFO_TYPE_COLUMN)).isEqualTo(SQL_BLOB);
     assertThat(cursor.getString(TABLE_INFO_NULLABLE_COLUMN)).isEqualTo("0");
     assertThat(cursor.getString(TABLE_INFO_PRIMARAY_KEY_COLUMN)).isEqualTo("0");
