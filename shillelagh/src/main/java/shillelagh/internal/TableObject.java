@@ -11,7 +11,7 @@ class TableObject {
           "(%s INTEGER PRIMARY KEY AUTOINCREMENT, %s);";
 
   private final String tableName;
-  private String idColumnName = "_id"; // default to _id if one isn't provided
+  private String idColumnName;
 
   private final List<TableColumn> columns = new LinkedList<TableColumn>();
 

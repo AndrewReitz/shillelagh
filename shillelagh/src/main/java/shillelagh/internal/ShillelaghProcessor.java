@@ -27,7 +27,7 @@ public final class ShillelaghProcessor extends AbstractProcessor {
 
   public static final String SUFFIX = "$$ShillelaghInjector";
 
-  static final boolean DEBUG = true;
+  static final boolean DEBUG = false;
 
   private ShillelaghLogger logger;
 
@@ -63,7 +63,7 @@ public final class ShillelaghProcessor extends AbstractProcessor {
         String targetType = element.toString();
         String classPackage = getPackageName(element);
         String className = getClassName((TypeElement) element, classPackage) + SUFFIX;
-        ShillelaghInjector injector = new ShillelaghInjector(classPackage, className, targetType, logger);
+        ShillelaghInjector injector = new ShillelaghInjector(classPackage, className, targetType);
         logger.d("TargetType: " + targetType);
         logger.d("ClassPackage: " + classPackage);
         logger.d("ClassName: " + className);
@@ -89,6 +89,9 @@ public final class ShillelaghProcessor extends AbstractProcessor {
         }
 
         logger.d(tableObject.toString());
+        if (tableObject.getIdColumnName() == null) {
+          logger.e(String.format("%s does not have an id column. Did you forget @id?", targetType));
+        }
         injector.setTable(tableObject);
 
         try {

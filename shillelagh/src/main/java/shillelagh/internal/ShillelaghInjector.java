@@ -1,8 +1,5 @@
 package shillelagh.internal;
 
-import java.util.HashMap;
-import java.util.Iterator;
-
 /** Class in charge of creating all the code injected into other classes */
 public final class ShillelaghInjector {
 
@@ -11,12 +8,12 @@ public final class ShillelaghInjector {
   /**
    * Internal class function names
    */
-  public static final String CREATE_TABLE_FUNCTION = "getCreateTableSql";
-  public static final String DROP_TABLE_FUNCTION = "getDropTableSql";
-  public static final String INSERT_OBJECT_FUNCTION = "getInsertSql";
-  public static final String UPDATE_OBJECT_FUNCTION = "getUpdateSql";
+  public static final String CREATE_TABLE_FUNCTION = "createTable";
+  public static final String DROP_TABLE_FUNCTION = "dropTable";
+  public static final String INSERT_OBJECT_FUNCTION = "insertObject";
+  public static final String UPDATE_OBJECT_FUNCTION = "updateObject";
   public static final String UPDATE_ID_FUNCTION = "updateColumnId";
-  public static final String DELETE_OBJECT_FUNCTION = "getDeleteSql";
+  public static final String DELETE_OBJECT_FUNCTION = "deleteObject";
   public static final String MAP_OBJECT_FUNCTION = "map";
 
   private static final String SERIALIZE_FUNCTION = "serialize";
@@ -28,46 +25,15 @@ public final class ShillelaghInjector {
    */
   private static final String GET_ID_OF_LAST_INSERTED_ROW_SQL = "SELECT ROWID FROM %s ORDER BY ROWID DESC LIMIT 1";
 
-  /** Mappings for cursor functions */ // TODO MOVE TO SEPARATE CLASS
-  private static final String BLOB = "blob";
-  private static final HashMap<String, String> SUPPORTED_CURSOR_METHODS = new HashMap<String, String>();
-
-  static {
-    final String cursorFunctionInt = "getInt";
-    final String cursorFunctionDouble = "getDouble";
-    final String cursorFunctionFloat = "getFloat";
-    final String cursorFunctionLong = "getLong";
-    final String cursorFunctionShort = "getShort";
-    final String cursorFunctionString = "getString";
-    final String cursorFunctionBlob = "getBlob";
-
-    SUPPORTED_CURSOR_METHODS.put(int.class.getName(), cursorFunctionInt);
-    SUPPORTED_CURSOR_METHODS.put(Integer.class.getName(), cursorFunctionInt);
-    SUPPORTED_CURSOR_METHODS.put(boolean.class.getName(), cursorFunctionInt);
-    SUPPORTED_CURSOR_METHODS.put(Boolean.class.getName(), cursorFunctionInt);
-    SUPPORTED_CURSOR_METHODS.put(double.class.getName(), cursorFunctionDouble);
-    SUPPORTED_CURSOR_METHODS.put(Double.class.getName(), cursorFunctionDouble);
-    SUPPORTED_CURSOR_METHODS.put(float.class.getName(), cursorFunctionFloat);
-    SUPPORTED_CURSOR_METHODS.put(Float.class.getName(), cursorFunctionFloat);
-    SUPPORTED_CURSOR_METHODS.put(long.class.getName(), cursorFunctionLong);
-    SUPPORTED_CURSOR_METHODS.put(Long.class.getName(), cursorFunctionLong);
-    SUPPORTED_CURSOR_METHODS.put(short.class.getName(), cursorFunctionShort);
-    SUPPORTED_CURSOR_METHODS.put(Short.class.getName(), cursorFunctionShort);
-    SUPPORTED_CURSOR_METHODS.put(String.class.getName(), cursorFunctionString);
-    SUPPORTED_CURSOR_METHODS.put(BLOB, cursorFunctionBlob);
-  }
-
   private final String classPackage;
   private final String className;
   private final String targetClass;
-  private final ShillelaghLogger logger;
   private TableObject tableObject;
 
-  ShillelaghInjector(String classPackage, String className, String targetClass, ShillelaghLogger logger) {
+  ShillelaghInjector(String classPackage, String className, String targetClass) {
     this.classPackage = classPackage;
     this.className = className;
     this.targetClass = targetClass;
-    this.logger = logger;
   }
 
   public void setTable(TableObject tableObject) {
@@ -84,10 +50,11 @@ public final class ShillelaghInjector {
     StringBuilder builder = new StringBuilder();
     builder.append("// Generated code from Shillelagh. Do not modify!\n");
     builder.append("package ").append(classPackage).append(";\n\n");
+    builder.append("import android.content.ContentValues;\n");
     builder.append("import android.database.Cursor;\n");
     builder.append("import android.database.DatabaseUtils;\n");
-    builder.append("import android.util.Log;\n");
-    builder.append("import android.database.sqlite.SQLiteDatabase;\n\n");
+    builder.append("import android.database.sqlite.SQLiteDatabase;\n");
+    builder.append("import android.util.Log;\n\n");
     builder.append("import java.io.ByteArrayInputStream;\n");
     builder.append("import java.io.ByteArrayOutputStream;\n");
     builder.append("import java.io.IOException;\n");
@@ -118,82 +85,35 @@ public final class ShillelaghInjector {
     return builder.toString();
   }
 
-  private void emmitByteArraySerialization(StringBuilder builder) {
-    builder.append("  public byte[] ").append(SERIALIZE_FUNCTION).append("(").append(tableObject.getTableName()).append(" object) {\n");
-    builder.append("    try {\n");
-    builder.append("      ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();\n");
-    builder.append("      ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);\n");
-    builder.append("      objectOutputStream.writeObject(object);\n");
-    builder.append("      return byteArrayOutputStream.toByteArray();\n");
-    builder.append("    } catch (IOException e) {\n");
-    builder.append("      throw new RuntimeException(e);\n");
-    builder.append("    }\n");
-    builder.append("  }\n\n");
-    builder.append("  public static ").append(tableObject.getTableName()).append(" ").append(DESERIALIZE_FUNCTION).append("(byte[] bytes) {\n");
-    builder.append("    try {\n");
-    builder.append("      ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);\n");
-    builder.append("      ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);\n");
-    builder.append("      return (").append(tableObject.getTableName()).append(") objectInputStream.readObject();");
-    builder.append("    } catch (IOException e) {");
-    builder.append("      throw new RuntimeException(e);");
-    builder.append("    } catch (ClassNotFoundException e) {");
-    builder.append("      throw new RuntimeException(e);");
-    builder.append("    }");
-    builder.append("  }");
-  }
-
   /** Creates the function for getting the create sql string */
   private void emmitCreateTableSql(StringBuilder builder) {
-    builder.append("  public static String ").append(CREATE_TABLE_FUNCTION).append("() {\n");
-    builder.append("    return \"").append(tableObject.getSchema()).append("\";\n");
+    builder.append("  public static void ").append(CREATE_TABLE_FUNCTION).append("(SQLiteDatabase db) {\n");
+    builder.append("    db.execSQL(\"").append(tableObject.getSchema()).append("\");\n");
     builder.append("  }\n");
   }
 
   /** Creates the function for getting the drop sql string */
   private void emmitDropTableSql(StringBuilder builder) {
-    builder.append("  public static String ").append(DROP_TABLE_FUNCTION).append("() {\n");
-    builder.append("    return \"DROP TABLE IF EXISTS ").append(tableObject.getTableName()).append("\";\n");
+    builder.append("  public static void ").append(DROP_TABLE_FUNCTION).append("(SQLiteDatabase db) {\n");
+    builder.append("    db.execSQL(\"DROP TABLE IF EXISTS ").append(tableObject.getTableName()).append("\");\n");
     builder.append("  }\n");
   }
 
   /** Creates the function for getting the insert sql string to insert a new value into the database */
   private void emmitInsertSql(StringBuilder builder) {
-    builder.append("  public static String ").append(INSERT_OBJECT_FUNCTION).append("(").append(targetClass).append(" element) {\n");
-    builder.append("    return \"INSERT INTO ").append(tableObject.getTableName());
-    builder.append(" (");
-
-    StringBuilder columns = new StringBuilder();
-    StringBuilder values = new StringBuilder();
-    Iterator<TableColumn> iterator = tableObject.getColumns().iterator();
-    while (iterator.hasNext()) {
-      TableColumn column = iterator.next();
-      columns.append(column.getColumnName());
-      if (column.getSqlType() == SqliteType.TEXT) {
-        values.append("'\" + element.").append(column.getColumnName()).append(" + \"'");
-      } else if (column.getSqlType() == SqliteType.BLOB) {
-        if (column.isByteArray()) {
-          // we already have a byte array YAY!
-          values.append("\" + element.").append(column.getColumnName()).append(" + \"");
-        } else {
-          // we need to convert to a byte array
-          values.append("\" + ").append(SERIALIZE_FUNCTION).append("(element.").append(column.getColumnName()).append(") + \"");
-        }
+    builder.append("  public static void ").append(INSERT_OBJECT_FUNCTION).append("(").append(tableObject.getTableName()).append(" element, SQLiteDatabase db) {\n");
+    builder.append("    ContentValues values = new ContentValues();\n");
+    for (TableColumn column : tableObject.getColumns()) {
+      String columnName = column.getColumnName();
+      if (column.getSqlType() == SqliteType.BLOB && !column.isByteArray()) {
+        builder.append("    values.put(\"").append(columnName).append("\", ").append(SERIALIZE_FUNCTION).append("(element.").append(columnName).append("));\n");
       } else if (column.isDate()) {
-        values.append("\" + element.").append(column.getColumnName()).append(".getTime() + \"");
-      } else if (column.isBoolean()) {
-        values.append("\" + (element.").append(column.getColumnName()).append(" ? \"1\" : \"0\") + \"");
+        builder.append("    values.put(\"").append(columnName).append("\", element.").append(columnName).append(".getTime());\n");
       } else {
-        values.append("\" + element.").append(column.getColumnName()).append(" + \"");
-      }
-      if (iterator.hasNext()) {
-        columns.append(", ");
-        values.append(", ");
+        builder.append("    values.put(\"").append(columnName).append("\", element.").append(columnName).append(");\n");
       }
     }
-
-    builder.append(columns.toString()).append(")");
-    builder.append(" VALUES (");
-    builder.append(values.toString()).append(");\";\n");
+    builder.append("    db.insert(\"").append(tableObject.getTableName()).append("\", null, values);\n");
     builder.append("  }\n");
   }
 
@@ -208,77 +128,63 @@ public final class ShillelaghInjector {
 
   /** Creates the function for getting the update sql statement */
   private void emmitUpdateSql(StringBuilder builder) {
-    builder.append("  public static String ").append(UPDATE_OBJECT_FUNCTION).append("(").append(targetClass).append(" element) {\n");
-    builder.append("    return \"UPDATE ").append(tableObject.getTableName()).append(" SET ");
-
-    StringBuilder columnUpdates = new StringBuilder();
-    Iterator<TableColumn> iterator = tableObject.getColumns().iterator();
-    while (iterator.hasNext()) {
-      TableColumn column = iterator.next();
-      if (column.getSqlType() == SqliteType.TEXT) {
-        columnUpdates.append(column.getColumnName()).append(" = \'\" + element.").append(column.getColumnName()).append(" + \"\'");
-      } else if (column.getSqlType() == SqliteType.BLOB) {
-        if (column.isByteArray()) {
-          columnUpdates.append(column.getColumnName()).append(" = \" + element.").append(column.getColumnName()).append(" + \"");
-        } else {
-          columnUpdates.append(column.getColumnName()).append(" = \" + ").append(SERIALIZE_FUNCTION).append("(element.").append(column.getColumnName()).append(") + \"");
-        }
+    builder.append("  public static void ").append(UPDATE_OBJECT_FUNCTION).append("(").append(targetClass).append(" element, SQLiteDatabase db) {\n");
+    builder.append("    ContentValues values = new ContentValues();\n");
+    for (TableColumn column : tableObject.getColumns()) {
+      String columnName = column.getColumnName();
+      if (column.getSqlType() == SqliteType.BLOB && !column.isByteArray()) {
+        builder.append("    values.put(\"").append(columnName).append("\", ").append(SERIALIZE_FUNCTION).append("(element.").append(columnName).append("));\n");
       } else if (column.isDate()) {
-        columnUpdates.append(column.getColumnName()).append(" = \" + element.").append(column.getColumnName()).append(".getTime() + \"");
-      } else if (column.isBoolean()) {
-        columnUpdates.append(column.getColumnName()).append(" = \" + (element.").append(column.getColumnName()).append(" ? \"1\" : \"0\") + \"");
+        builder.append("    values.put(\"").append(columnName).append("\", element.").append(columnName).append(".getTime());\n");
       } else {
-        columnUpdates.append(column.getColumnName()).append(" = \" + element.").append(column.getColumnName()).append(" + \"");
-      }
-      if (iterator.hasNext()) {
-        columnUpdates.append(", ");
+        builder.append("    values.put(\"").append(columnName).append("\", element.").append(columnName).append(");\n");
       }
     }
-
-    builder.append(columnUpdates.toString());
-    builder.append(" WHERE ").append(tableObject.getIdColumnName()).append(" = \" + element.").append(tableObject.getIdColumnName()).append(" + \"");
-    builder.append("\";\n");
+    final String idColumnName = tableObject.getIdColumnName();
+    builder.append("    db.update(\"").append(tableObject.getTableName()).append("\", values, \"").append(idColumnName).append(" = \" + element.").append(idColumnName).append(", null);\n");
     builder.append("  }\n");
   }
 
   /** Creates the function for getting the delete sql statement */
   private void emmitDeleteSqlWithObject(StringBuilder builder) {
-    builder.append("  public static String ").append(DELETE_OBJECT_FUNCTION).append("(").append(targetClass).append(" element) {\n");
-    builder.append("    return ").append(DELETE_OBJECT_FUNCTION).append("(element.").append(tableObject.getIdColumnName()).append(");\n");
+    builder.append("  public static void ").append(DELETE_OBJECT_FUNCTION).append("(").append(targetClass).append(" element, SQLiteDatabase db) {\n");
+    builder.append("    ").append(DELETE_OBJECT_FUNCTION).append("(element.").append(tableObject.getIdColumnName()).append(", db);\n");
     builder.append("  }\n");
   }
 
   /** Creates the function for getting the delete sql statement */
   private void emmitDeleteSqlWithId(StringBuilder builder) {
-    builder.append("  public static String ").append(DELETE_OBJECT_FUNCTION).append("(Long id) {\n");
-    builder.append("    return \"DELETE FROM ").append(tableObject.getTableName()).append(" WHERE id = \" + id;");
+    builder.append("  public static void ").append(DELETE_OBJECT_FUNCTION).append("(Long id, SQLiteDatabase db) {\n");
+    builder.append("    db.delete(\"").append(tableObject.getTableName()).append("\", \"").append(tableObject.getIdColumnName()).append(" = \" + id, null);\n");
     builder.append("  }\n");
   }
 
+  // TODO this is just a mess...
   /** Creates the function for mapping a cursor to the object after executing a sql statement */
   private void emmitMapCursorToObject(StringBuilder builder) {
     final String idColumnName = tableObject.getIdColumnName();
+    final String tableName = tableObject.getTableName();
 
-    builder.append("  public static List<").append(targetClass).append(">").append(MAP_OBJECT_FUNCTION).append("(Cursor cursor) {\n");
-    builder.append("    List<").append(targetClass).append("> tableObjects = new ArrayList<>();\n");
+    builder.append("  public static List<").append(tableName).append("> ").append(MAP_OBJECT_FUNCTION).append("(Cursor cursor) {\n");
+    builder.append("    List<").append(tableName).append("> tableObjects = new ArrayList<>();\n");
     builder.append("    if (cursor.moveToFirst()) {\n"); // can't assume the cursor is already at the front
     builder.append("       while (!cursor.isAfterLast()) {\n");
-    builder.append("        ").append(targetClass).append(" tableObject = new ").append(targetClass).append("();\n");
+    builder.append("        ").append(tableName).append(" tableObject = new ").append(targetClass).append("();\n");
     builder.append("        tableObject.").append(idColumnName).append(" = cursor.getLong(cursor.getColumnIndex(\"").append(idColumnName).append("\"));\n");
     for (TableColumn column : tableObject.getColumns()) {
       String columnName = column.getColumnName();
       if (column.isDate()) {
-        builder.append("        tableObject.").append(columnName).append(" = new Date(cursor.").append(getCursorCommand(long.class.getName())).append("(cursor.getColumnIndex(\"").append(columnName).append("\")));\n");
+        builder.append("        tableObject.").append(columnName).append(" = new Date(cursor.").append(CursorFunctions.get(long.class.getName())).append("(cursor.getColumnIndex(\"").append(columnName).append("\")));\n");
       } else if (column.isBoolean()) {
-        builder.append("        tableObject.").append(columnName).append(" = cursor.").append(getCursorCommand(column.getType())).append("(cursor.getColumnIndex(\"").append(columnName).append("\")) == 1;\n");
+        builder.append("        tableObject.").append(columnName).append(" = cursor.").append(CursorFunctions.get(column.getType())).append("(cursor.getColumnIndex(\"").append(columnName).append("\")) == 1;\n");
       } else if (column.getSqlType() == SqliteType.BLOB) {
         if (column.isByteArray()) {
-          builder.append("        tableObject.").append(columnName).append(" = cursor.").append(getCursorCommand(column.getType())).append("(cursor.getColumnIndex(\"").append(columnName).append("\"));\n");
+          builder.append("        tableObject.").append(columnName).append(" = cursor.").append(CursorFunctions.get(column.getType())).append("(cursor.getColumnIndex(\"").append(columnName).append("\"));\n");
         } else {
-          builder.append("        tableObject.").append(columnName).append(" = ").append(DESERIALIZE_FUNCTION).append("(cursor.").append(getCursorCommand(column.getType())).append("(cursor.getColumnIndex(\"").append(columnName).append("\")));\n");
+          builder.append("        tableObject.").append(columnName).append(" = ").append(DESERIALIZE_FUNCTION).append("(cursor.").append(CursorFunctions.get(column.getType())).append("(cursor.getColumnIndex(\"").append(columnName).append("\")));\n");
         }
       } else {
-        builder.append("        tableObject.").append(columnName).append(" = cursor.").append(getCursorCommand(column.getType())).append("(cursor.getColumnIndex(\"").append(columnName).append("\"));\n");
+        builder.append("        tableObject.").append(columnName).append(" = cursor.").append(CursorFunctions.get(column.getType())).append("(cursor.getColumnIndex(\"").append(columnName).append("\"));\n");
       }
     }
     builder.append("        tableObjects.add(tableObject);\n");
@@ -289,14 +195,28 @@ public final class ShillelaghInjector {
     builder.append("  }\n");
   }
 
-  /**
-   * Maps a type to the corresponding Cursor get function. For mapping objects between the database
-   * and java.
-   */
-  private String getCursorCommand(String type) {
-    logger.d("getCursorCommand: type = " + type);
-
-    final String returnValue = SUPPORTED_CURSOR_METHODS.get(type);
-    return returnValue != null ? returnValue : SUPPORTED_CURSOR_METHODS.get(BLOB); // all others are blobs
+  /** Creates functions for serialization to and from byte arrays */
+  private void emmitByteArraySerialization(StringBuilder builder) {
+    builder.append("  public static <K> byte[] ").append(SERIALIZE_FUNCTION).append("(K object) {\n");
+    builder.append("    try {\n");
+    builder.append("      ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();\n");
+    builder.append("      ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);\n");
+    builder.append("      objectOutputStream.writeObject(object);\n");
+    builder.append("      return byteArrayOutputStream.toByteArray();\n");
+    builder.append("    } catch (IOException e) {\n");
+    builder.append("      throw new RuntimeException(e);\n");
+    builder.append("    }\n");
+    builder.append("  }\n\n");
+    builder.append("  public static <K> K ").append(DESERIALIZE_FUNCTION).append("(byte[] bytes) {\n");
+    builder.append("    try {\n");
+    builder.append("      ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);\n");
+    builder.append("      ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);\n");
+    builder.append("      return (K) objectInputStream.readObject();\n");
+    builder.append("    } catch (IOException e) {\n");
+    builder.append("      throw new RuntimeException(e);\n");
+    builder.append("    } catch (ClassNotFoundException e) {\n");
+    builder.append("      throw new RuntimeException(e);\n");
+    builder.append("    }\n");
+    builder.append("  }\n");
   }
 }
