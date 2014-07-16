@@ -4,11 +4,13 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.test.AndroidTestCase;
 
+import com.example.shillelagh.model.TestBlobs;
 import com.example.shillelagh.model.TestBoxedPrimitivesTable;
 import com.example.shillelagh.model.TestJavaObjectsTable;
 import com.example.shillelagh.model.TestNotTableObject;
 import com.example.shillelagh.model.TestPrimitiveTable;
 
+import java.io.IOException;
 import java.util.Date;
 
 import shillelagh.Shillelagh;
@@ -160,6 +162,51 @@ public class UpdateTest extends AndroidTestCase {
 
     assertThat(cursor.moveToNext()).isFalse();
     cursor.close();
+  }
+
+  public void testUpdateBlob() throws IOException, ClassNotFoundException {
+    // Arrange
+    Byte[] expectedByteArray = new Byte[5];
+    for (int i = 0; i < expectedByteArray.length; i++) {
+      expectedByteArray[i] = (byte) (expectedByteArray.length - i);
+    }
+
+    byte[] expectedOtherByteArray = new byte[10];
+    for (byte i = 0; i < expectedOtherByteArray.length; i++) {
+      expectedOtherByteArray[i] = i;
+    }
+
+    TestBlobs.TestBlobObject expectedTestBlobObject = new TestBlobs.TestBlobObject();
+    expectedTestBlobObject.testString = "hello world!!";
+
+    TestBlobs insertTestBlob = new TestBlobs();
+    insertTestBlob.setaTestBlobObject(new TestBlobs.TestBlobObject());
+    insertTestBlob.setaByteArray(new Byte[5]);
+    insertTestBlob.setAnotherByteArray(new byte[40]);
+
+    // Act
+    shillelagh.insert(insertTestBlob);
+
+    TestBlobs updateTestBlob = new TestBlobs();
+    updateTestBlob.setId(insertTestBlob.getId());
+    updateTestBlob.setaByteArray(expectedByteArray);
+    updateTestBlob.setAnotherByteArray(expectedOtherByteArray);
+    updateTestBlob.setaTestBlobObject(expectedTestBlobObject);
+
+    shillelagh.update(updateTestBlob);
+
+    // Assert
+    Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
+        "SELECT * FROM " + TestBlobs.class.getSimpleName(), null);
+
+    assertThat(cursor.getCount()).isEqualTo(1);
+
+    assertThat(cursor.moveToFirst()).isTrue();
+    assertThat(cursor.getLong(0)).isEqualTo(1);
+    assertThat(shillelagh.<Byte[]>deserialize(cursor.getBlob(1))).isEqualTo(expectedByteArray);
+    assertThat(cursor.getBlob(2)).isEqualTo(expectedOtherByteArray);
+    assertThat(shillelagh.<TestBlobs.TestBlobObject>deserialize(cursor.getBlob(3)))
+        .isEqualsToByComparingFields(expectedTestBlobObject);
   }
 
   public void testInsertShouldFailWhenNotAnnotated() {
