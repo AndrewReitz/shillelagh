@@ -4,11 +4,15 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.test.AndroidTestCase;
 
+import com.example.shillelagh.model.TestBlobs;
 import com.example.shillelagh.model.TestBoxedPrimitivesTable;
 import com.example.shillelagh.model.TestJavaObjectsTable;
 import com.example.shillelagh.model.TestNotTableObject;
 import com.example.shillelagh.model.TestPrimitiveTable;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.Date;
 
 import shillelagh.Shillelagh;
@@ -129,6 +133,44 @@ public class InsertTest extends AndroidTestCase {
     assertThat(cursor.getLong(0)).isEqualTo(1);
     assertThat(cursor.getString(1)).isEqualTo(expected);
     assertThat(cursor.getLong(2)).isEqualTo(now.getTime());
+
+    assertThat(cursor.moveToNext()).isFalse();
+    cursor.close();
+  }
+
+  public void testInsertBlobs() throws IOException, ClassNotFoundException {
+    // Arrange
+    final String expectedString = "this is expected string";
+    final Byte[] expectedByteArray = new Byte[5];
+    for (byte i = 0; i < expectedByteArray.length; i++) {
+      expectedByteArray[i] = i;
+    }
+    final byte[] expectedOtherByteArray = new byte[10];
+    for (byte i = 0; i < expectedOtherByteArray.length; i++) {
+      expectedOtherByteArray[i] = i;
+    }
+    final TestBlobs.TestBlobObject expectedBlobObject = new TestBlobs.TestBlobObject();
+    expectedBlobObject.testString = expectedString;
+    TestBlobs row = new TestBlobs();
+    row.setaByteArray(expectedByteArray);
+    row.setAnotherByteArray(expectedOtherByteArray);
+    row.setaTestBlobObject(expectedBlobObject);
+
+    // Act
+    shillelagh.insert(row);
+
+    // Assert
+    Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
+        "SELECT * FROM " + TestBlobs.class.getSimpleName(), null);
+
+    assertThat(cursor.getCount()).isEqualTo(1);
+    assertThat(cursor.moveToFirst()).isTrue();
+    assertThat(cursor.getLong(0)).isEqualTo(1);
+    assertThat(Shillelagh.deserialize(cursor.getBlob(1))).isEqualTo(expectedByteArray);
+    assertThat(cursor.getBlob(2)).isEqualTo(expectedOtherByteArray);
+    TestBlobs.TestBlobObject resultBlob = Shillelagh.deserialize(cursor.getBlob(3));
+    assertThat(resultBlob).isEqualTo(expectedBlobObject);
+    assertThat(resultBlob.testString).isEqualTo(expectedString);
 
     assertThat(cursor.moveToNext()).isFalse();
     cursor.close();

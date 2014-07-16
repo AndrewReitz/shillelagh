@@ -1,5 +1,7 @@
 package com.example.shillelagh.model;
 
+import java.io.Serializable;
+
 import shillelagh.Field;
 import shillelagh.Id;
 import shillelagh.Table;
@@ -34,7 +36,15 @@ import shillelagh.Table;
     this.anotherByteArray = anotherByteArray;
   }
 
-  public static class TestBlobObject {
+  public void setaTestBlobObject(TestBlobObject testBlobObject) {
+    this.aTestBlobObject = testBlobObject;
+  }
+
+  public TestBlobObject getaTestBlobObject() {
+    return this.aTestBlobObject;
+  }
+
+  public static class TestBlobObject implements Serializable {
     public String testString;
   }
 }

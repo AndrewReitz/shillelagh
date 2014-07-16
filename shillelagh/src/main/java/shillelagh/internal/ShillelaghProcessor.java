@@ -1,6 +1,7 @@
 package shillelagh.internal;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.Writer;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -149,13 +150,31 @@ public final class ShillelaghProcessor extends AbstractProcessor {
     if (fieldAnnotation == null) return;
 
     TableColumn tableColumn = new TableColumn(element);
-    if (tableColumn.getSqlType() == SqliteType.UNKNOWN) {
+    if (tableColumn.getSqlType() == SqliteType.BLOB && !tableColumn.isByteArray()) {
+      // TODO
+//      if (checkForSuperType(element, Serializable.class)) {
+//        logger.e(String.format(
+//            "%s in %s is not Serializable and will not be able to be converted to a byte array",
+//            element.toString(), tableObject.getTableName()));
+//      }
+    } else if (tableColumn.getSqlType() == SqliteType.UNKNOWN) {
       Table annotation = typeUtils.asElement(element.asType()).getAnnotation(Table.class);
       if (annotation == null) {
-        logger.e(String.format("Class %s referenced in %s needs to be marked as a blob or should be " +
-                "annotated with @Table", element.toString(), element.asType().toString()));
+        logger.e(String.format("%s in %s needs to be marked as a blob or should be " +
+                "annotated with @Table", element.toString(), tableObject.getTableName()));
       }
     }
     tableObject.addColumn(tableColumn);
+  }
+
+  /** Checks for a supertype returns true if element has a supertype */
+  private boolean checkForSuperType(Element element, Class type) {
+    List<? extends TypeMirror> superTypes = typeUtils.directSupertypes(element.asType());
+    for (TypeMirror superType : superTypes) {
+      if (superType.toString().equals(type.getName())) {
+        return true;
+      }
+    }
+    return false;
   }
 }
