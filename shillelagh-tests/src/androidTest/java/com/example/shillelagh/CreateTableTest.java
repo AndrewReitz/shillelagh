@@ -215,13 +215,13 @@ public class CreateTableTest extends AndroidTestCase {
     assertThat(cursor.getCount()).isEqualTo(3);
 
     assertThat(cursor.moveToNext()).isTrue();
-    assertThat(cursor.getString(TABLE_INFO_DEFAULT_VALUE_COLUMN)).isEqualTo("id");
+    assertThat(cursor.getString(TABLE_INFO_NAME_COLUMN)).isEqualTo("id");
     assertThat(cursor.getString(TABLE_INFO_TYPE_COLUMN)).isEqualTo(SQL_INTEGER);
     assertThat(cursor.getString(TABLE_INFO_NULLABLE_COLUMN)).isEqualTo("0");
     assertThat(cursor.getString(TABLE_INFO_PRIMARAY_KEY_COLUMN)).isEqualTo("1");
 
     assertThat(cursor.moveToNext()).isTrue();
-    assertThat(cursor.getString(TABLE_INFO_DEFAULT_VALUE_COLUMN)).isEqualTo("aByteArray");
+    assertThat(cursor.getString(TABLE_INFO_NAME_COLUMN)).isEqualTo("aByteArray");
     assertThat(cursor.getString(TABLE_INFO_TYPE_COLUMN)).isEqualTo(SQL_BLOB);
     assertThat(cursor.getString(TABLE_INFO_NULLABLE_COLUMN)).isEqualTo("0");
     assertThat(cursor.getString(TABLE_INFO_PRIMARAY_KEY_COLUMN)).isEqualTo("0");

@@ -166,7 +166,7 @@ public final class ShillelaghInjector {
     final String tableName = tableObject.getTableName();
 
     builder.append("  public static List<").append(tableName).append("> ").append(MAP_OBJECT_FUNCTION).append("(Cursor cursor) {\n");
-    builder.append("    List<").append(tableName).append("> tableObjects = new ArrayList<>();\n");
+    builder.append("    List<").append(tableName).append("> tableObjects = new ArrayList<").append(tableName).append(">();\n");
     builder.append("    if (cursor.moveToFirst()) {\n"); // can't assume the cursor is already at the front
     builder.append("       while (!cursor.isAfterLast()) {\n");
     builder.append("        ").append(tableName).append(" tableObject = new ").append(targetClass).append("();\n");

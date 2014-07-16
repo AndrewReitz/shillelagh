@@ -49,7 +49,7 @@ public final class Shillelagh {
   public static void createTable(SQLiteDatabase db, Class<?> tableClass) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableClass);
-      getAndExecuteSqlStatement(db, shillelagh, CREATE_TABLE_FUNCTION);
+      executeMethod(shillelagh, CREATE_TABLE_FUNCTION, db);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -65,7 +65,7 @@ public final class Shillelagh {
   public static void dropTable(SQLiteDatabase db, Class<?> tableClass) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableClass);
-      getAndExecuteSqlStatement(db, shillelagh, DROP_TABLE_FUNCTION);
+      executeMethod(shillelagh, DROP_TABLE_FUNCTION, db);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -96,12 +96,76 @@ public final class Shillelagh {
     }
   }
 
+  /** Finds the internal Shillelagh class written to the clazz object by ShillelaghInjector */
+  private static Class<?> findShillelaghForClass(Class<?> clazz) throws ClassNotFoundException {
+    Class<?> shillelagh = CACHED_CLASSES.get(clazz);
+    if (shillelagh != null) {
+      log("Class Cache Hit!");
+      return shillelagh;
+    }
+
+    log("Class Cache Miss");
+    final String className = clazz.getName();
+    shillelagh = Class.forName(className + SUFFIX);
+    CACHED_CLASSES.put(clazz, shillelagh);
+    return shillelagh;
+  }
+
+  /** Gets internal method and then executes it */
+  private static void executeMethod(Class<?> shillelagh, String methodName, Object... params)
+      throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    final Method method = findMethodForClass(shillelagh, methodName, params);
+    method.invoke(null, params);
+  }
+
+  /** Gets the Class objects of a list of parameters, this is used for figuring out the parameters types of a method */
+  private static Class<?>[] getParamTypes(Object... params) {
+    Class<?>[] paramTypes = new Class[params.length];
+    for (int i = 0; i < params.length; i++) {
+      paramTypes[i] = params[i].getClass();
+    }
+    return paramTypes;
+  }
+
+  /** Finds a method in a class using reflection */
+  private static Method findMethodForClass(Class<?> shillelagh,
+                                           String methodName, Object... params
+  ) throws NoSuchMethodException {
+    Class<?>[] paramTypes = getParamTypes(params);
+    return findMethodForClass(shillelagh, methodName, paramTypes);
+  }
+
+  /** Finds a method in a class using reflection */
+  private static Method findMethodForClass(Class<?> shillelagh, String methodName,
+                                           Class<?>[] paramTypes) throws NoSuchMethodException {
+    String fqMethodName = shillelagh.getCanonicalName() + "#" + methodName;
+    Method method = CACHED_METHODS.get(fqMethodName);
+    if (method != null) {
+      log("Method Cache Hit!");
+      return method;
+    }
+
+    log("Method Cache Miss");
+    method = shillelagh.getMethod(methodName, paramTypes);
+    CACHED_METHODS.put(fqMethodName, method);
+    return method;
+  }
+
+  private static void executeSql(SQLiteDatabase database, String query) {
+    log("Running SQL Statement: %s", query);
+    database.execSQL(query);
+  }
+
+  private static void log(String format, Object... args) {
+    if (debug) Log.d(TAG, String.format(format, args));
+  }
+
   /** Insert the object into the table */
   public void insert(Object tableObject) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableObject.getClass());
-      getAndExecuteSqlStatement(sqliteOpenHelper.getWritableDatabase(), shillelagh,
-          INSERT_OBJECT_FUNCTION, tableObject);
+      executeMethod(shillelagh, INSERT_OBJECT_FUNCTION, tableObject,
+          sqliteOpenHelper.getWritableDatabase());
       final SQLiteDatabase db = sqliteOpenHelper.getReadableDatabase();
       final Method method = findMethodForClass(shillelagh, UPDATE_ID_FUNCTION, tableObject, db);
       method.invoke(null, tableObject, db);
@@ -122,8 +186,8 @@ public final class Shillelagh {
   public void update(Object tableObject) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableObject.getClass());
-      getAndExecuteSqlStatement(sqliteOpenHelper.getWritableDatabase(), shillelagh,
-          UPDATE_OBJECT_FUNCTION, tableObject);
+      executeMethod(shillelagh, UPDATE_OBJECT_FUNCTION, tableObject,
+          sqliteOpenHelper.getWritableDatabase());
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -134,7 +198,7 @@ public final class Shillelagh {
 
   /**
    * TODO: Write unit test for this method
-   *
+   * <p/>
    * Deletes the object from the table in which it resides. This does the look up based off of
    * the ID of the object. Passing in an object with out and ID will not delete other rows.
    *
@@ -143,8 +207,8 @@ public final class Shillelagh {
   public void delete(Object tableObject) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableObject.getClass());
-      getAndExecuteSqlStatement(sqliteOpenHelper.getWritableDatabase(), shillelagh,
-          DELETE_OBJECT_FUNCTION, tableObject);
+      executeMethod(shillelagh, DELETE_OBJECT_FUNCTION, tableObject,
+          sqliteOpenHelper.getWritableDatabase());
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -154,18 +218,17 @@ public final class Shillelagh {
 
   /**
    * TODO: Write unit test
-   *
+   * <p/>
    * Deletes a row in the table with the corresponding ID.
    *
    * @param tableClass The class which was used to generate the table that
    *                   you want to delete the corresponding row out of.
-   * @param id the id of the row you want to match
+   * @param id         the id of the row you want to match
    */
   public void delete(final Class<?> tableClass, final long id) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableClass);
-      getAndExecuteSqlStatement(sqliteOpenHelper.getWritableDatabase(), shillelagh,
-          DELETE_OBJECT_FUNCTION, id);
+      executeMethod(shillelagh, DELETE_OBJECT_FUNCTION, id, sqliteOpenHelper.getWritableDatabase());
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -200,7 +263,7 @@ public final class Shillelagh {
   /**
    * The equivalent of calling
    * {@link SQLiteDatabase#query(boolean, String, String[], String, String[], String, String, String, String, android.os.CancellationSignal)}
-   *
+   * <p/>
    * Only available for API 16+
    */
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -217,7 +280,7 @@ public final class Shillelagh {
    * The equivalent of calling
    * {@link SQLiteDatabase#query(boolean, String, String[], String, String[], String, String, String, String, android.os.CancellationSignal)}
    * and then calling {@link Shillelagh#map(Class, android.database.Cursor)} on the result
-   *
+   * <p/>
    * Only available for API 16+
    */
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -299,7 +362,7 @@ public final class Shillelagh {
 
   /**
    * Equivalent to calling {@link SQLiteDatabase#rawQuery(String, String[], CancellationSignal)}
-   *
+   * <p/>
    * Only available for API 16+
    */
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -311,7 +374,7 @@ public final class Shillelagh {
   /**
    * Equivalent to calling {@link SQLiteDatabase#rawQuery(String, String[], CancellationSignal)}
    * and then passing the result to {@link Shillelagh#map(Class, android.database.Cursor)}
-   *
+   * <p/>
    * Only available for API 16+
    */
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -327,73 +390,5 @@ public final class Shillelagh {
 
   public SQLiteDatabase getWritableDatabase() {
     return sqliteOpenHelper.getWritableDatabase();
-  }
-
-  /** Finds the internal Shillelagh class written to the clazz object by ShillelaghInjector */
-  private static Class<?> findShillelaghForClass(Class<?> clazz) throws ClassNotFoundException {
-    Class<?> shillelagh = CACHED_CLASSES.get(clazz);
-    if (shillelagh != null) {
-      log("Class Cache Hit!");
-      return shillelagh;
-    }
-
-    log("Class Cache Miss");
-    final String className = clazz.getName();
-    shillelagh = Class.forName(className + SUFFIX);
-    CACHED_CLASSES.put(clazz, shillelagh);
-    return shillelagh;
-  }
-
-  /** Gets the SQL statement by calling the internal Shillelagh object and then executes that statement */
-  private static void getAndExecuteSqlStatement(SQLiteDatabase database,
-                                                Class<?> shillelagh,
-                                                String methodName,
-                                                Object... params
-  ) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-    final Method method = findMethodForClass(shillelagh, methodName, params);
-    String sql = (String) method.invoke(null, params);
-    executeSql(database, sql);
-  }
-
-  /** Gets the Class objects of a list of parameters, this is used for figuring out the parameters types of a method */
-  private static Class<?>[] getParamTypes(Object... params) {
-    Class<?>[] paramTypes = new Class[params.length];
-    for (int i = 0; i < params.length; i++) {
-      paramTypes[i] = params[i].getClass();
-    }
-    return paramTypes;
-  }
-
-  /** Finds a method in a class using reflection */
-  private static Method findMethodForClass(Class<?> shillelagh,
-                                           String methodName, Object... params
-  ) throws NoSuchMethodException {
-    Class<?>[] paramTypes = getParamTypes(params);
-    return findMethodForClass(shillelagh, methodName, paramTypes);
-  }
-
-  /** Finds a method in a class using reflection */
-  private static Method findMethodForClass(Class<?> shillelagh, String methodName,
-                                           Class<?>[] paramTypes) throws NoSuchMethodException {
-    String fqMethodName = shillelagh.getCanonicalName() + "#" + methodName;
-    Method method = CACHED_METHODS.get(fqMethodName);
-    if (method != null) {
-      log("Method Cache Hit!");
-      return method;
-    }
-
-    log("Method Cache Miss");
-    method = shillelagh.getMethod(methodName, paramTypes);
-    CACHED_METHODS.put(fqMethodName, method);
-    return method;
-  }
-
-  private static void executeSql(SQLiteDatabase database, String query) {
-    log("Running SQL Statement: %s", query);
-    database.execSQL(query);
-  }
-
-  private static void log(String format, Object... args) {
-    if (debug) Log.d(TAG, String.format(format, args));
   }
 }
