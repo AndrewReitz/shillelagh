@@ -165,9 +165,9 @@ public class InsertTest extends AndroidTestCase {
     assertThat(cursor.getCount()).isEqualTo(1);
     assertThat(cursor.moveToFirst()).isTrue();
     assertThat(cursor.getLong(0)).isEqualTo(1);
-    assertThat(shillelagh.<Byte[]>deserialize(cursor.getBlob(1))).isEqualTo(expectedByteArray);
+    assertThat(this.<Byte[]>deserialize(cursor.getBlob(1))).isEqualTo(expectedByteArray);
     assertThat(cursor.getBlob(2)).isEqualTo(expectedOtherByteArray);
-    TestBlobs.TestBlobObject resultBlob = shillelagh.deserialize(cursor.getBlob(3));
+    TestBlobs.TestBlobObject resultBlob = deserialize(cursor.getBlob(3));
     assertThat(resultBlob).isEqualsToByComparingFields(expectedBlobObject);
 
     assertThat(cursor.moveToNext()).isFalse();
@@ -192,6 +192,13 @@ public class InsertTest extends AndroidTestCase {
 
     // Assert
     throw new AssertionError("Expected Exception Not Thrown");
+  }
+
+  @SuppressWarnings("unchecked")
+  private <K> K deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
+    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+    ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
+    return (K) objectInputStream.readObject();
   }
 
   // TODO Tests for null values

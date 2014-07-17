@@ -10,6 +10,9 @@ class TableColumn {
   private final String columnName;
   private final Element element;
 
+  /** Indicates if column is a one to one mapping */
+  private boolean oneToOne = false;
+
   TableColumn(Element element) {
     this.columnName = element.getSimpleName().toString();
     this.element = element;
@@ -40,6 +43,14 @@ class TableColumn {
   boolean isByteArray() {
     final String typeString = getType();
     return typeString.equals("byte[]");
+  }
+
+  void setOneToOne(boolean oneToOne) {
+    this.oneToOne = oneToOne;
+  }
+
+  boolean isOneToOne() {
+    return oneToOne;
   }
 
   @Override public String toString() {

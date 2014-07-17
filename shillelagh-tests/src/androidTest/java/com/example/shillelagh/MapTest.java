@@ -28,11 +28,13 @@ import static org.fest.assertions.api.Assertions.assertThat;
 public class MapTest extends AndroidTestCase {
 
   private SQLiteOpenHelper sqliteOpenHelper;
+  private Shillelagh shillelagh;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
 
     sqliteOpenHelper = new TestSQLiteOpenHelper(getContext());
+    shillelagh = new Shillelagh(sqliteOpenHelper);
   }
 
   public void testMapCursorToBoxedPrimitives() {
@@ -53,7 +55,7 @@ public class MapTest extends AndroidTestCase {
     Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
         "SELECT * FROM " + TestBoxedPrimitivesTable.class.getSimpleName(), null);
 
-    List<TestBoxedPrimitivesTable> result = Shillelagh.map(TestBoxedPrimitivesTable.class, cursor);
+    List<TestBoxedPrimitivesTable> result = shillelagh.map(TestBoxedPrimitivesTable.class, cursor);
 
     // Assert
     assertThat(result.size()).isEqualTo(1);
@@ -84,7 +86,7 @@ public class MapTest extends AndroidTestCase {
     sqliteOpenHelper.getWritableDatabase().execSQL(testPrimitiveInsert);
     Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
         "SELECT * FROM " + TestPrimitiveTable.class.getSimpleName(), null);
-    List<TestPrimitiveTable> result = Shillelagh.map(TestPrimitiveTable.class, cursor);
+    List<TestPrimitiveTable> result = shillelagh.map(TestPrimitiveTable.class, cursor);
 
     // Assert
     assertThat(result.size()).isEqualTo(1);
@@ -111,7 +113,7 @@ public class MapTest extends AndroidTestCase {
     Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
         "SELECT * FROM " + TestJavaObjectsTable.class.getSimpleName(), null);
 
-    List<TestJavaObjectsTable> result = Shillelagh.map(TestJavaObjectsTable.class, cursor);
+    List<TestJavaObjectsTable> result = shillelagh.map(TestJavaObjectsTable.class, cursor);
 
     // Assert
     assertThat(result.size()).isEqualTo(1);
@@ -146,7 +148,7 @@ public class MapTest extends AndroidTestCase {
     Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
         "SELECT * FROM " + TestBlobs.class.getSimpleName(), null);
 
-    List<TestBlobs> result = Shillelagh.map(TestBlobs.class, cursor);
+    List<TestBlobs> result = shillelagh.map(TestBlobs.class, cursor);
 
     // Assert
     assertThat(result.size()).isEqualTo(1);

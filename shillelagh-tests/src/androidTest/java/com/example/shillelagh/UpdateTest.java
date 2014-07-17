@@ -10,7 +10,9 @@ import com.example.shillelagh.model.TestJavaObjectsTable;
 import com.example.shillelagh.model.TestNotTableObject;
 import com.example.shillelagh.model.TestPrimitiveTable;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.Date;
 
 import shillelagh.Shillelagh;
@@ -203,9 +205,9 @@ public class UpdateTest extends AndroidTestCase {
 
     assertThat(cursor.moveToFirst()).isTrue();
     assertThat(cursor.getLong(0)).isEqualTo(1);
-    assertThat(shillelagh.<Byte[]>deserialize(cursor.getBlob(1))).isEqualTo(expectedByteArray);
+    assertThat(this.<Byte[]>deserialize(cursor.getBlob(1))).isEqualTo(expectedByteArray);
     assertThat(cursor.getBlob(2)).isEqualTo(expectedOtherByteArray);
-    assertThat(shillelagh.<TestBlobs.TestBlobObject>deserialize(cursor.getBlob(3)))
+    assertThat(this.<TestBlobs.TestBlobObject>deserialize(cursor.getBlob(3)))
         .isEqualsToByComparingFields(expectedTestBlobObject);
   }
 
@@ -226,5 +228,12 @@ public class UpdateTest extends AndroidTestCase {
 
     // Assert
     throw new AssertionError("Expected Exception Not Thrown");
+  }
+
+  @SuppressWarnings("unchecked")
+  private <K> K deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
+    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+    ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
+    return (K) objectInputStream.readObject();
   }
 }

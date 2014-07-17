@@ -162,6 +162,7 @@ public final class ShillelaghProcessor extends AbstractProcessor {
         logger.e(String.format("%s in %s needs to be marked as a blob or should be " +
                 "annotated with @Table", element.toString(), tableObject.getTableName()));
       }
+      tableColumn.setOneToOne(true);
     }
     tableObject.addColumn(tableColumn);
   }

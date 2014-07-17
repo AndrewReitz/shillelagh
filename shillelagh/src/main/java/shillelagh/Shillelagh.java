@@ -79,28 +79,6 @@ public final class Shillelagh {
     }
   }
 
-  /**
-   * Maps data from the cursor to it's corresponding model object.
-   *
-   * @param tableClass Class the data from the cursor should be mapped to. This class must have the
-   * @param cursor     Cursor of data pulled from the tableClass's generated table.
-   * @return List of tableClass objects mapped from the cursor.
-   * @see shillelagh.Table annotation on it
-   */
-  @SuppressWarnings("unchecked")
-  public static <T extends List<M>, M> T map(Class<? extends M> tableClass, Cursor cursor) {
-    try {
-      final Class<?> shillelagh = findShillelaghForClass(tableClass);
-      final Method mapMethod = findMethodForClass(shillelagh, MAP_OBJECT_FUNCTION,
-          new Class<?>[]{Cursor.class});
-      return (T) mapMethod.invoke(null, cursor);
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new RuntimeException("Unable to map cursor to " + tableClass, e);
-    }
-  }
-
   /** Finds the internal Shillelagh class written to the clazz object by ShillelaghInjector */
   private static Class<?> findShillelaghForClass(Class<?> clazz) throws ClassNotFoundException {
     Class<?> shillelagh = CACHED_CLASSES.get(clazz);
@@ -390,19 +368,26 @@ public final class Shillelagh {
   }
 
   /**
-   * Method for deserialize of byte arrays see {@link shillelagh.Field#isBlob()}
+   * Maps data from the cursor to it's corresponding model object.
    *
-   * @param bytes the byte array to be converted back into an object
-   * @param <K>   the object type to be converted back to
-   * @return the deserialized object
-   * @throws IOException
-   * @throws ClassNotFoundException
+   * @param tableClass Class the data from the cursor should be mapped to. This class must have the
+   * @param cursor     Cursor of data pulled from the tableClass's generated table.
+   * @return List of tableClass objects mapped from the cursor.
+   * @see shillelagh.Table annotation on it
    */
   @SuppressWarnings("unchecked")
-  public <K> K deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
-    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
-    ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
-    return (K) objectInputStream.readObject();
+  public <T extends List<M>, M> T map(Class<? extends M> tableClass, Cursor cursor) {
+    try {
+      final Class<?> shillelagh = findShillelaghForClass(tableClass);
+      final Method mapMethod = findMethodForClass(shillelagh, MAP_OBJECT_FUNCTION,
+          /* cursor is interface so can't resolve automatically */
+          new Class<?>[]{Cursor.class, SQLiteDatabase.class});
+      return (T) mapMethod.invoke(null, cursor, getReadableDatabase());
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException("Unable to map cursor to " + tableClass, e);
+    }
   }
 
   public SQLiteDatabase getReadableDatabase() {
