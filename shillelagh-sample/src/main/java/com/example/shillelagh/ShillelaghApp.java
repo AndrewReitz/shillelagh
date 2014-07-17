@@ -16,10 +16,6 @@ public class ShillelaghApp extends Application {
 
     SQLiteOpenHelper sqliteOpenHelper = new ExampleSqliteHelper(this);
     shillelagh = new Shillelagh(sqliteOpenHelper);
-
-    if (BuildConfig.DEBUG) {
-      Shillelagh.setDebug(true);
-    }
   }
 
   /** Returns the instance of shillelagh for this application */
