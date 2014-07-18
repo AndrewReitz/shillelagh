@@ -10,6 +10,7 @@ import android.test.AndroidTestCase;
 import com.example.shillelagh.model.TestBlobs;
 import com.example.shillelagh.model.TestBoxedPrimitivesTable;
 import com.example.shillelagh.model.TestJavaObjectsTable;
+import com.example.shillelagh.model.TestOneToOne;
 import com.example.shillelagh.model.TestPrimitiveTable;
 
 import java.io.ByteArrayOutputStream;
@@ -39,12 +40,12 @@ public class MapTest extends AndroidTestCase {
 
   public void testMapCursorToBoxedPrimitives() {
     // Arrange
-    int expectedBoolean = 0;
-    double expectedDouble = 100000;
-    float expectedFloat = 4.5f;
-    long expectedLong = 300000;
-    int expectedInt = 100;
-    short expectedShort = 1;
+    final int expectedBoolean = 0;
+    final double expectedDouble = 100000;
+    final float expectedFloat = 4.5f;
+    final long expectedLong = 300000;
+    final int expectedInt = 100;
+    final short expectedShort = 1;
 
     String testBoxedPrimitivesInsert = String.format("INSERT INTO %s (aBoolean, aDouble, aFloat, anInteger, " +
         "aLong, aShort) VALUES (%s, %s, %s, %s, %s, %s);", TestBoxedPrimitivesTable.class.getSimpleName(),
@@ -70,12 +71,12 @@ public class MapTest extends AndroidTestCase {
 
   public void testMapToPrimitives() {
     // Arrange
-    int expectedBoolean = 1;
-    double expectedDouble = 2900;
-    float expectedFloat = -3.5f;
-    long expectedLong = 3000000;
-    int expectedInt = -100;
-    short expectedShort = 23;
+    final int expectedBoolean = 1;
+    final double expectedDouble = 2900;
+    final float expectedFloat = -3.5f;
+    final long expectedLong = 3000000;
+    final int expectedInt = -100;
+    final short expectedShort = 23;
 
     String testPrimitiveInsert = String.format("INSERT INTO %s (aShort, anInt," +
         "aLong, aFloat, aDouble, aBoolean) VALUES (%s, %s, %s, %s, %s, %s);",
@@ -103,9 +104,9 @@ public class MapTest extends AndroidTestCase {
 
   public void testMapToJavaObjects() {
     // Arrange
-    String expectedString = "TestString";
-    Date expectedDate = new Date();
-    String testJavaObjectsInsert = String.format("INSERT INTO %s (aString, aDate)" +
+    final String expectedString = "TestString";
+    final Date expectedDate = new Date();
+    final String testJavaObjectsInsert = String.format("INSERT INTO %s (aString, aDate)" +
         " VALUES ('%s', %s);", TestJavaObjectsTable.class.getSimpleName(), expectedString, expectedDate.getTime());
 
     // Act
@@ -157,6 +158,35 @@ public class MapTest extends AndroidTestCase {
     assertThat(resultRow.getaByteArray()).isEqualTo(expectedByteArray);
     assertThat(resultRow.getAnotherByteArray()).isEqualTo(expectedOtherByteArray);
     assertThat(resultRow.getaTestBlobObject()).isEqualsToByComparingFields(expectedTestBlobObject);
+  }
+
+  public void testMapToOneToOne() {
+    // Arrange
+    final String expected = "TEST STRING";
+    final TestOneToOne.Child expectedChild = new TestOneToOne.Child(expected);
+    final TestOneToOne expectedOneToOne = new TestOneToOne(expectedChild);
+
+    final ContentValues childContentValues = new ContentValues();
+    childContentValues.put("childName", expected);
+
+    final ContentValues oneToOneContentValues = new ContentValues();
+    oneToOneContentValues.put("child", 1);
+
+    final String tableName = TestOneToOne.class.getSimpleName();
+
+    // Act
+    sqliteOpenHelper.getWritableDatabase().insert(TestOneToOne.Child.class.getSimpleName(), null,
+        childContentValues);
+    sqliteOpenHelper.getWritableDatabase().insert(tableName, null, oneToOneContentValues);
+    Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery("SELECT * FROM " + tableName,
+        null);
+
+    List<TestOneToOne> result = shillelagh.map(TestOneToOne.class, cursor);
+
+    // Assert
+    assertThat(result.size()).isEqualTo(1);
+    TestOneToOne resultRow = result.get(0);
+    assertThat(resultRow).isEqualsToByComparingFields(expectedOneToOne);
   }
 
   private <K> byte[] serialize(K object) throws IOException {
