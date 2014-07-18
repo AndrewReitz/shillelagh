@@ -26,6 +26,8 @@ Supported Types (and corresponding primitives)
 - Date
 - Boolean
 
+Must Provide Empty Constructors. Can be package protected
+
 ## TODO
 - Relationship Support
 - Constraint Support

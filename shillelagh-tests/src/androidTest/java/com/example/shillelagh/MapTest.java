@@ -159,7 +159,7 @@ public class MapTest extends AndroidTestCase {
     assertThat(resultRow.getaTestBlobObject()).isEqualsToByComparingFields(expectedTestBlobObject);
   }
 
-  public <K> byte[] serialize(K object) throws IOException {
+  private <K> byte[] serialize(K object) throws IOException {
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
     ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
     objectOutputStream.writeObject(object);

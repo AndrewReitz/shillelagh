@@ -6,7 +6,7 @@ import javax.lang.model.element.Element;
 
 /** Represents the data for a column in a database and mapping it back to its java counter part */
 class TableColumn {
-  private final SqliteType type;
+  private final SqliteType sqliteType;
   private final String columnName;
   private final Element element;
 
@@ -16,7 +16,7 @@ class TableColumn {
   TableColumn(Element element) {
     this.columnName = element.getSimpleName().toString();
     this.element = element;
-    this.type = SqliteType.from(element);
+    this.sqliteType = SqliteType.from(element);
   }
 
   String getColumnName() {
@@ -24,7 +24,7 @@ class TableColumn {
   }
 
   SqliteType getSqlType() {
-    return type;
+    return sqliteType;
   }
 
   String getType() {
@@ -54,6 +54,6 @@ class TableColumn {
   }
 
   @Override public String toString() {
-    return columnName + " " + type.toString();
+    return columnName + " " + sqliteType.toString();
   }
 }

@@ -28,7 +28,7 @@ public final class ShillelaghProcessor extends AbstractProcessor {
 
   public static final String SUFFIX = "$$ShillelaghInjector";
 
-  static final boolean DEBUG = false;
+  static final boolean DEBUG = true;
 
   private ShillelaghLogger logger;
 
@@ -43,6 +43,8 @@ public final class ShillelaghProcessor extends AbstractProcessor {
     elementUtils = processingEnv.getElementUtils();
     typeUtils = processingEnv.getTypeUtils();
     filer = processingEnv.getFiler();
+
+    writeShillelaghUtil();
   }
 
   @Override public Set<String> getSupportedAnnotationTypes() {
@@ -106,6 +108,7 @@ public final class ShillelaghProcessor extends AbstractProcessor {
         }
       }
     }
+
     return true;
   }
 
@@ -176,5 +179,20 @@ public final class ShillelaghProcessor extends AbstractProcessor {
       }
     }
     return false;
+  }
+
+  /** Write out shillelaghUtils */
+  private void writeShillelaghUtil() {
+    try {
+      ShillelaghUtilWriter utilIWriter = new ShillelaghUtilWriter();
+      JavaFileObject jfo = filer.createSourceFile("shillelagh.Util");
+      Writer writer = jfo.openWriter();
+      writer.write(utilIWriter.brewInternalJava());
+      writer.flush();
+      writer.close();
+    } catch (IOException e) {
+      logger.e(String.format("Unable to write required internal Shillelagh classes %s",
+          e.getMessage()));
+    }
   }
 }
