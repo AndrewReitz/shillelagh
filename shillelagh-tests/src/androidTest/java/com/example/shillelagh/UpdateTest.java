@@ -8,6 +8,7 @@ import com.example.shillelagh.model.TestBlobs;
 import com.example.shillelagh.model.TestBoxedPrimitivesTable;
 import com.example.shillelagh.model.TestJavaObjectsTable;
 import com.example.shillelagh.model.TestNotTableObject;
+import com.example.shillelagh.model.TestOneToOne;
 import com.example.shillelagh.model.TestPrimitiveTable;
 
 import java.io.ByteArrayInputStream;
@@ -209,6 +210,49 @@ public class UpdateTest extends AndroidTestCase {
     assertThat(cursor.getBlob(2)).isEqualTo(expectedOtherByteArray);
     assertThat(this.<TestBlobs.TestBlobObject>deserialize(cursor.getBlob(3)))
         .isEqualsToByComparingFields(expectedTestBlobObject);
+
+    cursor.close();
+  }
+
+  public void testUpdateOneToOne() {
+    // Arrange
+    final String expectedString = "TEST STRING";
+    final TestOneToOne.Child expectedChild = new TestOneToOne.Child(expectedString);
+    final TestOneToOne expectedOneToOne = new TestOneToOne(expectedChild);
+
+    final TestOneToOne.Child insertTestChild = new TestOneToOne.Child("Unexpected");
+    final TestOneToOne insertTestOneToOne = new TestOneToOne(insertTestChild);
+
+    // Act
+    shillelagh.insert(insertTestChild);
+    shillelagh.insert(insertTestOneToOne);
+    shillelagh.insert(expectedChild);
+
+    expectedOneToOne.setId(insertTestOneToOne.getId());
+    shillelagh.update(expectedOneToOne);
+
+    // Assert
+    Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
+        "SELECT * FROM " + TestOneToOne.class.getSimpleName(), null);
+
+    assertThat(cursor.getCount()).isEqualTo(1);
+
+    assertThat(cursor.moveToFirst()).isTrue();
+    assertThat(cursor.getLong(0)).isEqualTo(1);
+    assertThat(cursor.getLong(1)).isEqualTo(2);
+
+    cursor.close();
+
+    cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(String.format(
+        "SELECT * FROM %s WHERE Id = %d", TestOneToOne.Child.class.getSimpleName(), 2), null);
+
+    assertThat(cursor.getCount()).isEqualTo(1);
+
+    assertThat(cursor.moveToFirst()).isTrue();
+    assertThat(cursor.getLong(0)).isEqualTo(2);
+    assertThat(cursor.getString(1)).isEqualTo(expectedString);
+
+    cursor.close();
   }
 
   public void testInsertShouldFailWhenNotAnnotated() {

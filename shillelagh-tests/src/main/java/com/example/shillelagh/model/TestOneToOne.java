@@ -21,6 +21,10 @@ import shillelagh.Table;
     return id;
   }
 
+  public void setId(long id) {
+    this.id = id;
+  }
+
   public void setChild(Child child) {
     this.child = child;
   }
