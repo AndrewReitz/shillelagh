@@ -31,7 +31,7 @@ public class UpdateTest extends AndroidTestCase {
   }
 
   @Override protected void tearDown() throws Exception {
-    getContext().deleteDatabase(sqliteOpenHelper.getDatabaseName());
+    getContext().deleteDatabase(TestSQLiteOpenHelper.DATABASE_NAME);
     super.tearDown();
   }
 
