@@ -1,7 +1,7 @@
 package shillelagh.internal;
 
 /** Writes code for shillelagh injected code to utilize */
-public class ShillelaghUtilWriter {
+public final class ShillelaghUtilWriter {
 
   static final String SERIALIZE_FUNCTION = "serialize";
   static final String DESERIALIZE_FUNCTION = "deserialize";
@@ -16,7 +16,7 @@ public class ShillelaghUtilWriter {
     builder.append("import java.io.IOException;\n");
     builder.append("import java.io.ObjectInputStream;\n");
     builder.append("import java.io.ObjectOutputStream;\n\n");
-    builder.append("@SuppressWarnings(\"unchecked\")");
+    builder.append("@SuppressWarnings(\"unchecked\")\n");
     builder.append("public final class Util {\n");
     emmitByteArraySerialization(builder);
     builder.append("}\n");
