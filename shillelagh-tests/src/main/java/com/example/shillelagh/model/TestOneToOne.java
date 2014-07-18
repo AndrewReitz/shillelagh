@@ -28,6 +28,14 @@ import shillelagh.Table;
     @Id long id;
     @Field String childName;
 
+    public long getId() {
+      return id;
+    }
+
+    public void setId(long id) {
+      this.id = id;
+    }
+
     public Child() {}
 
     public Child(String childName) {

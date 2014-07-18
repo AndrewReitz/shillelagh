@@ -3,7 +3,8 @@ package shillelagh.internal;
 import java.util.Date;
 
 import javax.lang.model.element.Element;
-import javax.lang.model.element.Name;
+
+import static shillelagh.internal.SqliteType.INTEGER;
 
 /** Represents the data for a column in a database and mapping it back to its java counter part */
 class TableColumn {
@@ -25,7 +26,7 @@ class TableColumn {
   }
 
   SqliteType getSqlType() {
-    return sqliteType;
+    return isOneToOne() ? INTEGER : sqliteType;
   }
 
   String getType() {
@@ -55,6 +56,6 @@ class TableColumn {
   }
 
   @Override public String toString() {
-    return columnName + " " + sqliteType.toString();
+    return columnName + " " + getSqlType().toString();
   }
 }
