@@ -91,7 +91,7 @@ public final class ShillelaghProcessor extends AbstractProcessor {
 
         logger.d(tableObject.toString());
         if (tableObject.getIdColumnName() == null) {
-          logger.e(String.format("%s does not have an id column. Did you forget @id?", targetType));
+          logger.e(String.format("%s does not have an id column. Did you forget @Id?", targetType));
         }
         injector.setTable(tableObject);
 
