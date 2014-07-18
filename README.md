@@ -27,12 +27,14 @@ Supported Types (and corresponding primitives)
 - Boolean
 
 Must Provide Empty Constructors. Can be package protected
+Don't forget to update your database version if you change your models (Also create migration scripts)
 
 ## TODO
 - Relationship Support
 - Constraint Support
 - More Unit Tests
 - Documentation
+- Pull processor out into separate container += refactor writing of internal code
 
 # Download
 
