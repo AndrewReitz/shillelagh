@@ -1,11 +1,9 @@
 package shillelagh.internal;
 
 import static shillelagh.internal.ShillelaghProcessor.SUFFIX;
-import static shillelagh.internal.ShillelaghUtilWriter.DESERIALIZE_FUNCTION;
-import static shillelagh.internal.ShillelaghUtilWriter.SERIALIZE_FUNCTION;
 
 /** Class in charge of creating all the code injected into other classes */
-public final class ShillelaghInjector {
+public final class ShillelaghWriter {
 
   // I'm not really happy with the code in here, but then again, I'm writing Java in Strings...
 
@@ -21,6 +19,8 @@ public final class ShillelaghInjector {
   public static final String GET_OBJECT_BY_ID = "getById";
   public static final String MAP_OBJECT_FUNCTION = "map";
 
+  private static final String SERIALIZE_FUNCTION = "serialize";
+  private static final String DESERIALIZE_FUNCTION = "deserialize";
   private static final String GET_ID_FUNCTION = "getId";
 
   /**
@@ -34,7 +34,7 @@ public final class ShillelaghInjector {
   private final String targetClass;
   private TableObject tableObject;
 
-  ShillelaghInjector(String classPackage, String className, String targetClass) {
+  ShillelaghWriter(String classPackage, String className, String targetClass) {
     this.classPackage = classPackage;
     this.className = className;
     this.targetClass = targetClass;
@@ -58,11 +58,14 @@ public final class ShillelaghInjector {
     builder.append("import android.database.Cursor;\n");
     builder.append("import android.database.DatabaseUtils;\n");
     builder.append("import android.database.sqlite.SQLiteDatabase;\n\n");
+    builder.append("import java.io.ByteArrayInputStream;\n");
+    builder.append("import java.io.ByteArrayOutputStream;\n");
+    builder.append("import java.io.IOException;\n");
+    builder.append("import java.io.ObjectInputStream;\n");
+    builder.append("import java.io.ObjectOutputStream;\n\n");
     builder.append("import java.util.LinkedList;\n");
     builder.append("import java.util.Date;\n");
     builder.append("import java.util.List;\n\n");
-    builder.append("import static shillelagh.Util.").append(SERIALIZE_FUNCTION).append(";\n");
-    builder.append("import static shillelagh.Util.").append(DESERIALIZE_FUNCTION).append(";\n\n");
     builder.append("public final class ").append(className).append(" {\n");
     emitGetId(builder);
     builder.append("\n");
@@ -83,6 +86,8 @@ public final class ShillelaghInjector {
     emmitMapCursorToObject(builder);
     builder.append("\n");
     emmitSelectById(builder);
+    builder.append("\n");
+    emmitByteArraySerialization(builder);
     builder.append("}\n");
     return builder.toString();
   }
@@ -104,7 +109,7 @@ public final class ShillelaghInjector {
   /** Creates the function dropping the table */
   private void emmitDropTable(StringBuilder builder) {
     builder.append("  public static void ").append(DROP_TABLE_FUNCTION).append("(SQLiteDatabase db) {\n");
-    builder.append("    db.execSQL(\"DROP TABLE IF EXISTS ").append(targetClass).append("\");\n");
+    builder.append("    db.execSQL(\"DROP TABLE IF EXISTS ").append(tableObject.getTableName()).append("\");\n");
     builder.append("  }\n");
   }
 
@@ -124,7 +129,7 @@ public final class ShillelaghInjector {
         builder.append("    values.put(\"").append(columnName).append("\", element.").append(columnName).append(");\n");
       }
     }
-    builder.append("    db.insert(\"").append(targetClass).append("\", null, values);\n");
+    builder.append("    db.insert(\"").append(tableObject.getTableName()).append("\", null, values);\n");
     builder.append("  }\n");
   }
 
@@ -132,7 +137,7 @@ public final class ShillelaghInjector {
   private void emmitUpdateColumnId(StringBuilder builder) {
     // Updates the column id for the last inserted row
     builder.append("  public static void ").append(UPDATE_ID_FUNCTION).append("(").append(targetClass).append(" element, SQLiteDatabase db) {\n");
-    builder.append("    long id = DatabaseUtils.longForQuery(db, \"").append(String.format(GET_ID_OF_LAST_INSERTED_ROW_SQL, targetClass)).append("\", null);\n");
+    builder.append("    long id = DatabaseUtils.longForQuery(db, \"").append(String.format(GET_ID_OF_LAST_INSERTED_ROW_SQL, tableObject.getTableName())).append("\", null);\n");
     builder.append("    element.").append(tableObject.getIdColumnName()).append(" = id;\n");
     builder.append("  }\n");
   }
@@ -154,7 +159,7 @@ public final class ShillelaghInjector {
       }
     }
     final String idColumnName = tableObject.getIdColumnName();
-    builder.append("    db.update(\"").append(targetClass).append("\", values, \"").append(idColumnName).append(" = \" + element.").append(idColumnName).append(", null);\n");
+    builder.append("    db.update(\"").append(tableObject.getTableName()).append("\", values, \"").append(idColumnName).append(" = \" + element.").append(idColumnName).append(", null);\n");
     builder.append("  }\n");
   }
 
@@ -168,15 +173,14 @@ public final class ShillelaghInjector {
   /** Creates the function for deleting an object by id */
   private void emmitDeleteWithId(StringBuilder builder) {
     builder.append("  public static void ").append(DELETE_OBJECT_FUNCTION).append("(Long id, SQLiteDatabase db) {\n");
-    builder.append("    db.delete(\"").append(targetClass).append("\", \"").append(tableObject.getIdColumnName()).append(" = \" + id, null);\n");
+    builder.append("    db.delete(\"").append(tableObject.getTableName()).append("\", \"").append(tableObject.getIdColumnName()).append(" = \" + id, null);\n");
     builder.append("  }\n");
   }
 
   /** Creates function for getting an object by value */
   private void emmitSelectById(StringBuilder builder) {
-    final String tableName = targetClass;
-    builder.append("  public static ").append(tableName).append(" ").append(GET_OBJECT_BY_ID).append("(long id, SQLiteDatabase db) {\n");
-    builder.append("    return ").append(MAP_OBJECT_FUNCTION).append("(db.rawQuery(\"SELECT * FROM ").append(tableName).append(" WHERE ").append(tableObject.getIdColumnName()).append(" = id\", null), db).get(0);\n");
+    builder.append("  public static ").append(targetClass).append(" ").append(GET_OBJECT_BY_ID).append("(long id, SQLiteDatabase db) {\n");
+    builder.append("    return ").append(MAP_OBJECT_FUNCTION).append("(db.rawQuery(\"SELECT * FROM ").append(tableObject.getTableName()).append(" WHERE ").append(tableObject.getIdColumnName()).append(" = id\", null), db).get(0);\n");
     builder.append("  }\n");
   }
 
@@ -216,6 +220,31 @@ public final class ShillelaghInjector {
     builder.append("      }\n");
     builder.append("    }\n");
     builder.append("  return tableObjects;");
+    builder.append("  }\n");
+  }
+
+  /** Creates functions for serialization to and from byte arrays */
+  private void emmitByteArraySerialization(StringBuilder builder) {
+    builder.append("  public static <K> byte[] ").append(SERIALIZE_FUNCTION).append("(K object) {\n");
+    builder.append("    try {\n");
+    builder.append("      ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();\n");
+    builder.append("      ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);\n");
+    builder.append("      objectOutputStream.writeObject(object);\n");
+    builder.append("      return byteArrayOutputStream.toByteArray();\n");
+    builder.append("    } catch (IOException e) {\n");
+    builder.append("      throw new RuntimeException(e);\n");
+    builder.append("    }\n");
+    builder.append("  }\n\n");
+    builder.append("  public static <K> K ").append(DESERIALIZE_FUNCTION).append("(byte[] bytes) {\n");
+    builder.append("    try {\n");
+    builder.append("      ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);\n");
+    builder.append("      ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);\n");
+    builder.append("      return (K) objectInputStream.readObject();\n");
+    builder.append("    } catch (IOException e) {\n");
+    builder.append("      throw new RuntimeException(e);\n");
+    builder.append("    } catch (ClassNotFoundException e) {\n");
+    builder.append("      throw new RuntimeException(e);\n");
+    builder.append("    }\n");
     builder.append("  }\n");
   }
 }

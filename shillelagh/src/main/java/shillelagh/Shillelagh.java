@@ -14,13 +14,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static shillelagh.internal.ShillelaghInjector.CREATE_TABLE_FUNCTION;
-import static shillelagh.internal.ShillelaghInjector.DELETE_OBJECT_FUNCTION;
-import static shillelagh.internal.ShillelaghInjector.DROP_TABLE_FUNCTION;
-import static shillelagh.internal.ShillelaghInjector.INSERT_OBJECT_FUNCTION;
-import static shillelagh.internal.ShillelaghInjector.MAP_OBJECT_FUNCTION;
-import static shillelagh.internal.ShillelaghInjector.UPDATE_ID_FUNCTION;
-import static shillelagh.internal.ShillelaghInjector.UPDATE_OBJECT_FUNCTION;
+import static shillelagh.internal.ShillelaghWriter.CREATE_TABLE_FUNCTION;
+import static shillelagh.internal.ShillelaghWriter.DELETE_OBJECT_FUNCTION;
+import static shillelagh.internal.ShillelaghWriter.DROP_TABLE_FUNCTION;
+import static shillelagh.internal.ShillelaghWriter.INSERT_OBJECT_FUNCTION;
+import static shillelagh.internal.ShillelaghWriter.MAP_OBJECT_FUNCTION;
+import static shillelagh.internal.ShillelaghWriter.UPDATE_ID_FUNCTION;
+import static shillelagh.internal.ShillelaghWriter.UPDATE_OBJECT_FUNCTION;
 import static shillelagh.internal.ShillelaghProcessor.SUFFIX;
 
 public final class Shillelagh {

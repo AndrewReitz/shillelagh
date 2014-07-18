@@ -3,20 +3,21 @@ package shillelagh.internal;
 import java.util.Date;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.Name;
 
 /** Represents the data for a column in a database and mapping it back to its java counter part */
 class TableColumn {
   private final SqliteType sqliteType;
   private final String columnName;
-  private final Element element;
+  private final String type;
 
   /** Indicates if column is a one to one mapping */
   private boolean oneToOne = false;
 
-  TableColumn(Element element) {
+  TableColumn(Element element, String type) {
     this.columnName = element.getSimpleName().toString();
-    this.element = element;
     this.sqliteType = SqliteType.from(element);
+    this.type = type;
   }
 
   String getColumnName() {
@@ -28,7 +29,7 @@ class TableColumn {
   }
 
   String getType() {
-    return element.asType().toString();
+    return type;
   }
 
   boolean isDate() {

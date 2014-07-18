@@ -26,9 +26,9 @@ import shillelagh.Table;
 
 public final class ShillelaghProcessor extends AbstractProcessor {
 
-  public static final String SUFFIX = "$$ShillelaghInjector";
+  public static final String SUFFIX = "$$Shillelagh";
 
-  static final boolean DEBUG = true;
+  static final boolean DEBUG = false;
 
   private ShillelaghLogger logger;
 
@@ -43,8 +43,6 @@ public final class ShillelaghProcessor extends AbstractProcessor {
     elementUtils = processingEnv.getElementUtils();
     typeUtils = processingEnv.getTypeUtils();
     filer = processingEnv.getFiler();
-
-    writeShillelaghUtil();
   }
 
   @Override public Set<String> getSupportedAnnotationTypes() {
@@ -66,7 +64,7 @@ public final class ShillelaghProcessor extends AbstractProcessor {
         String targetType = element.toString();
         String classPackage = getPackageName(element);
         String className = getClassName((TypeElement) element, classPackage) + SUFFIX;
-        ShillelaghInjector injector = new ShillelaghInjector(classPackage, className, targetType);
+        ShillelaghWriter injector = new ShillelaghWriter(classPackage, className, targetType);
         logger.d("TargetType: " + targetType);
         logger.d("ClassPackage: " + classPackage);
         logger.d("ClassName: " + className);
@@ -152,7 +150,12 @@ public final class ShillelaghProcessor extends AbstractProcessor {
     Field fieldAnnotation = element.getAnnotation(Field.class);
     if (fieldAnnotation == null) return;
 
-    TableColumn tableColumn = new TableColumn(element);
+    /* Convert the element from a field to a type */
+    final Element typeElement = typeUtils.asElement(element.asType());
+    final String type = typeElement == null ? element.asType().toString() :
+        elementUtils.getBinaryName((TypeElement) typeElement).toString();
+
+    TableColumn tableColumn = new TableColumn(element, type);
     if (tableColumn.getSqlType() == SqliteType.BLOB && !tableColumn.isByteArray()) {
       if (!checkForSuperType(element, Serializable.class) && !element.asType().toString().equals("java.lang.Byte[]")) {
         logger.e(String.format(
@@ -160,7 +163,8 @@ public final class ShillelaghProcessor extends AbstractProcessor {
             element.toString(), tableObject.getTableName()));
       }
     } else if (tableColumn.getSqlType() == SqliteType.UNKNOWN) {
-      Table annotation = typeUtils.asElement(element.asType()).getAnnotation(Table.class);
+      @SuppressWarnings("ConstantConditions")
+      Table annotation = typeElement.getAnnotation(Table.class);
       if (annotation == null) {
         logger.e(String.format("%s in %s needs to be marked as a blob or should be " +
                 "annotated with @Table", element.toString(), tableObject.getTableName()));
@@ -183,6 +187,10 @@ public final class ShillelaghProcessor extends AbstractProcessor {
 
   /** Write out shillelaghUtils */
   private void writeShillelaghUtil() {
+    // ISSUE WITH ACCESSING THESE METHODS:
+    // Caused by: java.lang.IllegalAccessError: Class ref in pre-verified class resolved to unexpected implementation
+    // Looks like it gets compiled before types get resolved?
+    // TODO FIX LATER WITH REFACTOR OF ShillelaghWriter
     try {
       ShillelaghUtilWriter utilIWriter = new ShillelaghUtilWriter();
       JavaFileObject jfo = filer.createSourceFile("shillelagh.Util");

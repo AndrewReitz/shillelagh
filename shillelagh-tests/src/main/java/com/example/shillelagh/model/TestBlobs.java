@@ -9,7 +9,7 @@ import shillelagh.Table;
 @Table public class TestBlobs {
   @Id long id;
   @Field(isBlob = true) Byte[] aByteArray;
-  @Field(isBlob = true) byte[] anotherByteArray;
+  @Field(isBlob = true) byte[] anotherByteArray; // TODO Make this not require isBlob == true
   @Field(isBlob = true) TestBlobObject aTestBlobObject;
 
   public long getId() {

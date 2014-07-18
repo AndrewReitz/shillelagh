@@ -27,6 +27,7 @@ public class DropTableTest extends AndroidTestCase {
     databaseFile = new File(dbDir, "database_test.db");
 
     if (databaseFile.exists()) {
+      //noinspection ResultOfMethodCallIgnored
       databaseFile.delete();
     }
     database = SQLiteDatabase.openOrCreateDatabase(databaseFile.getPath(), null);
@@ -37,6 +38,7 @@ public class DropTableTest extends AndroidTestCase {
   @Override
   protected void tearDown() throws Exception {
     database.close();
+    //noinspection ResultOfMethodCallIgnored
     databaseFile.delete();
     super.tearDown();
   }

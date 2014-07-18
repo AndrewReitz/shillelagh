@@ -4,8 +4,7 @@ import shillelagh.Field;
 import shillelagh.Id;
 import shillelagh.Table;
 
-@Table
-public class  TestPrimitiveTable {
+@Table public class  TestPrimitiveTable {
   @Id long id;
 
   @Field short aShort;

@@ -25,7 +25,7 @@ public final class ShillelaghUtilWriter {
 
   /** Creates functions for serialization to and from byte arrays */
   private void emmitByteArraySerialization(StringBuilder builder) {
-    builder.append("  public static <K> byte[] ").append(SERIALIZE_FUNCTION).append("(K object) {\n");
+    builder.append("  public static byte[] ").append(SERIALIZE_FUNCTION).append("(Object object) {\n");
     builder.append("    try {\n");
     builder.append("      ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();\n");
     builder.append("      ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);\n");
