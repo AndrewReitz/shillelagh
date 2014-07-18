@@ -2,13 +2,14 @@ package com.example.shillelagh.model;
 
 import shillelagh.Field;
 import shillelagh.Id;
+import shillelagh.OrmOnly;
 import shillelagh.Table;
 
 @Table public class TestOneToOne {
   @Id long id;
   @Field Child child;
 
-  public TestOneToOne() {
+  @OrmOnly TestOneToOne() {
 
   }
 
@@ -36,7 +37,7 @@ import shillelagh.Table;
       this.id = id;
     }
 
-    public Child() {}
+    @OrmOnly Child() {}
 
     public Child(String childName) {
       this.childName = childName;

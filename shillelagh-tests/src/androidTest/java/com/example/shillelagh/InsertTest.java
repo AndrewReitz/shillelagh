@@ -8,6 +8,7 @@ import com.example.shillelagh.model.TestBlobs;
 import com.example.shillelagh.model.TestBoxedPrimitivesTable;
 import com.example.shillelagh.model.TestJavaObjectsTable;
 import com.example.shillelagh.model.TestNotTableObject;
+import com.example.shillelagh.model.TestOneToOne;
 import com.example.shillelagh.model.TestPrimitiveTable;
 
 import java.io.ByteArrayInputStream;
@@ -172,6 +173,42 @@ public class InsertTest extends AndroidTestCase {
 
     assertThat(cursor.moveToNext()).isFalse();
     cursor.close();
+  }
+
+  public void testOneToOneInsertion() {
+    // Arrange
+    final String expected = "TEST STRING";
+    final TestOneToOne.Child expectedChild = new TestOneToOne.Child(expected);
+    final TestOneToOne expectedOneToOne = new TestOneToOne(expectedChild);
+
+    // Act
+    shillelagh.insert(expectedChild);
+    shillelagh.insert(expectedOneToOne);
+
+    // Assert
+    Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
+        "SELECT * FROM " + TestOneToOne.class.getSimpleName(), null);
+
+    assertThat(cursor.getCount()).isEqualTo(1);
+    assertThat(cursor.moveToFirst()).isTrue();
+    assertThat(cursor.getLong(0)).isEqualTo(1);
+    assertThat(cursor.getLong(1)).isEqualTo(1);
+
+    assertThat(cursor.moveToNext()).isFalse();
+    cursor.close();
+
+    // Assert
+    cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
+        "SELECT * FROM " + TestOneToOne.Child.class.getSimpleName(), null);
+
+    assertThat(cursor.getCount()).isEqualTo(1);
+    assertThat(cursor.moveToFirst()).isTrue();
+    assertThat(cursor.getLong(0)).isEqualTo(1);
+    assertThat(cursor.getString(1)).isEqualTo(expected);
+
+    assertThat(cursor.moveToNext()).isFalse();
+    cursor.close();
+
   }
 
   public void testInsertShouldFailWhenNotAnnotated() {
