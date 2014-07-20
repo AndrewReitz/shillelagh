@@ -41,6 +41,7 @@ enum SqliteType {
       String.class.getName()
   ))),
   BLOB(Collections.<TypeKind>emptySet(), Collections.<String>emptySet()),
+  ONE_TO_MANY(Collections.<TypeKind>emptySet(), Collections.<String>emptySet()),
   // signals an unknown type probably should be a key into another table
   UNKNOWN(Collections.<TypeKind>emptySet(), Collections.<String>emptySet());
 
@@ -63,6 +64,11 @@ enum SqliteType {
 
     if (element.getAnnotation(Field.class).isBlob()) {
       return BLOB;
+    }
+
+    String typeString = element.asType().toString();
+    if (typeString.contains("java.util.List")) {
+      return ONE_TO_MANY;
     }
 
     final TypeMirror typeMirror = element.asType();

@@ -14,8 +14,11 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.JavaFileObject;
@@ -162,6 +165,10 @@ public final class ShillelaghProcessor extends AbstractProcessor {
             "%s in %s is not Serializable and will not be able to be converted to a byte array",
             element.toString(), tableObject.getTableName()));
       }
+    } else if (tableColumn.getSqlType() == SqliteType.ONE_TO_MANY) {
+      // List<T> should only have one internal type. Get that type and make sure
+      // it has @Table annotation
+      TypeMirror typeMirror = ((DeclaredType) element.asType()).getTypeArguments().get(0);
     } else if (tableColumn.getSqlType() == SqliteType.UNKNOWN) {
       @SuppressWarnings("ConstantConditions")
       Table annotation = typeElement.getAnnotation(Table.class);
