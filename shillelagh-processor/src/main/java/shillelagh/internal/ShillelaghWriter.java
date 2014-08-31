@@ -1,23 +1,21 @@
 package shillelagh.internal;
 
-import static shillelagh.internal.ShillelaghProcessor.SUFFIX;
+import shillelagh.Shillelagh;
+
+import static shillelagh.Shillelagh.$$CREATE_TABLE_FUNCTION;
+import static shillelagh.Shillelagh.$$DELETE_OBJECT_FUNCTION;
+import static shillelagh.Shillelagh.$$DROP_TABLE_FUNCTION;
+import static shillelagh.Shillelagh.$$GET_OBJECT_BY_ID;
+import static shillelagh.Shillelagh.$$INSERT_OBJECT_FUNCTION;
+import static shillelagh.Shillelagh.$$MAP_OBJECT_FUNCTION;
+import static shillelagh.Shillelagh.$$SUFFIX;
+import static shillelagh.Shillelagh.$$UPDATE_ID_FUNCTION;
+import static shillelagh.Shillelagh.$$UPDATE_OBJECT_FUNCTION;
 
 /** Class in charge of creating all the code injected into other classes */
 public final class ShillelaghWriter {
 
   // I'm not really happy with the code in here, but then again, I'm writing Java in Strings...
-
-  /**
-   * Internal class function names
-   */
-  public static final String CREATE_TABLE_FUNCTION = "createTable";
-  public static final String DROP_TABLE_FUNCTION = "dropTable";
-  public static final String INSERT_OBJECT_FUNCTION = "insertObject";
-  public static final String UPDATE_OBJECT_FUNCTION = "updateObject";
-  public static final String UPDATE_ID_FUNCTION = "updateColumnId";
-  public static final String DELETE_OBJECT_FUNCTION = "deleteObject";
-  public static final String GET_OBJECT_BY_ID = "getById";
-  public static final String MAP_OBJECT_FUNCTION = "map";
 
   private static final String SERIALIZE_FUNCTION = "serialize";
   private static final String DESERIALIZE_FUNCTION = "deserialize";
@@ -25,7 +23,7 @@ public final class ShillelaghWriter {
 
   /**
    * SQL statement to select the id of the last inserted row. Does not end with ; in order to be
-   * used with {@link android.database.sqlite.SQLiteDatabase#rawQuery(String, String[])}
+   * used with SQLiteDatabase#rawQuery(String, String[])
    */
   private static final String GET_ID_OF_LAST_INSERTED_ROW_SQL = "SELECT ROWID FROM %s ORDER BY ROWID DESC LIMIT 1";
 
@@ -101,28 +99,28 @@ public final class ShillelaghWriter {
 
   /** Creates the function for creating the table*/
   private void emmitCreateTable(StringBuilder builder) {
-    builder.append("  public static void ").append(CREATE_TABLE_FUNCTION).append("(SQLiteDatabase db) {\n");
+    builder.append("  public static void ").append($$CREATE_TABLE_FUNCTION).append("(SQLiteDatabase db) {\n");
     builder.append("    db.execSQL(\"").append(tableObject.getSchema()).append("\");\n");
     builder.append("  }\n");
   }
 
   /** Creates the function dropping the table */
   private void emmitDropTable(StringBuilder builder) {
-    builder.append("  public static void ").append(DROP_TABLE_FUNCTION).append("(SQLiteDatabase db) {\n");
+    builder.append("  public static void ").append($$DROP_TABLE_FUNCTION).append("(SQLiteDatabase db) {\n");
     builder.append("    db.execSQL(\"DROP TABLE IF EXISTS ").append(tableObject.getTableName()).append("\");\n");
     builder.append("  }\n");
   }
 
   /** Creates the function for inserting a new value into the database */
   private void emmitInsert(StringBuilder builder) {
-    builder.append("  public static void ").append(INSERT_OBJECT_FUNCTION).append("(").append(targetClass).append(" element, SQLiteDatabase db) {\n");
+    builder.append("  public static void ").append($$INSERT_OBJECT_FUNCTION).append("(").append(targetClass).append(" element, SQLiteDatabase db) {\n");
     builder.append("    ContentValues values = new ContentValues();\n");
     for (TableColumn column : tableObject.getColumns()) {
       String columnName = column.getColumnName();
       if (column.getSqlType() == SqliteType.BLOB && !column.isByteArray()) {
         builder.append("    values.put(\"").append(columnName).append("\", ").append(SERIALIZE_FUNCTION).append("(element.").append(columnName).append("));\n");
       } else if (column.isOneToOne()) {
-        builder.append("    values.put(\"").append(columnName).append("\", ").append(column.getType()).append(SUFFIX).append(".").append(GET_ID_FUNCTION).append("(element.").append(columnName).append("));\n");
+        builder.append("    values.put(\"").append(columnName).append("\", ").append(column.getType()).append($$SUFFIX).append(".").append(GET_ID_FUNCTION).append("(element.").append(columnName).append("));\n");
       } else if (column.isDate()) {
         builder.append("    values.put(\"").append(columnName).append("\", element.").append(columnName).append(".getTime());\n");
       } else {
@@ -136,7 +134,7 @@ public final class ShillelaghWriter {
   /** Updates the id of the object to the last insert */
   private void emmitUpdateColumnId(StringBuilder builder) {
     // Updates the column id for the last inserted row
-    builder.append("  public static void ").append(UPDATE_ID_FUNCTION).append("(").append(targetClass).append(" element, SQLiteDatabase db) {\n");
+    builder.append("  public static void ").append($$UPDATE_ID_FUNCTION).append("(").append(targetClass).append(" element, SQLiteDatabase db) {\n");
     builder.append("    long id = DatabaseUtils.longForQuery(db, \"").append(String.format(GET_ID_OF_LAST_INSERTED_ROW_SQL, tableObject.getTableName())).append("\", null);\n");
     builder.append("    element.").append(tableObject.getIdColumnName()).append(" = id;\n");
     builder.append("  }\n");
@@ -144,14 +142,14 @@ public final class ShillelaghWriter {
 
   /** Creates the function for updating an object */
   private void emmitUpdate(StringBuilder builder) {
-    builder.append("  public static void ").append(UPDATE_OBJECT_FUNCTION).append("(").append(targetClass).append(" element, SQLiteDatabase db) {\n");
+    builder.append("  public static void ").append($$UPDATE_OBJECT_FUNCTION).append("(").append(targetClass).append(" element, SQLiteDatabase db) {\n");
     builder.append("    ContentValues values = new ContentValues();\n");
     for (TableColumn column : tableObject.getColumns()) {
       String columnName = column.getColumnName();
       if (column.getSqlType() == SqliteType.BLOB && !column.isByteArray()) {
         builder.append("    values.put(\"").append(columnName).append("\", ").append(SERIALIZE_FUNCTION).append("(element.").append(columnName).append("));\n");
       } else if (column.isOneToOne()) {
-        builder.append("    values.put(\"").append(columnName).append("\", ").append(column.getType()).append(SUFFIX).append(".").append(GET_ID_FUNCTION).append("(element.").append(columnName).append("));\n");
+        builder.append("    values.put(\"").append(columnName).append("\", ").append(column.getType()).append($$SUFFIX).append(".").append(GET_ID_FUNCTION).append("(element.").append(columnName).append("));\n");
       } else if (column.isDate()) {
         builder.append("    values.put(\"").append(columnName).append("\", element.").append(columnName).append(".getTime());\n");
       } else {
@@ -165,22 +163,22 @@ public final class ShillelaghWriter {
 
   /** Creates the function for deleting an object from the table */
   private void emmitDeleteWithObject(StringBuilder builder) {
-    builder.append("  public static void ").append(DELETE_OBJECT_FUNCTION).append("(").append(targetClass).append(" element, SQLiteDatabase db) {\n");
-    builder.append("    ").append(DELETE_OBJECT_FUNCTION).append("(element.").append(tableObject.getIdColumnName()).append(", db);\n");
+    builder.append("  public static void ").append($$DELETE_OBJECT_FUNCTION).append("(").append(targetClass).append(" element, SQLiteDatabase db) {\n");
+    builder.append("    ").append($$DELETE_OBJECT_FUNCTION).append("(element.").append(tableObject.getIdColumnName()).append(", db);\n");
     builder.append("  }\n");
   }
 
   /** Creates the function for deleting an object by id */
   private void emmitDeleteWithId(StringBuilder builder) {
-    builder.append("  public static void ").append(DELETE_OBJECT_FUNCTION).append("(Long id, SQLiteDatabase db) {\n");
+    builder.append("  public static void ").append($$DELETE_OBJECT_FUNCTION).append("(Long id, SQLiteDatabase db) {\n");
     builder.append("    db.delete(\"").append(tableObject.getTableName()).append("\", \"").append(tableObject.getIdColumnName()).append(" = \" + id, null);\n");
     builder.append("  }\n");
   }
 
   /** Creates function for getting an object by value */
   private void emmitSelectById(StringBuilder builder) {
-    builder.append("  public static ").append(targetClass).append(" ").append(GET_OBJECT_BY_ID).append("(long id, SQLiteDatabase db) {\n");
-    builder.append("    return ").append(MAP_OBJECT_FUNCTION).append("(db.rawQuery(\"SELECT * FROM ").append(tableObject.getTableName()).append(" WHERE ").append(tableObject.getIdColumnName()).append(" = id\", null), db).get(0);\n");
+    builder.append("  public static ").append(targetClass).append(" ").append($$GET_OBJECT_BY_ID).append("(long id, SQLiteDatabase db) {\n");
+    builder.append("    return ").append($$MAP_OBJECT_FUNCTION).append("(db.rawQuery(\"SELECT * FROM ").append(tableObject.getTableName()).append(" WHERE ").append(tableObject.getIdColumnName()).append(" = id\", null), db).get(0);\n");
     builder.append("  }\n");
   }
 
@@ -191,7 +189,7 @@ public final class ShillelaghWriter {
     final String idColumnName = tableObject.getIdColumnName();
     final String tableName = targetClass;
 
-    builder.append("  public static List<").append(tableName).append("> ").append(MAP_OBJECT_FUNCTION).append("(Cursor cursor, SQLiteDatabase db) {\n");
+    builder.append("  public static List<").append(tableName).append("> ").append($$MAP_OBJECT_FUNCTION).append("(Cursor cursor, SQLiteDatabase db) {\n");
     builder.append("    List<").append(tableName).append("> tableObjects = new LinkedList<").append(tableName).append(">();\n");
     builder.append("    if (cursor.moveToFirst()) {\n"); // can't assume the cursor is already at the front
     builder.append("       while (!cursor.isAfterLast()) {\n");
@@ -202,7 +200,7 @@ public final class ShillelaghWriter {
       if (column.isDate()) {
         builder.append("        tableObject.").append(columnName).append(" = new Date(cursor.").append(CursorFunctions.get(long.class.getName())).append("(cursor.getColumnIndex(\"").append(columnName).append("\")));\n");
       } else if (column.isOneToOne()) {
-        builder.append("        tableObject.").append(columnName).append(" = ").append(column.getType()).append(SUFFIX).append(".").append(GET_OBJECT_BY_ID).append("(").append("cursor.").append(CursorFunctions.get(Long.class.getName())).append("(cursor.getColumnIndex(\"").append(columnName).append("\")), db);\n");
+        builder.append("        tableObject.").append(columnName).append(" = ").append(column.getType()).append($$SUFFIX).append(".").append($$GET_OBJECT_BY_ID).append("(").append("cursor.").append(CursorFunctions.get(Long.class.getName())).append("(cursor.getColumnIndex(\"").append(columnName).append("\")), db);\n");
       } else if (column.isBoolean()) {
         builder.append("        tableObject.").append(columnName).append(" = cursor.").append(CursorFunctions.get(column.getType())).append("(cursor.getColumnIndex(\"").append(columnName).append("\")) == 1;\n");
       } else if (column.getSqlType() == SqliteType.BLOB) {

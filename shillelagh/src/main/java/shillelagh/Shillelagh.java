@@ -14,18 +14,23 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static shillelagh.internal.ShillelaghWriter.CREATE_TABLE_FUNCTION;
-import static shillelagh.internal.ShillelaghWriter.DELETE_OBJECT_FUNCTION;
-import static shillelagh.internal.ShillelaghWriter.DROP_TABLE_FUNCTION;
-import static shillelagh.internal.ShillelaghWriter.INSERT_OBJECT_FUNCTION;
-import static shillelagh.internal.ShillelaghWriter.MAP_OBJECT_FUNCTION;
-import static shillelagh.internal.ShillelaghWriter.UPDATE_ID_FUNCTION;
-import static shillelagh.internal.ShillelaghWriter.UPDATE_OBJECT_FUNCTION;
-import static shillelagh.internal.ShillelaghProcessor.SUFFIX;
-
 public final class Shillelagh {
 
-  private static final Map<Class<?>, Class<?>> CACHED_CLASSES = new LinkedHashMap<Class<?>, Class<?>>();
+  /**
+   * Internal class function names
+   */
+  public static final String $$SUFFIX = "$$Shillelagh";
+  public static final String $$CREATE_TABLE_FUNCTION = "createTable";
+  public static final String $$DROP_TABLE_FUNCTION = "dropTable";
+  public static final String $$INSERT_OBJECT_FUNCTION = "insertObject";
+  public static final String $$UPDATE_OBJECT_FUNCTION = "updateObject";
+  public static final String $$UPDATE_ID_FUNCTION = "updateColumnId";
+  public static final String $$DELETE_OBJECT_FUNCTION = "deleteObject";
+  public static final String $$GET_OBJECT_BY_ID = "getById";
+  public static final String $$MAP_OBJECT_FUNCTION = "map";
+
+  private static final Map<Class<?>, Class<?>> CACHED_CLASSES
+      = new LinkedHashMap<Class<?>, Class<?>>();
   private static final Map<String, Method> CACHED_METHODS = new LinkedHashMap<String, Method>();
 
   private static final String TAG = Shillelagh.class.getSimpleName();
@@ -49,12 +54,12 @@ public final class Shillelagh {
   public static void createTable(SQLiteDatabase db, Class<?> tableClass) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableClass);
-      executeMethod(shillelagh, CREATE_TABLE_FUNCTION, db);
+      executeMethod(shillelagh, $$CREATE_TABLE_FUNCTION, db);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new RuntimeException("Unable to create table for " + tableClass +
-          ". Are you missing @Table annotation?", e);
+      throw new RuntimeException("Unable to create table for " + tableClass
+          + ". Are you missing @Table annotation?", e);
     }
   }
 
@@ -65,12 +70,12 @@ public final class Shillelagh {
   public static void dropTable(SQLiteDatabase db, Class<?> tableClass) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableClass);
-      executeMethod(shillelagh, DROP_TABLE_FUNCTION, db);
+      executeMethod(shillelagh, $$DROP_TABLE_FUNCTION, db);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new RuntimeException("Unable to drop table for " + tableClass +
-          ". Are you missing @Table annotation?", e);
+      throw new RuntimeException("Unable to drop table for " + tableClass
+          + ". Are you missing @Table annotation?", e);
     }
   }
 
@@ -84,7 +89,7 @@ public final class Shillelagh {
 
     log("Class Cache Miss");
     final String className = clazz.getName();
-    shillelagh = Class.forName(className + SUFFIX);
+    shillelagh = Class.forName(className + $$SUFFIX);
     CACHED_CLASSES.put(clazz, shillelagh);
     return shillelagh;
   }
@@ -96,7 +101,10 @@ public final class Shillelagh {
     method.invoke(null, params);
   }
 
-  /** Gets the Class objects of a list of parameters, this is used for figuring out the parameters types of a method */
+  /**
+   * Gets the Class objects of a list of parameters, this is used for figuring out the parameters
+   * types of a method
+   */
   private static Class<?>[] getParamTypes(Object... params) {
     Class<?>[] paramTypes = new Class[params.length];
     for (int i = 0; i < params.length; i++) {
@@ -142,16 +150,17 @@ public final class Shillelagh {
   public void insert(Object tableObject) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableObject.getClass());
-      executeMethod(shillelagh, INSERT_OBJECT_FUNCTION, tableObject,
+      executeMethod(shillelagh, $$INSERT_OBJECT_FUNCTION, tableObject,
           sqliteOpenHelper.getWritableDatabase());
       final SQLiteDatabase db = sqliteOpenHelper.getReadableDatabase();
-      final Method method = findMethodForClass(shillelagh, UPDATE_ID_FUNCTION, tableObject, db);
+      final Method method = findMethodForClass(shillelagh, $$UPDATE_ID_FUNCTION, tableObject, db);
       method.invoke(null, tableObject, db);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new RuntimeException("Unable to insert into " + tableObject.getClass().getName() +
-          ". Did you forget to call Shillelagh.createTable or are you missing @Table annotation?", e);
+      throw new RuntimeException("Unable to insert into " + tableObject.getClass().getName()
+          + ". Did you forget to call Shillelagh.createTable "
+          + "or are you missing @Table annotation?", e);
     }
   }
 
@@ -164,7 +173,7 @@ public final class Shillelagh {
   public void update(Object tableObject) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableObject.getClass());
-      executeMethod(shillelagh, UPDATE_OBJECT_FUNCTION, tableObject,
+      executeMethod(shillelagh, $$UPDATE_OBJECT_FUNCTION, tableObject,
           sqliteOpenHelper.getWritableDatabase());
     } catch (RuntimeException e) {
       throw e;
@@ -185,7 +194,7 @@ public final class Shillelagh {
   public void delete(Object tableObject) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableObject.getClass());
-      executeMethod(shillelagh, DELETE_OBJECT_FUNCTION, tableObject,
+      executeMethod(shillelagh, $$DELETE_OBJECT_FUNCTION, tableObject,
           sqliteOpenHelper.getWritableDatabase());
     } catch (RuntimeException e) {
       throw e;
@@ -206,7 +215,9 @@ public final class Shillelagh {
   public void delete(final Class<?> tableClass, final long id) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableClass);
-      executeMethod(shillelagh, DELETE_OBJECT_FUNCTION, id, sqliteOpenHelper.getWritableDatabase());
+      executeMethod(
+          shillelagh, $$DELETE_OBJECT_FUNCTION, id,
+          sqliteOpenHelper.getWritableDatabase());
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -214,7 +225,10 @@ public final class Shillelagh {
     }
   }
 
-  /** Equivalent to calling {@link SQLiteDatabase#query(boolean, String, String[], String, String[], String, String, String, String)} */
+  /**
+   * Equivalent to calling {@link SQLiteDatabase#query(boolean, String, String[], String, String[],
+   * String, String, String, String)}
+   */
   public Cursor query(boolean distinct, String table, String[] columns,
                       String selection, String[] selectionArgs, String groupBy,
                       String having, String orderBy, String limit) {
@@ -225,12 +239,15 @@ public final class Shillelagh {
 
   /**
    * Equivalent to calling
-   * {@link SQLiteDatabase#query(boolean, String, String[], String, String[], String, String, String, String)}
-   * then passing the result to {@link Shillelagh#map(Class, android.database.Cursor)}
+   * {@link SQLiteDatabase#query(boolean, String, String[], String, String[], String, String,
+   * String, String)} then passing the result to
+   * {@link Shillelagh#map(Class, android.database.Cursor)}
    */
-  public <T extends List<M>, M> T query(Class<? extends M> tableClass, boolean distinct, String table, String[] columns,
+  public <T extends List<M>, M> T query(Class<? extends M> tableClass, boolean distinct,
+                                        String table, String[] columns,
                                         String selection, String[] selectionArgs, String groupBy,
-                                        String having, String orderBy, String limit) {
+                                        String having, String orderBy, String limit
+  ) {
     Cursor results = sqliteOpenHelper.getReadableDatabase()
         .query(distinct, table, columns, selection, selectionArgs,
             groupBy, having, orderBy, limit);
@@ -240,7 +257,8 @@ public final class Shillelagh {
 
   /**
    * The equivalent of calling
-   * {@link SQLiteDatabase#query(boolean, String, String[], String, String[], String, String, String, String, android.os.CancellationSignal)}
+   * {@link SQLiteDatabase#query(boolean, String, String[], String, String[], String, String,
+   * String, String, android.os.CancellationSignal)}
    * <p/>
    * Only available for API 16+
    */
@@ -256,13 +274,15 @@ public final class Shillelagh {
 
   /**
    * The equivalent of calling
-   * {@link SQLiteDatabase#query(boolean, String, String[], String, String[], String, String, String, String, android.os.CancellationSignal)}
+   * {@link SQLiteDatabase#query(boolean, String, String[], String, String[], String, String,
+   * String, String, android.os.CancellationSignal)}
    * and then calling {@link Shillelagh#map(Class, android.database.Cursor)} on the result
    * <p/>
    * Only available for API 16+
    */
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-  public <T extends List<M>, M> T query(Class<? extends M> tableObject, boolean distinct, String table, String[] columns,
+  public <T extends List<M>, M> T query(Class<? extends M> tableObject, boolean distinct,
+                                        String table, String[] columns,
                                         String selection, String[] selectionArgs, String groupBy,
                                         String having, String orderBy, String limit,
                                         CancellationSignal cancellationSignal) {
@@ -272,7 +292,10 @@ public final class Shillelagh {
     return map(tableObject, results);
   }
 
-  /** Equivalent to calling {@link SQLiteDatabase#query(String, String[], String, String[], String, String, String)} */
+  /**
+   * Equivalent to calling {@link SQLiteDatabase#query(String, String[], String, String[], String,
+   * String, String)}
+   */
   public Cursor query(String table, String[] columns, String selection,
                       String[] selectionArgs, String groupBy, String having,
                       String orderBy) {
@@ -281,10 +304,12 @@ public final class Shillelagh {
   }
 
   /**
-   * Equivalent to calling {@link SQLiteDatabase#query(String, String[], String, String[], String, String, String)}
-   * and then calling {@link Shillelagh#map(Class, android.database.Cursor)} on the result.
+   * Equivalent to calling {@link SQLiteDatabase#query(String, String[], String, String[], String,
+   * String, String)} and then calling {@link Shillelagh#map(Class, android.database.Cursor)}
+   * on the result.
    */
-  public <T extends List<M>, M> T query(Class<? extends M> tableObject, String table, String[] columns, String selection,
+  public <T extends List<M>, M> T query(Class<? extends M> tableObject, String table,
+                                        String[] columns, String selection,
                                         String[] selectionArgs, String groupBy, String having,
                                         String orderBy) {
     final Cursor results = sqliteOpenHelper.getReadableDatabase().query(table, columns, selection,
@@ -292,7 +317,8 @@ public final class Shillelagh {
     return map(tableObject, results);
   }
 
-  /** Equivalent to calling {@link SQLiteDatabase#query(String, String[], String, String[], String, String, String, String)} */
+  /** Equivalent to calling {@link SQLiteDatabase#query(String, String[], String, String[], String,
+   *  String, String, String)} */
   public Cursor query(String table, String[] columns, String selection, String[] selectionArgs,
                       String groupBy, String having, String orderBy, String limit) {
     return sqliteOpenHelper.getReadableDatabase().query(table, columns, selection, selectionArgs,
@@ -300,25 +326,32 @@ public final class Shillelagh {
   }
 
   /**
-   * Equivalent to calling {@link SQLiteDatabase#query(String, String[], String, String[], String, String, String, String)}
+   * Equivalent to calling {@link SQLiteDatabase#query(String, String[], String, String[], String,
+   * String, String, String)}
    * and then calling {@link Shillelagh#map(Class, android.database.Cursor)} on the result.
    */
-  public <T extends List<M>, M> T query(Class<? extends M> tableObject, String table, String[] columns, String selection, String[] selectionArgs,
-                                        String groupBy, String having, String orderBy, String limit) {
-    final Cursor results = sqliteOpenHelper.getReadableDatabase().query(table, columns, selection, selectionArgs,
-        groupBy, having, orderBy, limit);
+  public <T extends List<M>, M> T query(Class<? extends M> tableObject, String table,
+                                        String[] columns, String selection, String[] selectionArgs,
+                                        String groupBy, String having, String orderBy, String limit
+  ) {
+    final Cursor results = sqliteOpenHelper.getReadableDatabase().query(table, columns, selection,
+        selectionArgs, groupBy, having, orderBy, limit);
 
     return map(tableObject, results);
   }
 
-  /** Equivalent to calling {@link SQLiteDatabase#rawQuery(String, String[])} where the selection args are null. */
+  /**
+   * Equivalent to calling {@link SQLiteDatabase#rawQuery(String, String[])} where the selection
+   * args are null.
+   */
   public Cursor rawQuery(String sql) {
     return sqliteOpenHelper.getReadableDatabase().rawQuery(sql, null);
   }
 
   /**
-   * Equivalent to calling {@link SQLiteDatabase#rawQuery(String, String[])} where the selection args are null
-   * and then passing the result to {@link Shillelagh#map(Class, android.database.Cursor)}
+   * Equivalent to calling {@link SQLiteDatabase#rawQuery(String, String[])} where the selection
+   * args are null and then passing the result to
+   * {@link Shillelagh#map(Class, android.database.Cursor)}
    */
   public <T extends List<M>, M> T rawQuery(Class<? extends M> tableObject, String sql) {
     return this.rawQuery(tableObject, sql, null);
@@ -333,7 +366,9 @@ public final class Shillelagh {
    * Equivalent to calling {@link SQLiteDatabase#rawQuery(String, String[])}
    * and then passing the result to {@link Shillelagh#map(Class, android.database.Cursor)}
    */
-  public <T extends List<M>, M> T rawQuery(Class<? extends M> tableObject, String sql, String[] selectionArgs) {
+  public <T extends List<M>, M> T rawQuery(Class<? extends M> tableObject, String sql,
+                                           String[] selectionArgs
+  ) {
     final Cursor result = sqliteOpenHelper.getReadableDatabase().rawQuery(sql, selectionArgs);
     return map(tableObject, result);
   }
@@ -356,9 +391,12 @@ public final class Shillelagh {
    * Only available for API 16+
    */
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-  public <T extends List<M>, M> T rawQuery(Class<? extends M> tableObject, String sql, String[] selectionArgs,
-                                           CancellationSignal cancellationSignal) {
-    final Cursor results = sqliteOpenHelper.getReadableDatabase().rawQuery(sql, selectionArgs, cancellationSignal);
+  public <T extends List<M>, M> T rawQuery(Class<? extends M> tableObject, String sql,
+                                           String[] selectionArgs,
+                                           CancellationSignal cancellationSignal
+  ) {
+    final Cursor results = sqliteOpenHelper.getReadableDatabase().rawQuery(sql, selectionArgs,
+        cancellationSignal);
     return map(tableObject, results);
   }
 
@@ -374,7 +412,7 @@ public final class Shillelagh {
   public <T extends List<M>, M> T map(Class<? extends M> tableClass, Cursor cursor) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableClass);
-      final Method mapMethod = findMethodForClass(shillelagh, MAP_OBJECT_FUNCTION,
+      final Method mapMethod = findMethodForClass(shillelagh, $$MAP_OBJECT_FUNCTION,
           /* cursor is interface so can't resolve automatically */
           new Class<?>[]{Cursor.class, SQLiteDatabase.class});
       return (T) mapMethod.invoke(null, cursor, getReadableDatabase());

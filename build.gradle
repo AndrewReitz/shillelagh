@@ -10,19 +10,23 @@ buildscript {
   }
 }
 
-apply plugin: "idea"
-
 allprojects {
   repositories {
     jcenter()
   }
 
-  version = '0.0.2-SNAPSHOT'
+  version = '0.1.0-SNAPSHOT'
   group = 'com.andrewreitz'
 
   ext {
     minSdkVersion = 14
     targetSdkVersion = 19
     versionCode = 1
+  }
+
+  apply plugin: 'checkstyle'
+
+  checkstyle {
+    configFile = new File(rootDir, "checkstyle.xml")
   }
 }

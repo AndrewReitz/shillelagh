@@ -25,12 +25,10 @@ import javax.tools.JavaFileObject;
 
 import shillelagh.Field;
 import shillelagh.Id;
+import shillelagh.Shillelagh;
 import shillelagh.Table;
 
 public final class ShillelaghProcessor extends AbstractProcessor {
-
-  public static final String SUFFIX = "$$Shillelagh";
-
   static final boolean DEBUG = false;
 
   private ShillelaghLogger logger;
@@ -66,7 +64,7 @@ public final class ShillelaghProcessor extends AbstractProcessor {
 
         String targetType = element.toString();
         String classPackage = getPackageName(element);
-        String className = getClassName((TypeElement) element, classPackage) + SUFFIX;
+        String className = getClassName((TypeElement) element, classPackage) + Shillelagh.$$SUFFIX;
         ShillelaghWriter injector = new ShillelaghWriter(classPackage, className, targetType);
         logger.d("TargetType: " + targetType);
         logger.d("ClassPackage: " + classPackage);
