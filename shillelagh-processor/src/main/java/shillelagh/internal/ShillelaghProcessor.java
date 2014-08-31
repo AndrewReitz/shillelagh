@@ -1,5 +1,7 @@
 package shillelagh.internal;
 
+import com.google.common.collect.Sets;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.Writer;
@@ -29,7 +31,7 @@ import shillelagh.Shillelagh;
 import shillelagh.Table;
 
 public final class ShillelaghProcessor extends AbstractProcessor {
-  static final boolean DEBUG = false;
+  static final boolean DEBUG = true;
 
   private ShillelaghLogger logger;
 
@@ -47,7 +49,7 @@ public final class ShillelaghProcessor extends AbstractProcessor {
   }
 
   @Override public Set<String> getSupportedAnnotationTypes() {
-    Set<String> supportTypes = new LinkedHashSet<String>();
+    Set<String> supportTypes = Sets.newLinkedHashSet();
     supportTypes.add(Table.class.getCanonicalName());
 
     return supportTypes;
@@ -65,7 +67,8 @@ public final class ShillelaghProcessor extends AbstractProcessor {
         String targetType = element.toString();
         String classPackage = getPackageName(element);
         String className = getClassName((TypeElement) element, classPackage) + Shillelagh.$$SUFFIX;
-        ShillelaghWriter injector = new ShillelaghWriter(classPackage, className, targetType);
+        ShillelaghWriter injector = new ShillelaghWriter(
+            classPackage, className, targetType, logger);
         logger.d("TargetType: " + targetType);
         logger.d("ClassPackage: " + classPackage);
         logger.d("ClassName: " + className);
@@ -99,7 +102,7 @@ public final class ShillelaghProcessor extends AbstractProcessor {
         try {
           JavaFileObject jfo = filer.createSourceFile(injector.getFqcn(), element);
           Writer writer = jfo.openWriter();
-          writer.write(injector.brewJava());
+          injector.brewJava(writer);
           writer.flush();
           writer.close();
         } catch (IOException e) {

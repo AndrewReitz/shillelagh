@@ -1,7 +1,24 @@
 package shillelagh.internal;
 
-import shillelagh.Shillelagh;
+import com.squareup.javawriter.JavaWriter;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Writer;
+import java.util.Date;
+import java.util.EnumSet;
+import java.util.LinkedList;
+import java.util.List;
+
+import javax.annotation.Generated;
+
+import static javax.lang.model.element.Modifier.DEFAULT;
+import static javax.lang.model.element.Modifier.PUBLIC;
+import static javax.lang.model.element.Modifier.FINAL;
+import static javax.lang.model.element.Modifier.STATIC;
 import static shillelagh.Shillelagh.$$CREATE_TABLE_FUNCTION;
 import static shillelagh.Shillelagh.$$DELETE_OBJECT_FUNCTION;
 import static shillelagh.Shillelagh.$$DROP_TABLE_FUNCTION;
@@ -30,12 +47,18 @@ public final class ShillelaghWriter {
   private final String classPackage;
   private final String className;
   private final String targetClass;
+
+  private final ShillelaghLogger logger;
+
   private TableObject tableObject;
 
-  ShillelaghWriter(String classPackage, String className, String targetClass) {
+  ShillelaghWriter(String classPackage, String className, String targetClass,
+                   ShillelaghLogger logger
+  ) {
     this.classPackage = classPackage;
     this.className = className;
     this.targetClass = targetClass;
+    this.logger = logger;
   }
 
   public void setTable(TableObject tableObject) {
@@ -48,201 +71,198 @@ public final class ShillelaghWriter {
   }
 
   /** Create the java functions required for the internal class */
-  String brewJava() {
-    StringBuilder builder = new StringBuilder();
-    builder.append("// Generated code from Shillelagh. Do not modify!\n");
-    builder.append("package ").append(classPackage).append(";\n\n");
-    builder.append("import android.content.ContentValues;\n");
-    builder.append("import android.database.Cursor;\n");
-    builder.append("import android.database.DatabaseUtils;\n");
-    builder.append("import android.database.sqlite.SQLiteDatabase;\n\n");
-    builder.append("import java.io.ByteArrayInputStream;\n");
-    builder.append("import java.io.ByteArrayOutputStream;\n");
-    builder.append("import java.io.IOException;\n");
-    builder.append("import java.io.ObjectInputStream;\n");
-    builder.append("import java.io.ObjectOutputStream;\n\n");
-    builder.append("import java.util.LinkedList;\n");
-    builder.append("import java.util.Date;\n");
-    builder.append("import java.util.List;\n\n");
-    builder.append("public final class ").append(className).append(" {\n");
-    emitGetId(builder);
-    builder.append("\n");
-    emmitCreateTable(builder);
-    builder.append("\n");
-    emmitDropTable(builder);
-    builder.append("\n");
-    emmitInsert(builder);
-    builder.append("\n");
-    emmitUpdate(builder);
-    builder.append("\n");
-    emmitUpdateColumnId(builder);
-    builder.append("\n");
-    emmitDeleteWithId(builder);
-    builder.append("\n");
-    emmitDeleteWithObject(builder);
-    builder.append("\n");
-    emmitMapCursorToObject(builder);
-    builder.append("\n");
-    emmitSelectById(builder);
-    builder.append("\n");
-    emmitByteArraySerialization(builder);
-    builder.append("}\n");
-    return builder.toString();
+  void brewJava(Writer writer) throws IOException {
+    logger.d("brewJava");
+    JavaWriter javaWriter = new JavaWriter(writer);
+
+    javaWriter.emitSingleLineComment("Generated code from Shillelagh. Do not modify!")
+        .emitPackage(classPackage)
+        .emitImports("android.content.ContentValues", "android.database.Cursor", // Knows nothing of android types
+            "android.database.DatabaseUtils", "android.database.sqlite.SQLiteDatabase")
+        .emitImports(ByteArrayInputStream.class, ByteArrayOutputStream.class, IOException.class,
+            ObjectInputStream.class, ObjectOutputStream.class, LinkedList.class, Date.class,
+            List.class)
+        .emitAnnotation(Generated.class, "Shillelagh")
+        .beginType(className, "class", EnumSet.of(PUBLIC, FINAL));
+
+    emitGetId(javaWriter);
+    emitCreateTable(javaWriter);
+    emitDropTable(javaWriter);
+    emitInsert(javaWriter);
+    emitUpdate(javaWriter);
+    emitUpdateColumnId(javaWriter);
+    emitDeleteWithId(javaWriter);
+    emitDeleteWithObject(javaWriter);
+    emitMapCursorToObject(javaWriter);
+    emitSelectById(javaWriter);
+    emitByteArraySerialization(javaWriter);
+    javaWriter.endType();
   }
 
   /** Create a way to get an id for foreign keys */
-  private void emitGetId(StringBuilder builder) {
-    builder.append("  public static long ").append(GET_ID_FUNCTION).append("(").append(targetClass).append(" value) {\n");
-    builder.append("    return value.").append(tableObject.getIdColumnName()).append(";\n");
-    builder.append("  }\n");
+  private void emitGetId(JavaWriter javaWriter) throws IOException {
+    logger.d("emitGetId");
+    javaWriter.beginMethod("long", GET_ID_FUNCTION, EnumSet.of(PUBLIC, STATIC), targetClass, "value")
+        .emitStatement("return value.%s", tableObject.getIdColumnName())
+        .endMethod();
   }
 
-  /** Creates the function for creating the table*/
-  private void emmitCreateTable(StringBuilder builder) {
-    builder.append("  public static void ").append($$CREATE_TABLE_FUNCTION).append("(SQLiteDatabase db) {\n");
-    builder.append("    db.execSQL(\"").append(tableObject.getSchema()).append("\");\n");
-    builder.append("  }\n");
+  /** Creates the function for creating the table */
+  private void emitCreateTable(JavaWriter javaWriter) throws IOException {
+    logger.d("emitCreateTable");
+    javaWriter.beginMethod("void", $$CREATE_TABLE_FUNCTION, EnumSet.of(PUBLIC, STATIC), "SQLiteDatabase", "db")
+        .emitStatement("db.execSQL(\"%s\")", tableObject.getSchema())
+        .endMethod();
   }
 
   /** Creates the function dropping the table */
-  private void emmitDropTable(StringBuilder builder) {
-    builder.append("  public static void ").append($$DROP_TABLE_FUNCTION).append("(SQLiteDatabase db) {\n");
-    builder.append("    db.execSQL(\"DROP TABLE IF EXISTS ").append(tableObject.getTableName()).append("\");\n");
-    builder.append("  }\n");
+  private void emitDropTable(JavaWriter javaWriter) throws IOException {
+    logger.d("emitDropTable");
+    javaWriter.beginMethod("void", $$DROP_TABLE_FUNCTION, EnumSet.of(PUBLIC, STATIC), "SQLiteDatabase", "db")
+        .emitStatement("db.execSQL(\"DROP TABLE IF EXISTS %s\"", tableObject.getTableName())
+        .endMethod();
   }
 
   /** Creates the function for inserting a new value into the database */
-  private void emmitInsert(StringBuilder builder) {
-    builder.append("  public static void ").append($$INSERT_OBJECT_FUNCTION).append("(").append(targetClass).append(" element, SQLiteDatabase db) {\n");
-    builder.append("    ContentValues values = new ContentValues();\n");
+  private void emitInsert(JavaWriter javaWriter) throws IOException {
+    logger.d("emitInsert");
+    javaWriter.beginMethod("void", $$INSERT_OBJECT_FUNCTION, EnumSet.of(PUBLIC, STATIC), targetClass, "element", "SQLiteDatabase", "db")
+        .emitStatement("ContentValues values = new ContentValues()");
     for (TableColumn column : tableObject.getColumns()) {
       String columnName = column.getColumnName();
       if (column.getSqlType() == SqliteType.BLOB && !column.isByteArray()) {
-        builder.append("    values.put(\"").append(columnName).append("\", ").append(SERIALIZE_FUNCTION).append("(element.").append(columnName).append("));\n");
+        javaWriter.emitStatement("values.put(\"%s\", %s(element.%s))", columnName, SERIALIZE_FUNCTION, columnName);
       } else if (column.isOneToOne()) {
-        builder.append("    values.put(\"").append(columnName).append("\", ").append(column.getType()).append($$SUFFIX).append(".").append(GET_ID_FUNCTION).append("(element.").append(columnName).append("));\n");
+        javaWriter.emitStatement("values.put(\"%s\", %s%s.%s(element.%s))", columnName, column.getType(), $$SUFFIX, GET_ID_FUNCTION, columnName);
       } else if (column.isDate()) {
-        builder.append("    values.put(\"").append(columnName).append("\", element.").append(columnName).append(".getTime());\n");
+        javaWriter.emitStatement("values.put(\"%s\", element.%s.getTime())", columnName, columnName);
       } else {
-        builder.append("    values.put(\"").append(columnName).append("\", element.").append(columnName).append(");\n");
+        javaWriter.emitStatement("values.put(\"%s\", element.%s)", columnName, columnName);
       }
     }
-    builder.append("    db.insert(\"").append(tableObject.getTableName()).append("\", null, values);\n");
-    builder.append("  }\n");
+    javaWriter.emitStatement("db.insert(\"%s\", null, values)", tableObject.getTableName())
+        .endMethod();
   }
 
   /** Updates the id of the object to the last insert */
-  private void emmitUpdateColumnId(StringBuilder builder) {
+  private void emitUpdateColumnId(JavaWriter javaWriter) throws IOException {
+    logger.d("emitUpdateColumnId");
     // Updates the column id for the last inserted row
-    builder.append("  public static void ").append($$UPDATE_ID_FUNCTION).append("(").append(targetClass).append(" element, SQLiteDatabase db) {\n");
-    builder.append("    long id = DatabaseUtils.longForQuery(db, \"").append(String.format(GET_ID_OF_LAST_INSERTED_ROW_SQL, tableObject.getTableName())).append("\", null);\n");
-    builder.append("    element.").append(tableObject.getIdColumnName()).append(" = id;\n");
-    builder.append("  }\n");
+    javaWriter.beginMethod("void", $$UPDATE_ID_FUNCTION, EnumSet.of(PUBLIC, STATIC), targetClass, "element", "SQLiteDatabase", "db")
+        .emitStatement("long id = DatabaseUtils.longForQuery(db, \"%s\", null)", String.format(GET_ID_OF_LAST_INSERTED_ROW_SQL, tableObject.getTableName()))
+        .emitStatement("element.%s = id", tableObject.getIdColumnName())
+        .endMethod();
   }
 
   /** Creates the function for updating an object */
-  private void emmitUpdate(StringBuilder builder) {
-    builder.append("  public static void ").append($$UPDATE_OBJECT_FUNCTION).append("(").append(targetClass).append(" element, SQLiteDatabase db) {\n");
-    builder.append("    ContentValues values = new ContentValues();\n");
+  private void emitUpdate(JavaWriter javaWriter) throws IOException {
+    logger.d("emitUpdate");
+    javaWriter.beginMethod("void", $$UPDATE_OBJECT_FUNCTION, EnumSet.of(PUBLIC, STATIC), targetClass, "element", "SQLiteDatabase", "db")
+        .emitStatement("ContentValues values = new ContentValues()");
     for (TableColumn column : tableObject.getColumns()) {
       String columnName = column.getColumnName();
       if (column.getSqlType() == SqliteType.BLOB && !column.isByteArray()) {
-        builder.append("    values.put(\"").append(columnName).append("\", ").append(SERIALIZE_FUNCTION).append("(element.").append(columnName).append("));\n");
+        javaWriter.emitStatement("values.put(\"%s\", %s(element.%s))", columnName, SERIALIZE_FUNCTION, columnName);
       } else if (column.isOneToOne()) {
-        builder.append("    values.put(\"").append(columnName).append("\", ").append(column.getType()).append($$SUFFIX).append(".").append(GET_ID_FUNCTION).append("(element.").append(columnName).append("));\n");
+        javaWriter.emitStatement("values.put(\"%\", %s%s.%s(element.%s))", columnName, column.getType(), $$SUFFIX, GET_ID_FUNCTION, columnName);
       } else if (column.isDate()) {
-        builder.append("    values.put(\"").append(columnName).append("\", element.").append(columnName).append(".getTime());\n");
+        javaWriter.emitStatement("values.put(\"%s\", element.%s.getTime())");
       } else {
-        builder.append("    values.put(\"").append(columnName).append("\", element.").append(columnName).append(");\n");
+        javaWriter.emitStatement("values.put(\"%s\", element.%s)", columnName, columnName);
       }
     }
     final String idColumnName = tableObject.getIdColumnName();
-    builder.append("    db.update(\"").append(tableObject.getTableName()).append("\", values, \"").append(idColumnName).append(" = \" + element.").append(idColumnName).append(", null);\n");
-    builder.append("  }\n");
+    javaWriter.emitStatement("db.update(\"%s\", values, \"%s = \" + element.%s, null)", tableObject.getTableName(), idColumnName, idColumnName);
+    javaWriter.endMethod();
   }
 
   /** Creates the function for deleting an object from the table */
-  private void emmitDeleteWithObject(StringBuilder builder) {
-    builder.append("  public static void ").append($$DELETE_OBJECT_FUNCTION).append("(").append(targetClass).append(" element, SQLiteDatabase db) {\n");
-    builder.append("    ").append($$DELETE_OBJECT_FUNCTION).append("(element.").append(tableObject.getIdColumnName()).append(", db);\n");
-    builder.append("  }\n");
+  private void emitDeleteWithObject(JavaWriter javaWriter) throws IOException {
+    logger.d("emitDeleteWithObject");
+    javaWriter.beginMethod("void", $$DELETE_OBJECT_FUNCTION, EnumSet.of(PUBLIC, STATIC), targetClass, "element", "SQLiteDatabase", "db")
+        .emitStatement("%s(element.%s, db)", $$DELETE_OBJECT_FUNCTION, targetClass)
+        .endMethod();
   }
 
   /** Creates the function for deleting an object by id */
-  private void emmitDeleteWithId(StringBuilder builder) {
-    builder.append("  public static void ").append($$DELETE_OBJECT_FUNCTION).append("(Long id, SQLiteDatabase db) {\n");
-    builder.append("    db.delete(\"").append(tableObject.getTableName()).append("\", \"").append(tableObject.getIdColumnName()).append(" = \" + id, null);\n");
-    builder.append("  }\n");
+  private void emitDeleteWithId(JavaWriter javaWriter) throws IOException {
+    logger.d("emitDeleteWithId");
+    javaWriter.beginMethod("void", $$DELETE_OBJECT_FUNCTION, EnumSet.of(PUBLIC, STATIC), "Long id", "SQLiteDatabase db")
+        .emitStatement("db.delete(\"%s\", \"%s = \" + id, null)", tableObject.getTableName(), tableObject.getIdColumnName())
+        .endMethod();
   }
 
   /** Creates function for getting an object by value */
-  private void emmitSelectById(StringBuilder builder) {
-    builder.append("  public static ").append(targetClass).append(" ").append($$GET_OBJECT_BY_ID).append("(long id, SQLiteDatabase db) {\n");
-    builder.append("    return ").append($$MAP_OBJECT_FUNCTION).append("(db.rawQuery(\"SELECT * FROM ").append(tableObject.getTableName()).append(" WHERE ").append(tableObject.getIdColumnName()).append(" = id\", null), db).get(0);\n");
-    builder.append("  }\n");
+  private void emitSelectById(JavaWriter javaWriter) throws IOException {
+    logger.d("emitSelectById");
+    javaWriter.beginMethod(targetClass, $$GET_OBJECT_BY_ID, EnumSet.of(PUBLIC, STATIC), "long id", "SQLiteDatabase db")
+        .emitStatement("return %s(db.rawQuery(\"SELECT * FROM %s WHERE %s  = id\", null), db).get(0)", $$MAP_OBJECT_FUNCTION, tableObject.getTableName(), tableObject.getIdColumnName())
+        .endMethod();
   }
 
   // TODO fix this. This is just a mess...
 
   /** Creates the function for mapping a cursor to the object after executing a sql statement */
-  private void emmitMapCursorToObject(StringBuilder builder) {
-    final String idColumnName = tableObject.getIdColumnName();
+  private void emitMapCursorToObject(JavaWriter javaWriter) throws IOException {
+    logger.d("emitMapCursorToObject");
     final String tableName = targetClass;
 
-    builder.append("  public static List<").append(tableName).append("> ").append($$MAP_OBJECT_FUNCTION).append("(Cursor cursor, SQLiteDatabase db) {\n");
-    builder.append("    List<").append(tableName).append("> tableObjects = new LinkedList<").append(tableName).append(">();\n");
-    builder.append("    if (cursor.moveToFirst()) {\n"); // can't assume the cursor is already at the front
-    builder.append("       while (!cursor.isAfterLast()) {\n");
-    builder.append("        ").append(tableName).append(" tableObject = new ").append(targetClass).append("();\n");
-    builder.append("        tableObject.").append(idColumnName).append(" = cursor.getLong(cursor.getColumnIndex(\"").append(idColumnName).append("\"));\n");
+    javaWriter.beginMethod("List<" + tableName + ">", $$MAP_OBJECT_FUNCTION, EnumSet.of(PUBLIC, STATIC), "Cursor", "cursor", "SQLiteDatabase", "db")
+        .emitStatement("List<%s> tableObjects = new LinkedList<%s>()", tableName, tableName)
+        .beginControlFlow("if (cursor.moveToFirst())") // can't assume the cursor is already at the front
+        .beginControlFlow("while (!cursor.isAfterLast())")
+        .emitStatement("%s tableObject = new %s()", tableName, targetClass);
+
     for (TableColumn column : tableObject.getColumns()) {
       String columnName = column.getColumnName();
       if (column.isDate()) {
-        builder.append("        tableObject.").append(columnName).append(" = new Date(cursor.").append(CursorFunctions.get(long.class.getName())).append("(cursor.getColumnIndex(\"").append(columnName).append("\")));\n");
+        javaWriter.emitStatement("tableObject.%s = new Date(cursor.%s(cursor.getColumnIndex(\"%s\")))", columnName, CursorFunctions.get(long.class.getName()), columnName);
       } else if (column.isOneToOne()) {
-        builder.append("        tableObject.").append(columnName).append(" = ").append(column.getType()).append($$SUFFIX).append(".").append($$GET_OBJECT_BY_ID).append("(").append("cursor.").append(CursorFunctions.get(Long.class.getName())).append("(cursor.getColumnIndex(\"").append(columnName).append("\")), db);\n");
+        javaWriter.emitStatement("tableObject.%s = %s%s.%s(cursor.%s(cursor.getColumnIndex(\"%s)), db)", columnName, column.getType(), $$SUFFIX, $$GET_OBJECT_BY_ID, CursorFunctions.get(Long.class.getName()), columnName);
       } else if (column.isBoolean()) {
-        builder.append("        tableObject.").append(columnName).append(" = cursor.").append(CursorFunctions.get(column.getType())).append("(cursor.getColumnIndex(\"").append(columnName).append("\")) == 1;\n");
+        javaWriter.emitStatement("tableObject.%s = cursor.%s(cursor.getColumnIndex(\"%s\")) == 1");
       } else if (column.getSqlType() == SqliteType.BLOB) {
         if (column.isByteArray()) {
-          builder.append("        tableObject.").append(columnName).append(" = cursor.").append(CursorFunctions.get(column.getType())).append("(cursor.getColumnIndex(\"").append(columnName).append("\"));\n");
+          javaWriter.emitStatement("tableObject.%s = cursor.%s(cursor.getColumnIndex(\"%s\"))", columnName, CursorFunctions.get(column.getType()), columnName);
         } else {
-          builder.append("        tableObject.").append(columnName).append(" = ").append(DESERIALIZE_FUNCTION).append("(cursor.").append(CursorFunctions.get(column.getType())).append("(cursor.getColumnIndex(\"").append(columnName).append("\")));\n");
+          javaWriter.emitStatement("tableObject.%s = %s(cursor.%s(cursor.getColumnIndex(\"%s\")));", columnName, DESERIALIZE_FUNCTION, CursorFunctions.get(column.getType()), columnName);
         }
       } else {
-        builder.append("        tableObject.").append(columnName).append(" = cursor.").append(CursorFunctions.get(column.getType())).append("(cursor.getColumnIndex(\"").append(columnName).append("\"));\n");
+        javaWriter.emitStatement("tableObject.%s = cursor.%s(cursor.getColumnIndex(\"%s\"))", columnName, CursorFunctions.get(column.getType()), columnName);
       }
     }
-    builder.append("        tableObjects.add(tableObject);\n");
-    builder.append("        cursor.moveToNext();\n");
-    builder.append("      }\n");
-    builder.append("    }\n");
-    builder.append("  return tableObjects;");
-    builder.append("  }\n");
+    javaWriter.emitStatement("tableObjects.add(tableObject)")
+        .emitStatement("cursor.moveToNext()")
+        .endControlFlow()
+        .endControlFlow()
+        .emitStatement("return tableObjects")
+        .endMethod();
   }
 
   /** Creates functions for serialization to and from byte arrays */
-  private void emmitByteArraySerialization(StringBuilder builder) {
-    builder.append("  public static <K> byte[] ").append(SERIALIZE_FUNCTION).append("(K object) {\n");
-    builder.append("    try {\n");
-    builder.append("      ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();\n");
-    builder.append("      ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);\n");
-    builder.append("      objectOutputStream.writeObject(object);\n");
-    builder.append("      return byteArrayOutputStream.toByteArray();\n");
-    builder.append("    } catch (IOException e) {\n");
-    builder.append("      throw new RuntimeException(e);\n");
-    builder.append("    }\n");
-    builder.append("  }\n\n");
-    builder.append("  public static <K> K ").append(DESERIALIZE_FUNCTION).append("(byte[] bytes) {\n");
-    builder.append("    try {\n");
-    builder.append("      ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);\n");
-    builder.append("      ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);\n");
-    builder.append("      return (K) objectInputStream.readObject();\n");
-    builder.append("    } catch (IOException e) {\n");
-    builder.append("      throw new RuntimeException(e);\n");
-    builder.append("    } catch (ClassNotFoundException e) {\n");
-    builder.append("      throw new RuntimeException(e);\n");
-    builder.append("    }\n");
-    builder.append("  }\n");
+  private void emitByteArraySerialization(JavaWriter javaWriter) throws IOException {
+    logger.d("emitByteArraySerialization");
+    javaWriter.beginMethod("<K> byte[]", SERIALIZE_FUNCTION, EnumSet.of(DEFAULT, STATIC), "K object")
+        .beginControlFlow("try")
+        .emitStatement("ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()")
+        .emitStatement("ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream)")
+        .emitStatement("objectOutputStream.writeObject(object)")
+        .emitStatement("return byteArrayOutputStream.toByteArray()")
+        .nextControlFlow("catch (IOException e)")
+        .emitStatement("throw new RuntimeException(e)")
+        .endControlFlow()
+        .endMethod()
+        .beginControlFlow("<K> K", DESERIALIZE_FUNCTION, EnumSet.of(DEFAULT, STATIC), "byte[] bytes")
+        .beginControlFlow("try")
+        .emitStatement("ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes)")
+        .emitStatement("ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream)")
+        .emitStatement("return (K) objectInputStream.readObject()")
+        .nextControlFlow("catch (IOException e)")
+        .emitStatement("throw new RuntimeException(e)")
+        .nextControlFlow("catch (ClassNotFoundException e)")
+        .emitStatement("throw new RuntimeException(e)")
+        .endControlFlow()
+        .endMethod();
+    logger.d("exit emitByteArraySerialization");
   }
 }
