@@ -1,0 +1,12 @@
+GROUP=com.andrewreitz
+VERSION=0.0.1
+
+signing.keyId=gpgid
+signing.password=passwordhere
+signing.secretKeyRingFile=/home/user/.gnupg/secring.gpg
+
+sonatypeUsername=usernamehere
+sonatypePassword=passwordhere
+
+#org.gradle.daemon=true
+#org.gradle.jvmargs=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
