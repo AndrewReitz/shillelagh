@@ -65,6 +65,7 @@ enum SqliteType {
     }
 
     String typeString = element.asType().toString();
+    // TODO Arrays?
     if (typeString.contains("java.util.List")) {
       return ONE_TO_MANY;
     }

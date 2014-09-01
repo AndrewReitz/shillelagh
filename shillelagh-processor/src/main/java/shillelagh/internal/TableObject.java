@@ -39,7 +39,7 @@ class TableObject {
     return tableName;
   }
 
-  /** Prints out the table schema */
+  /** Get table schema */
   String getSchema() {
     StringBuilder sb = new StringBuilder();
     Iterator<TableColumn> iterator = columns.iterator();

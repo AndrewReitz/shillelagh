@@ -28,7 +28,7 @@ import shillelagh.Shillelagh;
 import shillelagh.Table;
 
 public final class ShillelaghProcessor extends AbstractProcessor {
-  static final boolean DEBUG = false;
+  static final boolean DEBUG = true;
 
   private ShillelaghLogger logger;
 
@@ -63,7 +63,7 @@ public final class ShillelaghProcessor extends AbstractProcessor {
         String targetType = element.toString();
         String classPackage = getPackageName(element);
         String className = getClassName((TypeElement) element, classPackage) + Shillelagh.$$SUFFIX;
-        ShillelaghWriter injector = new ShillelaghWriter(
+        ShillelaghWriter shillelaghWriter = new ShillelaghWriter(
             classPackage, className, targetType, logger);
         logger.d("TargetType: " + targetType);
         logger.d("ClassPackage: " + classPackage);
@@ -93,17 +93,17 @@ public final class ShillelaghProcessor extends AbstractProcessor {
         if (tableObject.getIdColumnName() == null) {
           logger.e(String.format("%s does not have an id column. Did you forget @Id?", targetType));
         }
-        injector.setTable(tableObject);
+        shillelaghWriter.setTable(tableObject);
 
         try {
-          JavaFileObject jfo = filer.createSourceFile(injector.getFqcn(), element);
+          JavaFileObject jfo = filer.createSourceFile(shillelaghWriter.getFqcn(), element);
           Writer writer = jfo.openWriter();
-          injector.brewJava(writer);
+          shillelaghWriter.brewJava(writer);
           writer.flush();
           writer.close();
         } catch (IOException e) {
           logger.e(String.format(
-              "Unable to write injector for type %s: %s", element, e.getMessage()));
+              "Unable to write s for type %s: %s", element, e.getMessage()));
         }
       }
     }
@@ -170,8 +170,15 @@ public final class ShillelaghProcessor extends AbstractProcessor {
     } else if (tableColumn.getSqlType() == SqliteType.ONE_TO_MANY) {
       // List<T> should only have one internal type. Get that type and make sure
       // it has @Table annotation
-      // TODO
       TypeMirror typeMirror = ((DeclaredType) element.asType()).getTypeArguments().get(0);
+      // TODO All Table objects know how to write themselves. Differ until all annotations
+      // have been processed to write them out this way we can sign that parents in one to many
+      // don't write out and that children now have an extra field.
+
+      if (typeUtils.asElement(typeMirror).getAnnotation(Table.class) == null) {
+        // TODO BETTER ERROR MESSAGE
+        logger.e("One to many relationship where many is not annotated with @Table");
+      }
     } else if (tableColumn.getSqlType() == SqliteType.UNKNOWN) {
       @SuppressWarnings("ConstantConditions")
       Table annotation = typeElement.getAnnotation(Table.class);
