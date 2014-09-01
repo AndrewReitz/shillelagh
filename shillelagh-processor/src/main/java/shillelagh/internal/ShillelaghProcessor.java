@@ -5,7 +5,6 @@ import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.Writer;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -16,11 +15,9 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.JavaFileObject;
@@ -55,8 +52,7 @@ public final class ShillelaghProcessor extends AbstractProcessor {
     return supportTypes;
   }
 
-  @Override
-  public boolean process(Set<? extends TypeElement> annotations,
+  @Override public boolean process(Set<? extends TypeElement> annotations,
                          RoundEnvironment roundEnvironment) {
     for (TypeElement annotation : annotations) {
       Set<? extends Element> elements = roundEnvironment.getElementsAnnotatedWith(annotation);
@@ -106,7 +102,8 @@ public final class ShillelaghProcessor extends AbstractProcessor {
           writer.flush();
           writer.close();
         } catch (IOException e) {
-          logger.e(String.format("Unable to write injector for type %s: %s", element, e.getMessage()));
+          logger.e(String.format(
+              "Unable to write injector for type %s: %s", element, e.getMessage()));
         }
       }
     }
@@ -140,8 +137,8 @@ public final class ShillelaghProcessor extends AbstractProcessor {
     // Check if user wants to use an id other than _id
     Id idAnnotation = element.getAnnotation(Id.class);
     if (idAnnotation != null) {
-      if (element.asType().getKind() != TypeKind.LONG &&
-          !("java.lang.Long".equals(element.asType().toString()))) {
+      if (element.asType().getKind() != TypeKind.LONG
+          && !("java.lang.Long".equals(element.asType().toString()))) {
         logger.e("@Id must be on a long");
       }
       // Id attribute set and continue
@@ -149,19 +146,23 @@ public final class ShillelaghProcessor extends AbstractProcessor {
     }
   }
 
-  /** Check if the element has a @Field annotation if it does parse it and add it to the table object */
+  /**
+   * Check if the element has a @Field annotation if it does parse it and
+   * add it to the table object
+   */
   private void checkForFields(TableObject tableObject, Element element) {
     Field fieldAnnotation = element.getAnnotation(Field.class);
     if (fieldAnnotation == null) return;
 
     /* Convert the element from a field to a type */
     final Element typeElement = typeUtils.asElement(element.asType());
-    final String type = typeElement == null ? element.asType().toString() :
-        elementUtils.getBinaryName((TypeElement) typeElement).toString();
+    final String type = typeElement == null ? element.asType().toString()
+        : elementUtils.getBinaryName((TypeElement) typeElement).toString();
 
     TableColumn tableColumn = new TableColumn(element, type);
     if (tableColumn.getSqlType() == SqliteType.BLOB && !tableColumn.isByteArray()) {
-      if (!checkForSuperType(element, Serializable.class) && !element.asType().toString().equals("java.lang.Byte[]")) {
+      if (!checkForSuperType(element, Serializable.class)
+          && !element.asType().toString().equals("java.lang.Byte[]")) {
         logger.e(String.format(
             "%s in %s is not Serializable and will not be able to be converted to a byte array",
             element.toString(), tableObject.getTableName()));
@@ -169,13 +170,14 @@ public final class ShillelaghProcessor extends AbstractProcessor {
     } else if (tableColumn.getSqlType() == SqliteType.ONE_TO_MANY) {
       // List<T> should only have one internal type. Get that type and make sure
       // it has @Table annotation
+      // TODO
       TypeMirror typeMirror = ((DeclaredType) element.asType()).getTypeArguments().get(0);
     } else if (tableColumn.getSqlType() == SqliteType.UNKNOWN) {
       @SuppressWarnings("ConstantConditions")
       Table annotation = typeElement.getAnnotation(Table.class);
       if (annotation == null) {
-        logger.e(String.format("%s in %s needs to be marked as a blob or should be " +
-                "annotated with @Table", element.toString(), tableObject.getTableName()));
+        logger.e(String.format("%s in %s needs to be marked as a blob or should be "
+            + "annotated with @Table", element.toString(), tableObject.getTableName()));
       }
       tableColumn.setOneToOne(true);
     }
@@ -191,24 +193,5 @@ public final class ShillelaghProcessor extends AbstractProcessor {
       }
     }
     return false;
-  }
-
-  /** Write out shillelaghUtils */
-  private void writeShillelaghUtil() {
-    // ISSUE WITH ACCESSING THESE METHODS:
-    // Caused by: java.lang.IllegalAccessError: Class ref in pre-verified class resolved to unexpected implementation
-    // Looks like it gets compiled before types get resolved?
-    // TODO FIX LATER WITH REFACTOR OF ShillelaghWriter
-    try {
-      ShillelaghUtilWriter utilIWriter = new ShillelaghUtilWriter();
-      JavaFileObject jfo = filer.createSourceFile("shillelagh.Util");
-      Writer writer = jfo.openWriter();
-      writer.write(utilIWriter.brewInternalJava());
-      writer.flush();
-      writer.close();
-    } catch (IOException e) {
-      logger.e(String.format("Unable to write required internal Shillelagh classes %s",
-          e.getMessage()));
-    }
   }
 }

@@ -4,12 +4,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.element.Element;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 import shillelagh.Field;
@@ -73,8 +71,8 @@ enum SqliteType {
 
     final TypeMirror typeMirror = element.asType();
     for (SqliteType sqliteType : values()) {
-      if (sqliteType.kinds.contains(typeMirror.getKind()) ||
-          sqliteType.objects.contains(typeMirror.toString())) {
+      if (sqliteType.kinds.contains(typeMirror.getKind())
+          || sqliteType.objects.contains(typeMirror.toString())) {
         return sqliteType;
       }
     }

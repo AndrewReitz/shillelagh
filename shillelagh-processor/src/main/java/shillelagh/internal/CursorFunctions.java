@@ -4,7 +4,8 @@ import java.util.HashMap;
 
 final class CursorFunctions {
   private static final String BLOB = "blob";
-  private static final HashMap<String, String> SUPPORTED_CURSOR_METHODS = new HashMap<String, String>();
+  private static final HashMap<String, String> SUPPORTED_CURSOR_METHODS
+      = new HashMap<String, String>();
 
   static {
     final String cursorFunctionInt = "getInt";

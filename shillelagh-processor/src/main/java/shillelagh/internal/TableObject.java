@@ -7,8 +7,8 @@ import java.util.List;
 class TableObject {
 
   /** Used as a template to create a new table */
-  private static final String CREATE_TABLE_DEFAULT = "CREATE TABLE %s " +
-          "(%s INTEGER PRIMARY KEY AUTOINCREMENT, %s);";
+  private static final String CREATE_TABLE_DEFAULT = "CREATE TABLE %s "
+      + "(%s INTEGER PRIMARY KEY AUTOINCREMENT, %s);";
 
   private final String tableName;
   private String idColumnName;
