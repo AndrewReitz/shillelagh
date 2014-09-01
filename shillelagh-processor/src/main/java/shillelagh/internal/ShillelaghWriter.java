@@ -13,9 +13,6 @@ import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.annotation.Generated;
-
-import static javax.lang.model.element.Modifier.DEFAULT;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.STATIC;
@@ -74,6 +71,7 @@ public final class ShillelaghWriter {
   void brewJava(Writer writer) throws IOException {
     logger.d("brewJava");
     JavaWriter javaWriter = new JavaWriter(writer);
+    javaWriter.setCompressingTypes(false);
 
     javaWriter.emitSingleLineComment("Generated code from Shillelagh. Do not modify!")
         .emitPackage(classPackage)
@@ -82,7 +80,6 @@ public final class ShillelaghWriter {
         .emitImports(ByteArrayInputStream.class, ByteArrayOutputStream.class, IOException.class,
             ObjectInputStream.class, ObjectOutputStream.class, LinkedList.class, Date.class,
             List.class)
-        .emitAnnotation(Generated.class, "Shillelagh")
         .beginType(className, "class", EnumSet.of(PUBLIC, FINAL));
 
     emitGetId(javaWriter);
@@ -119,7 +116,7 @@ public final class ShillelaghWriter {
   private void emitDropTable(JavaWriter javaWriter) throws IOException {
     logger.d("emitDropTable");
     javaWriter.beginMethod("void", $$DROP_TABLE_FUNCTION, EnumSet.of(PUBLIC, STATIC), "SQLiteDatabase", "db")
-        .emitStatement("db.execSQL(\"DROP TABLE IF EXISTS %s\"", tableObject.getTableName())
+        .emitStatement("db.execSQL(\"DROP TABLE IF EXISTS %s\")", tableObject.getTableName())
         .endMethod();
   }
 
@@ -164,9 +161,9 @@ public final class ShillelaghWriter {
       if (column.getSqlType() == SqliteType.BLOB && !column.isByteArray()) {
         javaWriter.emitStatement("values.put(\"%s\", %s(element.%s))", columnName, SERIALIZE_FUNCTION, columnName);
       } else if (column.isOneToOne()) {
-        javaWriter.emitStatement("values.put(\"%\", %s%s.%s(element.%s))", columnName, column.getType(), $$SUFFIX, GET_ID_FUNCTION, columnName);
+        javaWriter.emitStatement("values.put(\"%s\", %s%s.%s(element.%s))", columnName, column.getType(), $$SUFFIX, GET_ID_FUNCTION, columnName);
       } else if (column.isDate()) {
-        javaWriter.emitStatement("values.put(\"%s\", element.%s.getTime())");
+        javaWriter.emitStatement("values.put(\"%s\", element.%s.getTime())", columnName, columnName);
       } else {
         javaWriter.emitStatement("values.put(\"%s\", element.%s)", columnName, columnName);
       }
@@ -180,14 +177,14 @@ public final class ShillelaghWriter {
   private void emitDeleteWithObject(JavaWriter javaWriter) throws IOException {
     logger.d("emitDeleteWithObject");
     javaWriter.beginMethod("void", $$DELETE_OBJECT_FUNCTION, EnumSet.of(PUBLIC, STATIC), targetClass, "element", "SQLiteDatabase", "db")
-        .emitStatement("%s(element.%s, db)", $$DELETE_OBJECT_FUNCTION, targetClass)
+        .emitStatement("%s(element.%s, db)", $$DELETE_OBJECT_FUNCTION, tableObject.getIdColumnName())
         .endMethod();
   }
 
   /** Creates the function for deleting an object by id */
   private void emitDeleteWithId(JavaWriter javaWriter) throws IOException {
     logger.d("emitDeleteWithId");
-    javaWriter.beginMethod("void", $$DELETE_OBJECT_FUNCTION, EnumSet.of(PUBLIC, STATIC), "Long id", "SQLiteDatabase db")
+    javaWriter.beginMethod("void", $$DELETE_OBJECT_FUNCTION, EnumSet.of(PUBLIC, STATIC), "Long", "id", "SQLiteDatabase", "db")
         .emitStatement("db.delete(\"%s\", \"%s = \" + id, null)", tableObject.getTableName(), tableObject.getIdColumnName())
         .endMethod();
   }
@@ -195,7 +192,7 @@ public final class ShillelaghWriter {
   /** Creates function for getting an object by value */
   private void emitSelectById(JavaWriter javaWriter) throws IOException {
     logger.d("emitSelectById");
-    javaWriter.beginMethod(targetClass, $$GET_OBJECT_BY_ID, EnumSet.of(PUBLIC, STATIC), "long id", "SQLiteDatabase db")
+    javaWriter.beginMethod(targetClass, $$GET_OBJECT_BY_ID, EnumSet.of(PUBLIC, STATIC), "long", "id", "SQLiteDatabase", "db")
         .emitStatement("return %s(db.rawQuery(\"SELECT * FROM %s WHERE %s  = id\", null), db).get(0)", $$MAP_OBJECT_FUNCTION, tableObject.getTableName(), tableObject.getIdColumnName())
         .endMethod();
   }
@@ -206,21 +203,23 @@ public final class ShillelaghWriter {
   private void emitMapCursorToObject(JavaWriter javaWriter) throws IOException {
     logger.d("emitMapCursorToObject");
     final String tableName = targetClass;
+    final String idColumnName = tableObject.getIdColumnName();
 
     javaWriter.beginMethod("List<" + tableName + ">", $$MAP_OBJECT_FUNCTION, EnumSet.of(PUBLIC, STATIC), "Cursor", "cursor", "SQLiteDatabase", "db")
         .emitStatement("List<%s> tableObjects = new LinkedList<%s>()", tableName, tableName)
         .beginControlFlow("if (cursor.moveToFirst())") // can't assume the cursor is already at the front
         .beginControlFlow("while (!cursor.isAfterLast())")
-        .emitStatement("%s tableObject = new %s()", tableName, targetClass);
+        .emitStatement("%s tableObject = new %s()", tableName, targetClass)
+        .emitStatement("tableObject.%s = cursor.getLong(cursor.getColumnIndex(\"%s\"))", idColumnName, idColumnName);
 
     for (TableColumn column : tableObject.getColumns()) {
       String columnName = column.getColumnName();
       if (column.isDate()) {
         javaWriter.emitStatement("tableObject.%s = new Date(cursor.%s(cursor.getColumnIndex(\"%s\")))", columnName, CursorFunctions.get(long.class.getName()), columnName);
       } else if (column.isOneToOne()) {
-        javaWriter.emitStatement("tableObject.%s = %s%s.%s(cursor.%s(cursor.getColumnIndex(\"%s)), db)", columnName, column.getType(), $$SUFFIX, $$GET_OBJECT_BY_ID, CursorFunctions.get(Long.class.getName()), columnName);
+        javaWriter.emitStatement("tableObject.%s = %s%s.%s(cursor.%s(cursor.getColumnIndex(\"%s\")), db)", columnName, column.getType(), $$SUFFIX, $$GET_OBJECT_BY_ID, CursorFunctions.get(Long.class.getName()), columnName);
       } else if (column.isBoolean()) {
-        javaWriter.emitStatement("tableObject.%s = cursor.%s(cursor.getColumnIndex(\"%s\")) == 1");
+        javaWriter.emitStatement("tableObject.%s = cursor.%s(cursor.getColumnIndex(\"%s\")) == 1", columnName, CursorFunctions.get(column.getType()), columnName);
       } else if (column.getSqlType() == SqliteType.BLOB) {
         if (column.isByteArray()) {
           javaWriter.emitStatement("tableObject.%s = cursor.%s(cursor.getColumnIndex(\"%s\"))", columnName, CursorFunctions.get(column.getType()), columnName);
@@ -242,7 +241,7 @@ public final class ShillelaghWriter {
   /** Creates functions for serialization to and from byte arrays */
   private void emitByteArraySerialization(JavaWriter javaWriter) throws IOException {
     logger.d("emitByteArraySerialization");
-    javaWriter.beginMethod("<K> byte[]", SERIALIZE_FUNCTION, EnumSet.of(DEFAULT, STATIC), "K object")
+    javaWriter.beginMethod("<K> byte[]", SERIALIZE_FUNCTION, EnumSet.of(STATIC), "K", "object")
         .beginControlFlow("try")
         .emitStatement("ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()")
         .emitStatement("ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream)")
@@ -252,7 +251,7 @@ public final class ShillelaghWriter {
         .emitStatement("throw new RuntimeException(e)")
         .endControlFlow()
         .endMethod()
-        .beginControlFlow("<K> K", DESERIALIZE_FUNCTION, EnumSet.of(DEFAULT, STATIC), "byte[] bytes")
+        .beginMethod("<K> K", DESERIALIZE_FUNCTION, EnumSet.of(STATIC), "byte[]", "bytes")
         .beginControlFlow("try")
         .emitStatement("ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes)")
         .emitStatement("ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream)")
