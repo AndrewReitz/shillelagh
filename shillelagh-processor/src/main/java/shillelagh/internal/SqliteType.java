@@ -1,5 +1,7 @@
 package shillelagh.internal;
 
+import com.google.common.collect.Sets;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -20,22 +22,22 @@ enum SqliteType {
       TypeKind.SHORT,
       TypeKind.LONG,
       TypeKind.BOOLEAN // true false types
-  )), new HashSet<String>(Arrays.asList(
+  )), Sets.newHashSet(Arrays.asList(
       Integer.class.getName(),
       Short.class.getName(),
       Long.class.getName(),
       Boolean.class.getName(), // true false types
       Date.class.getName()
   ))),
-  REAL(new HashSet<TypeKind>(Arrays.asList(
+  REAL(Sets.newHashSet(Arrays.asList(
       TypeKind.DOUBLE,
       TypeKind.FLOAT
-  )), new HashSet<String>(Arrays.asList(
+  )), Sets.newHashSet(Arrays.asList(
       Double.class.getName(),
       Float.class.getName(),
       Number.class.getName()
   ))),
-  TEXT(Collections.<TypeKind>emptySet(), new HashSet<String>(Arrays.asList(
+  TEXT(Collections.<TypeKind>emptySet(), Sets.newHashSet(Arrays.asList(
       String.class.getName()
   ))),
   BLOB(Collections.<TypeKind>emptySet(), Collections.<String>emptySet()),
