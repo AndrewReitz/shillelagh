@@ -8,11 +8,11 @@ import shillelagh.Table;
 
 @Table public class TestOneToMany {
   @Id long id;
-//  @Field List<Child> children;
-//
-//  public final class Child {
-//    @Id long id;
-//    @Field String testString;
-//    @Field int testInt;
-//  }
+  @Field List<Child> children;
+
+  public final class Child {
+    @Id long id;
+    @Field String testString;
+    @Field int testInt;
+  }
 }
