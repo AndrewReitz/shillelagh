@@ -1,11 +1,13 @@
 package shillelagh.internal;
 
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.Writer;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -29,6 +31,8 @@ import shillelagh.Table;
 
 public final class ShillelaghProcessor extends AbstractProcessor {
   static final boolean DEBUG = true;
+
+  private Map<String, String> oneToManyCache;
 
   private ShillelaghLogger logger;
 
@@ -54,17 +58,18 @@ public final class ShillelaghProcessor extends AbstractProcessor {
 
   @Override public boolean process(Set<? extends TypeElement> annotations,
                          RoundEnvironment roundEnvironment) {
+
+    Map<String, TableObject> tableObjectCache = Maps.newHashMap();
+    oneToManyCache = Maps.newHashMap();
+
     for (TypeElement annotation : annotations) {
       Set<? extends Element> elements = roundEnvironment.getElementsAnnotatedWith(annotation);
       for (Element element : elements) {
-        logger.d("Element: " + element.toString());
-        TableObject tableObject = createTable(element);
-
         String targetType = element.toString();
         String classPackage = getPackageName(element);
         String className = getClassName((TypeElement) element, classPackage) + Shillelagh.$$SUFFIX;
-        ShillelaghWriter shillelaghWriter = new ShillelaghWriter(
-            classPackage, className, targetType, logger);
+        TableObject tableObject = new TableObject(element, classPackage, className, logger);
+        logger.d("Element: " + element.toString());
         logger.d("TargetType: " + targetType);
         logger.d("ClassPackage: " + classPackage);
         logger.d("ClassName: " + className);
@@ -93,18 +98,23 @@ public final class ShillelaghProcessor extends AbstractProcessor {
         if (tableObject.getIdColumnName() == null) {
           logger.e(String.format("%s does not have an id column. Did you forget @Id?", targetType));
         }
-        shillelaghWriter.setTable(tableObject);
 
-        try {
-          JavaFileObject jfo = filer.createSourceFile(shillelaghWriter.getFqcn(), element);
-          Writer writer = jfo.openWriter();
-          shillelaghWriter.brewJava(writer);
-          writer.flush();
-          writer.close();
-        } catch (IOException e) {
-          logger.e(String.format(
-              "Unable to write s for type %s: %s", element, e.getMessage()));
-        }
+        tableObjectCache.put(element.toString(), tableObject);
+      }
+    }
+
+    for (TableObject tableObject : tableObjectCache.values()) {
+      logger.d("Writing for " + tableObject.getTableName());
+      Element element = tableObject.getOriginatingElement();
+      try {
+        JavaFileObject jfo = filer.createSourceFile(tableObject.getFqcn(), element);
+        Writer writer = jfo.openWriter();
+        tableObject.brewJava(writer);
+        writer.flush();
+        writer.close();
+      } catch (IOException e) {
+        logger.e(String.format(
+            "Unable to write shillelagh classes for type %s: %s", element, e.getMessage()));
       }
     }
 
@@ -115,7 +125,7 @@ public final class ShillelaghProcessor extends AbstractProcessor {
     return SourceVersion.latestSupported();
   }
 
-  /** Gets the package the element is */
+  /** Gets the package the element is in */
   private String getPackageName(Element type) {
     return elementUtils.getPackageOf(type).getQualifiedName().toString();
   }
@@ -124,11 +134,6 @@ public final class ShillelaghProcessor extends AbstractProcessor {
   private String getClassName(TypeElement type, String packageName) {
     int packageLen = packageName.length() + 1;
     return type.getQualifiedName().toString().substring(packageLen).replace('.', '$');
-  }
-
-  /** Create a new table with the elements name */
-  private TableObject createTable(Element element) {
-    return new TableObject(element);
   }
 
   /** Check if the element has the @Id annotation if it does use that for it's id */
@@ -167,7 +172,7 @@ public final class ShillelaghProcessor extends AbstractProcessor {
             element.toString(), tableObject.getTableName()));
       }
     } else if (tableColumn.getSqlType() == SqliteType.ONE_TO_MANY) {
-      // List<T> should only have one internal type. Get that type and make sure
+      // List<T> should only have one generic type. Get that type and make sure
       // it has @Table annotation
       TypeMirror typeMirror = ((DeclaredType) element.asType()).getTypeArguments().get(0);
       // TODO All Table objects know how to write themselves. Differ until all annotations
@@ -178,6 +183,7 @@ public final class ShillelaghProcessor extends AbstractProcessor {
         // TODO BETTER ERROR MESSAGE
         logger.e("One to many relationship where many is not annotated with @Table");
       }
+      oneToManyCache.put(element.toString(), tableColumn.getColumnName());
     } else if (tableColumn.getSqlType() == SqliteType.UNKNOWN) {
       @SuppressWarnings("ConstantConditions")
       Table annotation = typeElement.getAnnotation(Table.class);
