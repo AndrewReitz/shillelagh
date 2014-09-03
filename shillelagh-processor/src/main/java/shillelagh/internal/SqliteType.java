@@ -16,8 +16,8 @@ import shillelagh.Field;
 
 /** Sqlite3 Types */
 enum SqliteType {
-  NULL(new HashSet<TypeKind>(Arrays.asList(TypeKind.NULL)), Collections.<String>emptySet()),
-  INTEGER(new HashSet<TypeKind>(Arrays.asList(
+  NULL(Sets.newHashSet(Arrays.asList(TypeKind.NULL)), Collections.<String>emptySet()),
+  INTEGER(Sets.newHashSet(Arrays.asList(
       TypeKind.INT,
       TypeKind.SHORT,
       TypeKind.LONG,
