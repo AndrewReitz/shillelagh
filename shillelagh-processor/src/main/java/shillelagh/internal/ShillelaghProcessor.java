@@ -128,8 +128,7 @@ public final class ShillelaghProcessor extends AbstractProcessor {
 
   /** Create a new table with the elements name */
   private TableObject createTable(Element element) {
-    String tableName = element.getSimpleName().toString();
-    return new TableObject(tableName);
+    return new TableObject(element);
   }
 
   /** Check if the element has the @Id annotation if it does use that for it's id */
