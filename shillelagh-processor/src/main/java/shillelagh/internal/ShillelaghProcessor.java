@@ -2,6 +2,7 @@ package shillelagh.internal;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.squareup.javawriter.JavaWriter;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -32,7 +33,7 @@ import shillelagh.Table;
 public final class ShillelaghProcessor extends AbstractProcessor {
   static final boolean DEBUG = true;
 
-  private Map<String, String> oneToManyCache;
+  private Map<String, TableObject> oneToManyCache;
 
   private ShillelaghLogger logger;
 
@@ -103,6 +104,15 @@ public final class ShillelaghProcessor extends AbstractProcessor {
       }
     }
 
+    // Process one to many relationships
+    for (Map.Entry<String, TableObject> entry : oneToManyCache.entrySet()) {
+      logger.d("Entry: " + entry.getKey() + " " + entry.getValue());
+      TableObject tableObject = tableObjectCache.get(entry.getKey());
+      tableObject.addColumn(new TableColumn(entry.getValue().getTableName().toLowerCase(),
+          Integer.class.getName(), SqliteType.INTEGER));
+      tableObject.setIsChildTable(true);
+    }
+
     for (TableObject tableObject : tableObjectCache.values()) {
       logger.d("Writing for " + tableObject.getTableName());
       Element element = tableObject.getOriginatingElement();
@@ -130,7 +140,7 @@ public final class ShillelaghProcessor extends AbstractProcessor {
     return elementUtils.getPackageOf(type).getQualifiedName().toString();
   }
 
-  /** Create the injector fully qualified class name */
+  /** Create the fully qualified class name */
   private String getClassName(TypeElement type, String packageName) {
     int packageLen = packageName.length() + 1;
     return type.getQualifiedName().toString().substring(packageLen).replace('.', '$');
@@ -154,27 +164,27 @@ public final class ShillelaghProcessor extends AbstractProcessor {
    * Check if the element has a @Field annotation if it does parse it and
    * add it to the table object
    */
-  private void checkForFields(TableObject tableObject, Element element) {
-    Field fieldAnnotation = element.getAnnotation(Field.class);
+  private void checkForFields(TableObject tableObject, Element columnElement) {
+    Field fieldAnnotation = columnElement.getAnnotation(Field.class);
     if (fieldAnnotation == null) return;
 
     /* Convert the element from a field to a type */
-    final Element typeElement = typeUtils.asElement(element.asType());
-    final String type = typeElement == null ? element.asType().toString()
+    final Element typeElement = typeUtils.asElement(columnElement.asType());
+    final String type = typeElement == null ? columnElement.asType().toString()
         : elementUtils.getBinaryName((TypeElement) typeElement).toString();
 
-    TableColumn tableColumn = new TableColumn(element, type);
+    TableColumn tableColumn = new TableColumn(columnElement, type);
     if (tableColumn.getSqlType() == SqliteType.BLOB && !tableColumn.isByteArray()) {
-      if (!checkForSuperType(element, Serializable.class)
-          && !element.asType().toString().equals("java.lang.Byte[]")) {
+      if (!checkForSuperType(columnElement, Serializable.class)
+          && !columnElement.asType().toString().equals("java.lang.Byte[]")) {
         logger.e(String.format(
             "%s in %s is not Serializable and will not be able to be converted to a byte array",
-            element.toString(), tableObject.getTableName()));
+            columnElement.toString(), tableObject.getTableName()));
       }
     } else if (tableColumn.getSqlType() == SqliteType.ONE_TO_MANY) {
       // List<T> should only have one generic type. Get that type and make sure
       // it has @Table annotation
-      TypeMirror typeMirror = ((DeclaredType) element.asType()).getTypeArguments().get(0);
+      TypeMirror typeMirror = ((DeclaredType) columnElement.asType()).getTypeArguments().get(0);
       // TODO All Table objects know how to write themselves. Differ until all annotations
       // have been processed to write them out this way we can sign that parents in one to many
       // don't write out and that children now have an extra field.
@@ -183,13 +193,13 @@ public final class ShillelaghProcessor extends AbstractProcessor {
         // TODO BETTER ERROR MESSAGE
         logger.e("One to many relationship where many is not annotated with @Table");
       }
-      oneToManyCache.put(element.toString(), tableColumn.getColumnName());
+      oneToManyCache.put(typeMirror.toString(), tableObject);
     } else if (tableColumn.getSqlType() == SqliteType.UNKNOWN) {
       @SuppressWarnings("ConstantConditions")
       Table annotation = typeElement.getAnnotation(Table.class);
       if (annotation == null) {
         logger.e(String.format("%s in %s needs to be marked as a blob or should be "
-            + "annotated with @Table", element.toString(), tableObject.getTableName()));
+            + "annotated with @Table", columnElement.toString(), tableObject.getTableName()));
       }
       tableColumn.setOneToOne(true);
     }

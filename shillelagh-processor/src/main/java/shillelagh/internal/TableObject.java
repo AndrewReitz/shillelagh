@@ -32,9 +32,10 @@ import static shillelagh.Shillelagh.$$UPDATE_OBJECT_FUNCTION;
 
 class TableObject {
 
-  static final String SERIALIZE_FUNCTION = "serialize";
-  static final String DESERIALIZE_FUNCTION = "deserialize";
+  private static final String SERIALIZE_FUNCTION = "serialize";
+  private static final String DESERIALIZE_FUNCTION = "deserialize";
   private static final String GET_ID_FUNCTION = "getId";
+  private static final String PARENT_INSERT_FUNCTION = "parentInsert";
 
   /** Used as a template to create a new table */
   private static final String CREATE_TABLE_DEFAULT = "CREATE TABLE %s "
@@ -52,6 +53,7 @@ class TableObject {
   private final String className;
   private final ShillelaghLogger logger;
 
+  private boolean isChildTable = false;
   private String idColumnName;
 
   private final List<TableColumn> columns = Lists.newLinkedList();
@@ -69,6 +71,10 @@ class TableObject {
 
   String getIdColumnName() {
     return idColumnName;
+  }
+
+  void setIsChildTable(boolean isChildTable) {
+    this.isChildTable = isChildTable;
   }
 
   Element getOriginatingElement() {
@@ -98,12 +104,7 @@ class TableObject {
       }
     }
 
-    return String.format(
-            CREATE_TABLE_DEFAULT,
-            getTableName(),
-            idColumnName,
-            sb.toString()
-    );
+    return String.format(CREATE_TABLE_DEFAULT, getTableName(), idColumnName, sb.toString());
   }
 
   /** Get the fully qualified class name */
@@ -185,6 +186,9 @@ class TableObject {
       } else if (column.isDate()) {
         javaWriter.emitStatement(
             "values.put(\"%s\", element.%s.getTime())", columnName, columnName);
+      } else if (column.getSqlType() == SqliteType.ONE_TO_MANY) {
+        javaWriter.emitStatement("%s.%s.%s(%s)", column.getType(), $$SUFFIX,
+            PARENT_INSERT_FUNCTION, columnName);
       } else {
         javaWriter.emitStatement("values.put(\"%s\", element.%s)", columnName, columnName);
       }
@@ -210,6 +214,8 @@ class TableObject {
       } else if (column.isDate()) {
         javaWriter.emitStatement("values.put(\"%s\", element.%s.getTime())", columnName,
             columnName);
+      } else if (column.getSqlType() == SqliteType.ONE_TO_MANY) {
+        // TODO
       } else {
         javaWriter.emitStatement("values.put(\"%s\", element.%s)", columnName, columnName);
       }
@@ -288,7 +294,7 @@ class TableObject {
               "tableObject.%s = %s(cursor.%s(cursor.getColumnIndex(\"%s\")));", columnName,
               DESERIALIZE_FUNCTION, CursorFunctions.get(column.getType()), columnName);
         }
-      } else {
+      } else if (column.getSqlType() != SqliteType.ONE_TO_MANY) {
         javaWriter.emitStatement("tableObject.%s = cursor.%s(cursor.getColumnIndex(\"%s\"))",
             columnName, CursorFunctions.get(column.getType()), columnName);
       }
