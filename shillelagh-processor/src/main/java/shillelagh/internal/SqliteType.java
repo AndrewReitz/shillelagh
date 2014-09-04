@@ -41,6 +41,7 @@ enum SqliteType {
   ))),
   BLOB(Collections.<TypeKind>emptySet(), Collections.<String>emptySet()),
   ONE_TO_MANY(Collections.<TypeKind>emptySet(), Collections.<String>emptySet()),
+  ONE_TO_MANY_CHILD(Collections.<TypeKind>emptySet(), Collections.<String>emptySet()),
   // signals an unknown type probably should be a key into another table
   UNKNOWN(Collections.<TypeKind>emptySet(), Collections.<String>emptySet());
 

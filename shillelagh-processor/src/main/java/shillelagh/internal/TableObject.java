@@ -318,6 +318,34 @@ class TableObject {
         .endMethod();
   }
 
+  private void emitParentInsert(JavaWriter javaWriter) throws IOException {
+    javaWriter.beginMethod("void", PARENT_INSERT_FUNCTION, EnumSet.of(PUBLIC, STATIC), "int",
+        "parentId")
+        .emitStatement("ContentValues values = new ContentValues()");
+    for (TableColumn column : columns) {
+      String columnName = column.getColumnName();
+      if (column.getSqlType() == SqliteType.BLOB && !column.isByteArray()) {
+        javaWriter.emitStatement("values.put(\"%s\", %s(element.%s))", columnName,
+            SERIALIZE_FUNCTION, columnName);
+      } else if (column.isOneToOne()) {
+        javaWriter.emitStatement("values.put(\"%s\", %s%s.%s(element.%s))", columnName,
+            column.getType(), $$SUFFIX, GET_ID_FUNCTION, columnName);
+      } else if (column.isDate()) {
+        javaWriter.emitStatement(
+            "values.put(\"%s\", element.%s.getTime())", columnName, columnName);
+      } else if (column.getSqlType() == SqliteType.ONE_TO_MANY) {
+        javaWriter.emitStatement("%s.%s.%s(%s)", column.getType(), $$SUFFIX,
+            PARENT_INSERT_FUNCTION, columnName);
+      } else if (column.getSqlType() == SqliteType.ONE_TO_MANY_CHILD) {
+        javaWriter.emitStatement("values.put(\"%s\", %s)", columnName, "parentId");
+      } else {
+        javaWriter.emitStatement("values.put(\"%s\", element.%s)", columnName, columnName);
+      }
+    }
+    javaWriter.emitStatement("db.insert(\"%s\", null, values)", getTableName())
+        .endMethod();
+  }
+
   /** Creates functions for serialization to and from byte arrays */
   private void emitByteArraySerialization(JavaWriter javaWriter) throws IOException {
     logger.d("emitByteArraySerialization");

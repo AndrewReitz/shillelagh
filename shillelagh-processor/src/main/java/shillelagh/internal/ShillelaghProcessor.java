@@ -2,7 +2,6 @@ package shillelagh.internal;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.squareup.javawriter.JavaWriter;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -109,7 +108,7 @@ public final class ShillelaghProcessor extends AbstractProcessor {
       logger.d("Entry: " + entry.getKey() + " " + entry.getValue());
       TableObject tableObject = tableObjectCache.get(entry.getKey());
       tableObject.addColumn(new TableColumn(entry.getValue().getTableName().toLowerCase(),
-          Integer.class.getName(), SqliteType.INTEGER));
+          Integer.class.getName(), SqliteType.ONE_TO_MANY_CHILD));
       tableObject.setIsChildTable(true);
     }
 
@@ -185,15 +184,12 @@ public final class ShillelaghProcessor extends AbstractProcessor {
       // List<T> should only have one generic type. Get that type and make sure
       // it has @Table annotation
       TypeMirror typeMirror = ((DeclaredType) columnElement.asType()).getTypeArguments().get(0);
-      // TODO All Table objects know how to write themselves. Differ until all annotations
-      // have been processed to write them out this way we can sign that parents in one to many
-      // don't write out and that children now have an extra field.
-
       if (typeUtils.asElement(typeMirror).getAnnotation(Table.class) == null) {
-        // TODO BETTER ERROR MESSAGE
-        logger.e("One to many relationship where many is not annotated with @Table");
+        logger.e("One to many relationship in class %s where %s is not annotated with @Table",
+            tableObject.getTableName(), tableColumn.getColumnName());
       }
       oneToManyCache.put(typeMirror.toString(), tableObject);
+      tableColumn.setType(typeMirror.toString());
     } else if (tableColumn.getSqlType() == SqliteType.UNKNOWN) {
       @SuppressWarnings("ConstantConditions")
       Table annotation = typeElement.getAnnotation(Table.class);

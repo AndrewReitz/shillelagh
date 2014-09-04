@@ -10,7 +10,7 @@ import static shillelagh.internal.SqliteType.INTEGER;
 class TableColumn {
   private final SqliteType sqliteType;
   private final String columnName;
-  private final String type;
+  private String type;
 
   /** Indicates if column is a one to one mapping */
   private boolean oneToOne = false;
@@ -51,6 +51,11 @@ class TableColumn {
 
   String getType() {
     return type;
+  }
+
+  /** Allow setting the generic type for one to manys */
+  void setType(String type) {
+    this.type = type;
   }
 
   boolean isDate() {
