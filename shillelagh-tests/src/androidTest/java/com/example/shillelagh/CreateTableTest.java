@@ -10,6 +10,7 @@ import com.example.shillelagh.model.TestBlobs;
 import com.example.shillelagh.model.TestBoxedPrimitivesTable;
 import com.example.shillelagh.model.TestJavaObjectsTable;
 import com.example.shillelagh.model.TestNotTableObject;
+import com.example.shillelagh.model.TestOneToMany;
 import com.example.shillelagh.model.TestOneToOne;
 import com.example.shillelagh.model.TestPrimitiveTable;
 
@@ -271,7 +272,34 @@ public class CreateTableTest extends AndroidTestCase {
     cursor.close();
   }
 
-  /** Test for checing that a internal class can be created */
+  public void testShouldCreateOneToManyTable() {
+    // Arrange
+
+    // Act
+    Shillelagh.createTable(database, TestOneToMany.class);
+    final Cursor cursor = database.rawQuery(String.format(TABLE_INFO_QUERY,
+        TestOneToMany.class.getSimpleName()), null);
+
+    // Assert
+    assertThat(cursor.getCount()).isEqualTo(2);
+
+    assertThat(cursor.moveToNext()).isTrue();
+    assertThat(cursor.getString(TABLE_INFO_NAME_COLUMN)).isEqualTo("id");
+    assertThat(cursor.getString(TABLE_INFO_TYPE_COLUMN)).isEqualTo(SQL_INTEGER);
+    assertThat(cursor.getString(TABLE_INFO_NULLABLE_COLUMN)).isEqualTo("0");
+    assertThat(cursor.getString(TABLE_INFO_PRIMARAY_KEY_COLUMN)).isEqualTo("1");
+
+    assertThat(cursor.moveToNext()).isTrue();
+    assertThat(cursor.getString(TABLE_INFO_NAME_COLUMN)).isEqualTo("someValue");
+    assertThat(cursor.getString(TABLE_INFO_TYPE_COLUMN)).isEqualTo(SQL_TEXT);
+    assertThat(cursor.getString(TABLE_INFO_NULLABLE_COLUMN)).isEqualTo("0");
+    assertThat(cursor.getString(TABLE_INFO_PRIMARAY_KEY_COLUMN)).isEqualTo("0");
+
+    assertThat(cursor.moveToNext()).isFalse();
+    cursor.close();
+  }
+
+  /** Test for checking that a internal class can be created */
   public void testShouldCreateInnerObjectTable() {
     // Arrange
 

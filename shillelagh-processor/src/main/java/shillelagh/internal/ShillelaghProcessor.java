@@ -189,7 +189,8 @@ public final class ShillelaghProcessor extends AbstractProcessor {
             tableObject.getTableName(), tableColumn.getColumnName());
       }
       oneToManyCache.put(typeMirror.toString(), tableObject);
-      tableColumn.setType(typeMirror.toString());
+      TypeElement childColumnElement = elementUtils.getTypeElement(typeMirror.toString());
+      tableColumn.setType(getClassName(childColumnElement, getPackageName(childColumnElement)));
     } else if (tableColumn.getSqlType() == SqliteType.UNKNOWN) {
       @SuppressWarnings("ConstantConditions")
       Table annotation = typeElement.getAnnotation(Table.class);

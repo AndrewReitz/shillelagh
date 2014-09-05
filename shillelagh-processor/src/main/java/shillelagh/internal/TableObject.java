@@ -98,7 +98,14 @@ class TableObject {
     StringBuilder sb = new StringBuilder();
     Iterator<TableColumn> iterator = columns.iterator();
     while (iterator.hasNext()) {
-      sb.append(iterator.next());
+      TableColumn column = iterator.next();
+      if (column.isOneToMany()) {
+        // remove the extra ", " after one to many
+        int length = sb.length();
+        sb.replace(length - 2, length, "");
+        break;
+      }
+      sb.append(column);
       if (iterator.hasNext()) {
         sb.append(", ");
       }
@@ -128,16 +135,20 @@ class TableObject {
             List.class)
         .beginType(className, "class", EnumSet.of(PUBLIC, FINAL));
 
-    emitGetId(javaWriter);
-    emitCreateTable(javaWriter);
-    emitDropTable(javaWriter);
-    emitInsert(javaWriter);
-    emitUpdate(javaWriter);
-    emitUpdateColumnId(javaWriter);
-    emitDeleteWithId(javaWriter);
-    emitDeleteWithObject(javaWriter);
-    emitMapCursorToObject(javaWriter);
-    emitSelectById(javaWriter);
+    if (this.isChildTable) {
+      emitParentInsert(javaWriter);
+    } else {
+      emitGetId(javaWriter);
+      emitCreateTable(javaWriter);
+      emitDropTable(javaWriter);
+      emitInsert(javaWriter);
+      emitUpdate(javaWriter);
+      emitUpdateColumnId(javaWriter);
+      emitDeleteWithId(javaWriter);
+      emitDeleteWithObject(javaWriter);
+      emitMapCursorToObject(javaWriter);
+      emitSelectById(javaWriter);
+    }
     emitByteArraySerialization(javaWriter);
     javaWriter.endType();
   }
@@ -187,8 +198,8 @@ class TableObject {
         javaWriter.emitStatement(
             "values.put(\"%s\", element.%s.getTime())", columnName, columnName);
       } else if (column.getSqlType() == SqliteType.ONE_TO_MANY) {
-        javaWriter.emitStatement("%s.%s.%s(%s)", column.getType(), $$SUFFIX,
-            PARENT_INSERT_FUNCTION, columnName);
+        javaWriter.emitStatement("%s%s.%s(element.%s, element.%s, db)", column.getType(), $$SUFFIX,
+            PARENT_INSERT_FUNCTION, idColumnName, columnName);
       } else {
         javaWriter.emitStatement("values.put(\"%s\", element.%s)", columnName, columnName);
       }
@@ -319,30 +330,33 @@ class TableObject {
   }
 
   private void emitParentInsert(JavaWriter javaWriter) throws IOException {
-    javaWriter.beginMethod("void", PARENT_INSERT_FUNCTION, EnumSet.of(PUBLIC, STATIC), "int",
-        "parentId")
+    javaWriter.beginMethod("void", PARENT_INSERT_FUNCTION, EnumSet.of(PUBLIC, STATIC),
+        "long", "parentId", String.format("List<%s>", getTargetClass()), "children",
+        "SQLiteDatabase", "db")
+        .beginControlFlow("for(%s child : children)", getTargetClass())
         .emitStatement("ContentValues values = new ContentValues()");
     for (TableColumn column : columns) {
       String columnName = column.getColumnName();
       if (column.getSqlType() == SqliteType.BLOB && !column.isByteArray()) {
-        javaWriter.emitStatement("values.put(\"%s\", %s(element.%s))", columnName,
+        javaWriter.emitStatement("values.put(\"%s\", %s(child.%s))", columnName,
             SERIALIZE_FUNCTION, columnName);
       } else if (column.isOneToOne()) {
-        javaWriter.emitStatement("values.put(\"%s\", %s%s.%s(element.%s))", columnName,
+        javaWriter.emitStatement("values.put(\"%s\", %s%s.%s(child.%s))", columnName,
             column.getType(), $$SUFFIX, GET_ID_FUNCTION, columnName);
       } else if (column.isDate()) {
         javaWriter.emitStatement(
-            "values.put(\"%s\", element.%s.getTime())", columnName, columnName);
+            "values.put(\"%s\", child.%s.getTime())", columnName, columnName);
       } else if (column.getSqlType() == SqliteType.ONE_TO_MANY) {
         javaWriter.emitStatement("%s.%s.%s(%s)", column.getType(), $$SUFFIX,
             PARENT_INSERT_FUNCTION, columnName);
       } else if (column.getSqlType() == SqliteType.ONE_TO_MANY_CHILD) {
         javaWriter.emitStatement("values.put(\"%s\", %s)", columnName, "parentId");
       } else {
-        javaWriter.emitStatement("values.put(\"%s\", element.%s)", columnName, columnName);
+        javaWriter.emitStatement("values.put(\"%s\", child.%s)", columnName, columnName);
       }
     }
     javaWriter.emitStatement("db.insert(\"%s\", null, values)", getTableName())
+        .endControlFlow()
         .endMethod();
   }
 

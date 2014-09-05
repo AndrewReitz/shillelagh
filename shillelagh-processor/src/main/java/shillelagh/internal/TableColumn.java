@@ -72,6 +72,10 @@ class TableColumn {
     return typeString.equals("byte[]");
   }
 
+  boolean isOneToMany() {
+    return sqliteType == SqliteType.ONE_TO_MANY;
+  }
+
   void setOneToOne(boolean oneToOne) {
     this.oneToOne = oneToOne;
   }
