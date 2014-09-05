@@ -29,12 +29,13 @@ Supported Types (and corresponding primitives)
 Must Provide Empty Constructors. Can be package protected
 Don't forget to update your database version if you change your models (Also create migration scripts)
 
+NOTES: Inner classes MUST be marked static
+
 ## TODO
 - Relationship Support
 - Constraint Support
 - More Unit Tests
 - Documentation
-- Pull processor out into separate container += refactor writing of internal code
 
 # Download
 
