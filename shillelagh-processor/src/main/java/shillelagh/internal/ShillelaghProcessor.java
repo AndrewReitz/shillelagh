@@ -30,7 +30,7 @@ import shillelagh.Shillelagh;
 import shillelagh.Table;
 
 public final class ShillelaghProcessor extends AbstractProcessor {
-  static final boolean DEBUG = true;
+  static final boolean DEBUG = false;
 
   private Map<String, TableObject> oneToManyCache;
 
@@ -57,7 +57,9 @@ public final class ShillelaghProcessor extends AbstractProcessor {
   }
 
   @Override public boolean process(Set<? extends TypeElement> annotations,
-                         RoundEnvironment roundEnvironment) {
+                                   RoundEnvironment roundEnvironment) {
+
+    long startTime = System.currentTimeMillis();
 
     Map<String, TableObject> tableObjectCache = Maps.newHashMap();
     oneToManyCache = Maps.newHashMap();
@@ -126,6 +128,9 @@ public final class ShillelaghProcessor extends AbstractProcessor {
             "Unable to write shillelagh classes for type %s: %s", element, e.getMessage()));
       }
     }
+
+    long endTime = System.currentTimeMillis() - startTime;
+    logger.n("Shillelagh took %d milliseconds", endTime);
 
     return true;
   }
