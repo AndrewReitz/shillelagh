@@ -138,17 +138,18 @@ class TableObject {
     if (this.isChildTable) {
       emitParentInsert(javaWriter);
     } else {
-      emitGetId(javaWriter);
-      emitCreateTable(javaWriter);
-      emitDropTable(javaWriter);
+      // Don't allow inserts directly on child objects
       emitInsert(javaWriter);
-      emitUpdate(javaWriter);
-      emitUpdateColumnId(javaWriter);
-      emitDeleteWithId(javaWriter);
-      emitDeleteWithObject(javaWriter);
-      emitMapCursorToObject(javaWriter);
-      emitSelectById(javaWriter);
     }
+    emitGetId(javaWriter);
+    emitCreateTable(javaWriter);
+    emitDropTable(javaWriter);
+    emitUpdate(javaWriter);
+    emitUpdateColumnId(javaWriter);
+    emitDeleteWithId(javaWriter);
+    emitDeleteWithObject(javaWriter);
+    emitMapCursorToObject(javaWriter);
+    emitSelectById(javaWriter);
     emitByteArraySerialization(javaWriter);
     javaWriter.endType();
   }
@@ -225,8 +226,10 @@ class TableObject {
       } else if (column.isDate()) {
         javaWriter.emitStatement("values.put(\"%s\", element.%s.getTime())", columnName,
             columnName);
-      } else if (column.getSqlType() == SqliteType.ONE_TO_MANY) {
+      } else if (column.isOneToMany()) {
         // TODO
+      } else if (column.isOneToManyChild()) {
+        // TODO: actually no way of actually updating this value directly add a wrapper?
       } else {
         javaWriter.emitStatement("values.put(\"%s\", element.%s)", columnName, columnName);
       }
@@ -305,7 +308,11 @@ class TableObject {
               "tableObject.%s = %s(cursor.%s(cursor.getColumnIndex(\"%s\")));", columnName,
               DESERIALIZE_FUNCTION, CursorFunctions.get(column.getType()), columnName);
         }
-      } else if (column.getSqlType() != SqliteType.ONE_TO_MANY) {
+      } else if (column.isOneToMany()) {
+        // TODO
+      } else if (column.isOneToManyChild()) {
+        // TODO Skip and have custom mapping?
+      } else {
         javaWriter.emitStatement("tableObject.%s = cursor.%s(cursor.getColumnIndex(\"%s\"))",
             columnName, CursorFunctions.get(column.getType()), columnName);
       }

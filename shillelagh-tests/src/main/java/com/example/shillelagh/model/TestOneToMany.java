@@ -11,7 +11,7 @@ import shillelagh.Table;
   @Field String someValue;
   @Field List<Child> children;
 
-  @Table public final class Child {
+  @Table public static class Child {
     @Id long id;
     @Field String testString;
     @Field int testInt;

@@ -57,6 +57,15 @@ enum SqliteType {
     this.objects = objects;
   }
 
+  @Override public String toString() {
+    if (this == ONE_TO_MANY_CHILD) {
+      return INTEGER.name();
+    } else if(this == ONE_TO_MANY) {
+      throw new RuntimeException("Should not be using ONE_TO_MANY to write sql");
+    }
+    return name();
+  }
+
   static SqliteType from(Element element) {
     if (element == null) {
       throw new NullPointerException("element must not be null");

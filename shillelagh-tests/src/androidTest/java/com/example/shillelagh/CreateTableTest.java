@@ -272,7 +272,7 @@ public class CreateTableTest extends AndroidTestCase {
     cursor.close();
   }
 
-  public void testShouldCreateOneToManyTable() {
+  public void testShouldCreateOneToManyParentTable() {
     // Arrange
 
     // Act
@@ -292,6 +292,45 @@ public class CreateTableTest extends AndroidTestCase {
     assertThat(cursor.moveToNext()).isTrue();
     assertThat(cursor.getString(TABLE_INFO_NAME_COLUMN)).isEqualTo("someValue");
     assertThat(cursor.getString(TABLE_INFO_TYPE_COLUMN)).isEqualTo(SQL_TEXT);
+    assertThat(cursor.getString(TABLE_INFO_NULLABLE_COLUMN)).isEqualTo("0");
+    assertThat(cursor.getString(TABLE_INFO_PRIMARAY_KEY_COLUMN)).isEqualTo("0");
+
+    assertThat(cursor.moveToNext()).isFalse();
+    cursor.close();
+  }
+
+  public void testShouldCreateOneToManyChildTable() {
+    // Arrange
+
+    // Act
+    Shillelagh.createTable(database, TestOneToMany.Child.class);
+    final Cursor cursor = database.rawQuery(String.format(TABLE_INFO_QUERY,
+        TestOneToMany.Child.class.getSimpleName()), null);
+
+    // Assert
+    assertThat(cursor.getCount()).isEqualTo(4);
+
+    assertThat(cursor.moveToNext()).isTrue();
+    assertThat(cursor.getString(TABLE_INFO_NAME_COLUMN)).isEqualTo("id");
+    assertThat(cursor.getString(TABLE_INFO_TYPE_COLUMN)).isEqualTo(SQL_INTEGER);
+    assertThat(cursor.getString(TABLE_INFO_NULLABLE_COLUMN)).isEqualTo("0");
+    assertThat(cursor.getString(TABLE_INFO_PRIMARAY_KEY_COLUMN)).isEqualTo("1");
+
+    assertThat(cursor.moveToNext()).isTrue();
+    assertThat(cursor.getString(TABLE_INFO_NAME_COLUMN)).isEqualTo("testString");
+    assertThat(cursor.getString(TABLE_INFO_TYPE_COLUMN)).isEqualTo(SQL_TEXT);
+    assertThat(cursor.getString(TABLE_INFO_NULLABLE_COLUMN)).isEqualTo("0");
+    assertThat(cursor.getString(TABLE_INFO_PRIMARAY_KEY_COLUMN)).isEqualTo("0");
+
+    assertThat(cursor.moveToNext()).isTrue();
+    assertThat(cursor.getString(TABLE_INFO_NAME_COLUMN)).isEqualTo("testInt");
+    assertThat(cursor.getString(TABLE_INFO_TYPE_COLUMN)).isEqualTo(SQL_INTEGER);
+    assertThat(cursor.getString(TABLE_INFO_NULLABLE_COLUMN)).isEqualTo("0");
+    assertThat(cursor.getString(TABLE_INFO_PRIMARAY_KEY_COLUMN)).isEqualTo("0");
+
+    assertThat(cursor.moveToNext()).isTrue();
+    assertThat(cursor.getString(TABLE_INFO_NAME_COLUMN)).isEqualTo("testonetomany");
+    assertThat(cursor.getString(TABLE_INFO_TYPE_COLUMN)).isEqualTo(SQL_INTEGER);
     assertThat(cursor.getString(TABLE_INFO_NULLABLE_COLUMN)).isEqualTo("0");
     assertThat(cursor.getString(TABLE_INFO_PRIMARAY_KEY_COLUMN)).isEqualTo("0");
 

@@ -76,6 +76,10 @@ class TableColumn {
     return sqliteType == SqliteType.ONE_TO_MANY;
   }
 
+  boolean isOneToManyChild() {
+    return sqliteType == SqliteType.ONE_TO_MANY_CHILD;
+  }
+
   void setOneToOne(boolean oneToOne) {
     this.oneToOne = oneToOne;
   }
