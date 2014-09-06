@@ -129,7 +129,7 @@ class TableObject {
         .emitPackage(classPackage)
         /* Knows nothing of android types */
         .emitImports("android.content.ContentValues", "android.database.Cursor",
-            "android.database.DatabaseUtils", "android.database.sqlite.SQLiteDatabase", "android.util.Log")
+            "android.database.DatabaseUtils", "android.database.sqlite.SQLiteDatabase")
         .emitImports(ByteArrayInputStream.class, ByteArrayOutputStream.class, IOException.class,
             ObjectInputStream.class, ObjectOutputStream.class, LinkedList.class, Date.class,
             List.class)
@@ -225,7 +225,6 @@ class TableObject {
     logger.d("emitUpdate");
     javaWriter.beginMethod("void", $$UPDATE_OBJECT_FUNCTION, EnumSet.of(PUBLIC, STATIC),
         getTargetClass(), "element", "SQLiteDatabase", "db")
-        .emitStatement("Log.d(\"%s\", \"Inside update\")", getTableName())
         .emitStatement("ContentValues values = new ContentValues()");
 
     for (TableColumn column : columns) {
@@ -242,11 +241,8 @@ class TableObject {
       } else if (column.isOneToMany()) {
         javaWriter.beginControlFlow("for (%s child : element.%s)",
             column.getType().replace("$", "."), column.getColumnName())
-            .emitStatement("Log.d(\"%s\", \"Calling child update\")", getTableName())
-            .emitStatement("Log.d(\"%s\", child.toString())", getTableName())
             .emitStatement("%s%s.%s(child, db)", column.getType(), $$SUFFIX,
                 $$UPDATE_OBJECT_FUNCTION)
-            .emitStatement("Log.d(\"%s\", \"Out of child update\")", getTableName())
             .endControlFlow();
       } else if (column.isOneToManyChild()) {
         // TODO: actually no way of actually updating this value directly add a wrapper?
