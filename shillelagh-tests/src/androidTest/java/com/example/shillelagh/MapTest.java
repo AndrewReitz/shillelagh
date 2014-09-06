@@ -47,14 +47,15 @@ public class MapTest extends AndroidTestCase {
     final int expectedInt = 100;
     final short expectedShort = 1;
 
-    String testBoxedPrimitivesInsert = String.format("INSERT INTO %s (aBoolean, aDouble, aFloat, anInteger, " +
-        "aLong, aShort) VALUES (%s, %s, %s, %s, %s, %s);", TestBoxedPrimitivesTable.class.getSimpleName(),
-        expectedBoolean, expectedDouble, expectedFloat, expectedInt, expectedLong, expectedShort);
+    String testBoxedPrimitivesInsert = String.format("INSERT INTO %s (aBoolean, aDouble, " +
+            "aFloat, anInteger, aLong, aShort) VALUES (%s, %s, %s, %s, %s, %s);",
+        Shillelagh.$getTableName$(TestBoxedPrimitivesTable.class), expectedBoolean, expectedDouble,
+        expectedFloat, expectedInt, expectedLong, expectedShort);
 
     // Act
     sqliteOpenHelper.getWritableDatabase().execSQL(testBoxedPrimitivesInsert);
     Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
-        "SELECT * FROM " + TestBoxedPrimitivesTable.class.getSimpleName(), null);
+        "SELECT * FROM " + Shillelagh.$getTableName$(TestBoxedPrimitivesTable.class), null);
 
     List<TestBoxedPrimitivesTable> result = shillelagh.map(TestBoxedPrimitivesTable.class, cursor);
 
@@ -78,15 +79,17 @@ public class MapTest extends AndroidTestCase {
     final int expectedInt = -100;
     final short expectedShort = 23;
 
+    String tableName = Shillelagh.$getTableName$(TestPrimitiveTable.class);
+
     String testPrimitiveInsert = String.format("INSERT INTO %s (aShort, anInt," +
         "aLong, aFloat, aDouble, aBoolean) VALUES (%s, %s, %s, %s, %s, %s);",
-        TestPrimitiveTable.class.getSimpleName(), expectedShort, expectedInt,
+        tableName, expectedShort, expectedInt,
         expectedLong, expectedFloat, expectedDouble, expectedBoolean);
 
     // Act
     sqliteOpenHelper.getWritableDatabase().execSQL(testPrimitiveInsert);
     Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
-        "SELECT * FROM " + TestPrimitiveTable.class.getSimpleName(), null);
+        "SELECT * FROM " + tableName, null);
     List<TestPrimitiveTable> result = shillelagh.map(TestPrimitiveTable.class, cursor);
 
     // Assert
@@ -107,12 +110,13 @@ public class MapTest extends AndroidTestCase {
     final String expectedString = "TestString";
     final Date expectedDate = new Date();
     final String testJavaObjectsInsert = String.format("INSERT INTO %s (aString, aDate)" +
-        " VALUES ('%s', %s);", TestJavaObjectsTable.class.getSimpleName(), expectedString, expectedDate.getTime());
+        " VALUES ('%s', %s);", Shillelagh.$getTableName$(TestJavaObjectsTable.class),
+        expectedString, expectedDate.getTime());
 
     // Act
     sqliteOpenHelper.getWritableDatabase().execSQL(testJavaObjectsInsert);
     Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
-        "SELECT * FROM " + TestJavaObjectsTable.class.getSimpleName(), null);
+        "SELECT * FROM " + Shillelagh.$getTableName$(TestJavaObjectsTable.class), null);
 
     List<TestJavaObjectsTable> result = shillelagh.map(TestJavaObjectsTable.class, cursor);
 
@@ -145,9 +149,9 @@ public class MapTest extends AndroidTestCase {
     values.put("aTestBlobObject", serialize(expectedTestBlobObject));
 
     // Act
-    sqliteOpenHelper.getWritableDatabase().insert(TestBlobs.class.getSimpleName(), null, values);
+    sqliteOpenHelper.getWritableDatabase().insert(Shillelagh.$getTableName$(TestBlobs.class), null, values);
     Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
-        "SELECT * FROM " + TestBlobs.class.getSimpleName(), null);
+        "SELECT * FROM " + Shillelagh.$getTableName$(TestBlobs.class), null);
 
     List<TestBlobs> result = shillelagh.map(TestBlobs.class, cursor);
 
@@ -172,11 +176,11 @@ public class MapTest extends AndroidTestCase {
     final ContentValues oneToOneContentValues = new ContentValues();
     oneToOneContentValues.put("child", 1);
 
-    final String tableName = TestOneToOne.class.getSimpleName();
+    final String tableName = Shillelagh.$getTableName$(TestOneToOne.class);
 
     // Act
-    sqliteOpenHelper.getWritableDatabase().insert(TestOneToOne.Child.class.getSimpleName(), null,
-        childContentValues);
+    sqliteOpenHelper.getWritableDatabase().insert(
+        Shillelagh.$getTableName$(TestOneToOne.Child.class), null, childContentValues);
     sqliteOpenHelper.getWritableDatabase().insert(tableName, null, oneToOneContentValues);
     Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery("SELECT * FROM " + tableName,
         null);

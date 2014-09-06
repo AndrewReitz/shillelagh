@@ -8,12 +8,14 @@ import com.example.shillelagh.model.TestBlobs;
 import com.example.shillelagh.model.TestBoxedPrimitivesTable;
 import com.example.shillelagh.model.TestJavaObjectsTable;
 import com.example.shillelagh.model.TestNotTableObject;
+import com.example.shillelagh.model.TestOneToMany;
 import com.example.shillelagh.model.TestOneToOne;
 import com.example.shillelagh.model.TestPrimitiveTable;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.Arrays;
 import java.util.Date;
 
 import shillelagh.Shillelagh;
@@ -58,7 +60,7 @@ public class InsertTest extends AndroidTestCase {
 
     // Assert
     Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
-        "SELECT * FROM " + TestPrimitiveTable.class.getSimpleName(), null);
+        "SELECT * FROM " + Shillelagh.$getTableName$(TestPrimitiveTable.class), null);
 
     assertThat(cursor.getCount()).isEqualTo(1);
 
@@ -96,7 +98,7 @@ public class InsertTest extends AndroidTestCase {
 
     // Assert
     Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
-        "SELECT * FROM " + TestBoxedPrimitivesTable.class.getSimpleName(), null);
+        "SELECT * FROM " + Shillelagh.$getTableName$(TestBoxedPrimitivesTable.class), null);
 
     assertThat(cursor.getCount()).isEqualTo(1);
 
@@ -126,7 +128,7 @@ public class InsertTest extends AndroidTestCase {
 
     // Assert
     Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
-        "SELECT * FROM " + TestJavaObjectsTable.class.getSimpleName(), null);
+        "SELECT * FROM " + Shillelagh.$getTableName$(TestJavaObjectsTable.class), null);
 
     assertThat(cursor.getCount()).isEqualTo(1);
 
@@ -161,7 +163,7 @@ public class InsertTest extends AndroidTestCase {
 
     // Assert
     Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
-        "SELECT * FROM " + TestBlobs.class.getSimpleName(), null);
+        "SELECT * FROM " + Shillelagh.$getTableName$(TestBlobs.class), null);
 
     assertThat(cursor.getCount()).isEqualTo(1);
     assertThat(cursor.moveToFirst()).isTrue();
@@ -187,7 +189,7 @@ public class InsertTest extends AndroidTestCase {
 
     // Assert
     Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
-        "SELECT * FROM " + TestOneToOne.class.getSimpleName(), null);
+        "SELECT * FROM " + Shillelagh.$getTableName$(TestOneToOne.class), null);
 
     assertThat(cursor.getCount()).isEqualTo(1);
     assertThat(cursor.moveToFirst()).isTrue();
@@ -197,9 +199,8 @@ public class InsertTest extends AndroidTestCase {
     assertThat(cursor.moveToNext()).isFalse();
     cursor.close();
 
-    // Assert
     cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
-        "SELECT * FROM " + TestOneToOne.Child.class.getSimpleName(), null);
+        "SELECT * FROM " + Shillelagh.$getTableName$(TestOneToOne.Child.class), null);
 
     assertThat(cursor.getCount()).isEqualTo(1);
     assertThat(cursor.moveToFirst()).isTrue();
@@ -209,6 +210,53 @@ public class InsertTest extends AndroidTestCase {
     assertThat(cursor.moveToNext()).isFalse();
     cursor.close();
 
+  }
+
+  public void testOneToManyInsertion() {
+    // Arrange
+    String childExpectedString1 = "some test string";
+    int childExpectedInt1 = 123;
+    TestOneToMany.Child child1 = new TestOneToMany.Child(childExpectedString1, childExpectedInt1);
+
+    String childExpectedString2 = "some other string";
+    int childExpectedInt2 = -1;
+    TestOneToMany.Child child2 = new TestOneToMany.Child(childExpectedString2, childExpectedInt2);
+
+    String someValueExpected = "some value";
+    TestOneToMany testOneToMany = new TestOneToMany(someValueExpected,
+        Arrays.asList(child1, child2));
+
+    // Act
+    shillelagh.insert(testOneToMany);
+
+    // Assert
+    Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
+        "SELECT * FROM " + Shillelagh.$getTableName$(TestOneToMany.class), null);
+
+    assertThat(cursor.getCount()).isEqualTo(1);
+    assertThat(cursor.moveToFirst()).isTrue();
+    assertThat(cursor.getLong(0)).isEqualTo(1);
+    assertThat(cursor.getString(1)).isEqualTo(someValueExpected);
+
+    assertThat(cursor.moveToNext()).isFalse();
+    cursor.close();
+
+    cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
+        "SELECT * FROM " + Shillelagh.$getTableName$(TestOneToMany.Child.class), null);
+
+    assertThat(cursor.getCount()).isEqualTo(2);
+
+    assertThat(cursor.moveToFirst()).isTrue();
+    assertThat(cursor.getLong(0)).isEqualTo(1);
+    assertThat(cursor.getString(1)).isEqualTo(childExpectedString1);
+    assertThat(cursor.getInt(2)).isEqualTo(childExpectedInt1);
+    assertThat(cursor.getLong(3)).isEqualTo(1);
+
+    assertThat(cursor.moveToNext()).isTrue();
+    assertThat(cursor.getLong(0)).isEqualTo(2);
+    assertThat(cursor.getString(1)).isEqualTo(childExpectedString2);
+    assertThat(cursor.getInt(2)).isEqualTo(childExpectedInt2);
+    assertThat(cursor.getLong(3)).isEqualTo(1);
   }
 
   public void testInsertShouldFailWhenNotAnnotated() {

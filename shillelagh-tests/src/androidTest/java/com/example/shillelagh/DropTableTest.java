@@ -45,11 +45,12 @@ public class DropTableTest extends AndroidTestCase {
 
   public void testShouldDropTable() {
     // Arrange
+    String tableName = Shillelagh.$getTableName$(TestPrimitiveTable.class);
     String tableCheckQuery = String.format("SELECT DISTINCT tbl_name FROM " +
-        "sqlite_master WHERE tbl_name = \'%s\'", TestPrimitiveTable.class.getSimpleName());
+        "sqlite_master WHERE tbl_name = \'%s\'", tableName);
     String create = String.format("CREATE TABLE %s (id INTEGER PRIMARY KEY AUTOINCREMENT, aShort " +
         "INTEGER, anInt INTEGER, aLong INTEGER, aFloat REAL, aDouble REAL, aBoolean INTEGER);",
-        TestPrimitiveTable.class.getSimpleName());
+        tableName);
     database.execSQL(create);
 
     // Act

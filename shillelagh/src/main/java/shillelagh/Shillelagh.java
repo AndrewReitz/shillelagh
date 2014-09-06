@@ -430,4 +430,8 @@ public final class Shillelagh {
   public SQLiteDatabase getWritableDatabase() {
     return sqliteOpenHelper.getWritableDatabase();
   }
+
+  @VisibleForTesting public static String $getTableName$(Class<?> clazz) {
+    return clazz.getCanonicalName().replace(".", "_");
+  }
 }

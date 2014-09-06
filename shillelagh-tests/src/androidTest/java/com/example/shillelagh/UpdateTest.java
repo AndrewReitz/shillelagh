@@ -68,7 +68,7 @@ public class UpdateTest extends AndroidTestCase {
 
     // Assert
     Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
-        "SELECT * FROM " + TestPrimitiveTable.class.getSimpleName(), null);
+        "SELECT * FROM " + Shillelagh.$getTableName$(TestPrimitiveTable.class), null);
 
     assertThat(cursor.getCount()).isEqualTo(1);
 
@@ -117,7 +117,7 @@ public class UpdateTest extends AndroidTestCase {
 
     // Assert
     Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
-        "SELECT * FROM " + TestBoxedPrimitivesTable.class.getSimpleName(), null);
+        "SELECT * FROM " + Shillelagh.$getTableName$(TestBoxedPrimitivesTable.class), null);
 
     assertThat(cursor.getCount()).isEqualTo(1);
 
@@ -154,7 +154,7 @@ public class UpdateTest extends AndroidTestCase {
 
     // Assert
     Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
-        "SELECT * FROM " + TestJavaObjectsTable.class.getSimpleName(), null);
+        "SELECT * FROM " + Shillelagh.$getTableName$(TestJavaObjectsTable.class), null);
 
     assertThat(cursor.getCount()).isEqualTo(1);
 
@@ -200,7 +200,7 @@ public class UpdateTest extends AndroidTestCase {
 
     // Assert
     Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
-        "SELECT * FROM " + TestBlobs.class.getSimpleName(), null);
+        "SELECT * FROM " + Shillelagh.$getTableName$(TestBlobs.class), null);
 
     assertThat(cursor.getCount()).isEqualTo(1);
 
@@ -233,7 +233,7 @@ public class UpdateTest extends AndroidTestCase {
 
     // Assert
     Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
-        "SELECT * FROM " + TestOneToOne.class.getSimpleName(), null);
+        "SELECT * FROM " + Shillelagh.$getTableName$(TestOneToOne.class), null);
 
     assertThat(cursor.getCount()).isEqualTo(1);
 
@@ -243,8 +243,9 @@ public class UpdateTest extends AndroidTestCase {
 
     cursor.close();
 
-    cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(String.format(
-        "SELECT * FROM %s WHERE Id = %d", TestOneToOne.Child.class.getSimpleName(), 2), null);
+    cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
+        String.format("SELECT * FROM %s WHERE Id = %d",
+            Shillelagh.$getTableName$(TestOneToOne.Child.class), 2), null);
 
     assertThat(cursor.getCount()).isEqualTo(1);
 

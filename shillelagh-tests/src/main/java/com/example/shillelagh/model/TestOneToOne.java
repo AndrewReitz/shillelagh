@@ -9,9 +9,7 @@ import shillelagh.Table;
   @Id long id;
   @Field Child child;
 
-  @OrmOnly TestOneToOne() {
-
-  }
+  @OrmOnly TestOneToOne() { }
 
   public TestOneToOne(Child child) {
     this.child = child;

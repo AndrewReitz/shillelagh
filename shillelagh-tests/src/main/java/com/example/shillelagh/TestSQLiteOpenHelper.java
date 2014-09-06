@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.example.shillelagh.model.TestBlobs;
 import com.example.shillelagh.model.TestBoxedPrimitivesTable;
 import com.example.shillelagh.model.TestJavaObjectsTable;
+import com.example.shillelagh.model.TestOneToMany;
 import com.example.shillelagh.model.TestOneToOne;
 import com.example.shillelagh.model.TestPrimitiveTable;
 
@@ -14,7 +15,7 @@ import shillelagh.Shillelagh;
 
 public class TestSQLiteOpenHelper extends SQLiteOpenHelper {
   public static final String DATABASE_NAME = "shillelagh_test.db";
-  private static final int DATABASE_VERSION = 2;
+  private static final int DATABASE_VERSION = 3;
 
   public TestSQLiteOpenHelper(Context context) {
     super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -27,6 +28,8 @@ public class TestSQLiteOpenHelper extends SQLiteOpenHelper {
     Shillelagh.createTable(db, TestBlobs.class);
     Shillelagh.createTable(db, TestOneToOne.class);
     Shillelagh.createTable(db, TestOneToOne.Child.class);
+    Shillelagh.createTable(db, TestOneToMany.class);
+    Shillelagh.createTable(db, TestOneToMany.Child.class);
   }
 
   @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -37,6 +40,8 @@ public class TestSQLiteOpenHelper extends SQLiteOpenHelper {
     Shillelagh.dropTable(db, TestBlobs.class);
     Shillelagh.dropTable(db, TestOneToOne.class);
     Shillelagh.dropTable(db, TestOneToOne.Child.class);
+    Shillelagh.dropTable(db, TestOneToMany.class);
+    Shillelagh.dropTable(db, TestOneToMany.Child.class);
     onCreate(db);
   }
 }

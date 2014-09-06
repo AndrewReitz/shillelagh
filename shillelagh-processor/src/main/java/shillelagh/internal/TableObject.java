@@ -86,7 +86,7 @@ class TableObject {
   }
 
   String getTableName() {
-    return element.getSimpleName().toString();
+    return element.toString().replace(".", "_");
   }
 
   String getTargetClass() {
@@ -184,9 +184,11 @@ class TableObject {
   /** Creates the function for inserting a new value into the database */
   private void emitInsert(JavaWriter javaWriter) throws IOException {
     logger.d("emitInsert");
+    String tableName = getTableName();
     javaWriter.beginMethod("void", $$INSERT_OBJECT_FUNCTION, EnumSet.of(PUBLIC, STATIC),
         getTargetClass(), "element", "SQLiteDatabase", "db")
         .emitStatement("ContentValues values = new ContentValues()");
+    List<TableColumn> childColumns = Lists.newLinkedList();
     for (TableColumn column : columns) {
       String columnName = column.getColumnName();
       if (column.getSqlType() == SqliteType.BLOB && !column.isByteArray()) {
@@ -198,15 +200,24 @@ class TableObject {
       } else if (column.isDate()) {
         javaWriter.emitStatement(
             "values.put(\"%s\", element.%s.getTime())", columnName, columnName);
-      } else if (column.getSqlType() == SqliteType.ONE_TO_MANY) {
-        javaWriter.emitStatement("%s%s.%s(element.%s, element.%s, db)", column.getType(), $$SUFFIX,
-            PARENT_INSERT_FUNCTION, idColumnName, columnName);
+      } else if (column.isOneToMany()) {
+        childColumns.add(column);
       } else {
         javaWriter.emitStatement("values.put(\"%s\", element.%s)", columnName, columnName);
       }
     }
-    javaWriter.emitStatement("db.insert(\"%s\", null, values)", getTableName())
-        .endMethod();
+    javaWriter.emitStatement("db.insert(\"%s\", null, values)", tableName);
+
+    if (!childColumns.isEmpty()) {
+      javaWriter.emitStatement("long id = DatabaseUtils.longForQuery(db, " +
+          "\"SELECT ROWID FROM %s ORDER BY ROWID DESC LIMIT 1\", null)", tableName);
+    }
+    for (TableColumn childColumn : childColumns) {
+      javaWriter.emitStatement("%s%s.%s(id, element.%s, db)", childColumn.getType(),
+          $$SUFFIX, PARENT_INSERT_FUNCTION, childColumn.getColumnName());
+    }
+
+    javaWriter.endMethod();
   }
 
   /** Creates the function for updating an object */
