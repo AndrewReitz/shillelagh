@@ -2,7 +2,6 @@ package com.example.shillelagh;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
 
@@ -18,6 +17,7 @@ import java.io.File;
 
 import shillelagh.Shillelagh;
 
+import static com.example.shillelagh.TestUtils.getTableName;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 public class CreateTableTest extends AndroidTestCase {
@@ -65,7 +65,7 @@ public class CreateTableTest extends AndroidTestCase {
     // Act
     Shillelagh.createTable(database, TestPrimitiveTable.class);
     final Cursor cursor = database.rawQuery(String.format(TABLE_INFO_QUERY,
-        Shillelagh.$getTableName$(TestPrimitiveTable.class)), null);
+        getTableName(TestPrimitiveTable.class)), null);
 
     // Assert
     assertThat(cursor.getCount()).isEqualTo(7);
@@ -122,7 +122,7 @@ public class CreateTableTest extends AndroidTestCase {
     // Act
     Shillelagh.createTable(database, TestBoxedPrimitivesTable.class);
     final Cursor cursor = database.rawQuery(String.format(TABLE_INFO_QUERY,
-        Shillelagh.$getTableName$(TestBoxedPrimitivesTable.class)), null);
+        getTableName(TestBoxedPrimitivesTable.class)), null);
 
     // Assert
     assertThat(cursor.getCount()).isEqualTo(7);
@@ -179,7 +179,7 @@ public class CreateTableTest extends AndroidTestCase {
     // Act
     Shillelagh.createTable(database, TestJavaObjectsTable.class);
     final Cursor cursor = database.rawQuery(String.format(TABLE_INFO_QUERY,
-        Shillelagh.$getTableName$(TestJavaObjectsTable.class)), null);
+        getTableName(TestJavaObjectsTable.class)), null);
 
     // Assert
     assertThat(cursor.getCount()).isEqualTo(3);
@@ -212,7 +212,7 @@ public class CreateTableTest extends AndroidTestCase {
     // Act
     Shillelagh.createTable(database, TestBlobs.class);
     final Cursor cursor = database.rawQuery(String.format(TABLE_INFO_QUERY,
-        Shillelagh.$getTableName$(TestBlobs.class)), null);
+        getTableName(TestBlobs.class)), null);
 
     // Assert
     assertThat(cursor.getCount()).isEqualTo(4);
@@ -251,7 +251,7 @@ public class CreateTableTest extends AndroidTestCase {
     // Act
     Shillelagh.createTable(database, TestOneToOne.class);
     final Cursor cursor = database.rawQuery(String.format(TABLE_INFO_QUERY,
-        Shillelagh.$getTableName$(TestOneToOne.class)), null);
+        getTableName(TestOneToOne.class)), null);
 
     // Assert
     assertThat(cursor.getCount()).isEqualTo(2);
@@ -278,7 +278,7 @@ public class CreateTableTest extends AndroidTestCase {
     // Act
     Shillelagh.createTable(database, TestOneToMany.class);
     final Cursor cursor = database.rawQuery(String.format(TABLE_INFO_QUERY,
-        Shillelagh.$getTableName$(TestOneToMany.class)), null);
+        getTableName(TestOneToMany.class)), null);
 
     // Assert
     assertThat(cursor.getCount()).isEqualTo(2);
@@ -305,7 +305,7 @@ public class CreateTableTest extends AndroidTestCase {
     // Act
     Shillelagh.createTable(database, TestOneToMany.Child.class);
     final Cursor cursor = database.rawQuery(String.format(TABLE_INFO_QUERY,
-        Shillelagh.$getTableName$(TestOneToMany.Child.class)), null);
+        getTableName(TestOneToMany.Child.class)), null);
 
     // Assert
     assertThat(cursor.getCount()).isEqualTo(4);
@@ -346,7 +346,7 @@ public class CreateTableTest extends AndroidTestCase {
     // Act
     Shillelagh.createTable(database, TestOneToOne.Child.class);
     final Cursor cursor = database.rawQuery(String.format(TABLE_INFO_QUERY,
-        Shillelagh.$getTableName$(TestOneToOne.Child.class)), null);
+        getTableName(TestOneToOne.Child.class)), null);
 
     // Assert
     assertThat(cursor.getCount()).isEqualTo(2);

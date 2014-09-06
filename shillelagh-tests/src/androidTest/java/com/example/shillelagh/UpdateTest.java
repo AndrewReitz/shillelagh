@@ -20,6 +20,7 @@ import java.util.Date;
 
 import shillelagh.Shillelagh;
 
+import static com.example.shillelagh.TestUtils.getTableName;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 public class UpdateTest extends AndroidTestCase {
@@ -70,7 +71,7 @@ public class UpdateTest extends AndroidTestCase {
 
     // Assert
     Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
-        "SELECT * FROM " + Shillelagh.$getTableName$(TestPrimitiveTable.class), null);
+        "SELECT * FROM " + getTableName(TestPrimitiveTable.class), null);
 
     assertThat(cursor.getCount()).isEqualTo(1);
 
@@ -119,7 +120,7 @@ public class UpdateTest extends AndroidTestCase {
 
     // Assert
     Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
-        "SELECT * FROM " + Shillelagh.$getTableName$(TestBoxedPrimitivesTable.class), null);
+        "SELECT * FROM " + getTableName(TestBoxedPrimitivesTable.class), null);
 
     assertThat(cursor.getCount()).isEqualTo(1);
 
@@ -156,7 +157,7 @@ public class UpdateTest extends AndroidTestCase {
 
     // Assert
     Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
-        "SELECT * FROM " + Shillelagh.$getTableName$(TestJavaObjectsTable.class), null);
+        "SELECT * FROM " + getTableName(TestJavaObjectsTable.class), null);
 
     assertThat(cursor.getCount()).isEqualTo(1);
 
@@ -202,7 +203,7 @@ public class UpdateTest extends AndroidTestCase {
 
     // Assert
     Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
-        "SELECT * FROM " + Shillelagh.$getTableName$(TestBlobs.class), null);
+        "SELECT * FROM " + getTableName(TestBlobs.class), null);
 
     assertThat(cursor.getCount()).isEqualTo(1);
 
@@ -235,7 +236,7 @@ public class UpdateTest extends AndroidTestCase {
 
     // Assert
     Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
-        "SELECT * FROM " + Shillelagh.$getTableName$(TestOneToOne.class), null);
+        "SELECT * FROM " + getTableName(TestOneToOne.class), null);
 
     assertThat(cursor.getCount()).isEqualTo(1);
 
@@ -247,7 +248,7 @@ public class UpdateTest extends AndroidTestCase {
 
     cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
         String.format("SELECT * FROM %s WHERE Id = %d",
-            Shillelagh.$getTableName$(TestOneToOne.Child.class), 2), null);
+            getTableName(TestOneToOne.Child.class), 2), null);
 
     assertThat(cursor.getCount()).isEqualTo(1);
 
@@ -277,7 +278,7 @@ public class UpdateTest extends AndroidTestCase {
 
     // Assert
     Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
-        "SELECT * FROM " + Shillelagh.$getTableName$(TestOneToMany.class), null);
+        "SELECT * FROM " + getTableName(TestOneToMany.class), null);
 
     assertThat(cursor.getCount()).isEqualTo(1);
 
@@ -289,7 +290,7 @@ public class UpdateTest extends AndroidTestCase {
 
     cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
         String.format("SELECT * FROM %s WHERE com_example_shillelagh_model_testonetomany = %d",
-            Shillelagh.$getTableName$(TestOneToMany.Child.class), 1), null);
+            getTableName(TestOneToMany.Child.class), 1), null);
 
     assertThat(cursor.getCount()).isEqualTo(1);
 

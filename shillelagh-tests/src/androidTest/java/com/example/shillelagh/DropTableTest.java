@@ -12,6 +12,7 @@ import java.io.File;
 
 import shillelagh.Shillelagh;
 
+import static com.example.shillelagh.TestUtils.getTableName;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 public class DropTableTest extends AndroidTestCase {
@@ -45,7 +46,7 @@ public class DropTableTest extends AndroidTestCase {
 
   public void testShouldDropTable() {
     // Arrange
-    String tableName = Shillelagh.$getTableName$(TestPrimitiveTable.class);
+    String tableName = getTableName(TestPrimitiveTable.class);
     String tableCheckQuery = String.format("SELECT DISTINCT tbl_name FROM " +
         "sqlite_master WHERE tbl_name = \'%s\'", tableName);
     String create = String.format("CREATE TABLE %s (id INTEGER PRIMARY KEY AUTOINCREMENT, aShort " +
