@@ -19,6 +19,10 @@ import shillelagh.Table;
     this.children = children;
   }
 
+  public void setSomeValue(String someValue) {
+    this.someValue = someValue;
+  }
+
   @Table public static class Child {
     @Id long id;
     @Field String testString;
@@ -29,6 +33,18 @@ import shillelagh.Table;
     public Child(String testString, int testInt) {
       this.testString = testString;
       this.testInt = testInt;
+    }
+
+    public void setTestString(String testString) {
+      this.testString = testString;
+    }
+
+    @Override public String toString() {
+      return "Child{" +
+          "id=" + id +
+          ", testString='" + testString + '\'' +
+          ", testInt=" + testInt +
+          '}';
     }
   }
 }

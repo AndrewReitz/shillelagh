@@ -8,12 +8,14 @@ import com.example.shillelagh.model.TestBlobs;
 import com.example.shillelagh.model.TestBoxedPrimitivesTable;
 import com.example.shillelagh.model.TestJavaObjectsTable;
 import com.example.shillelagh.model.TestNotTableObject;
+import com.example.shillelagh.model.TestOneToMany;
 import com.example.shillelagh.model.TestOneToOne;
 import com.example.shillelagh.model.TestPrimitiveTable;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.Arrays;
 import java.util.Date;
 
 import shillelagh.Shillelagh;
@@ -252,6 +254,50 @@ public class UpdateTest extends AndroidTestCase {
     assertThat(cursor.moveToFirst()).isTrue();
     assertThat(cursor.getLong(0)).isEqualTo(2);
     assertThat(cursor.getString(1)).isEqualTo(expectedString);
+
+    cursor.close();
+  }
+
+  public void testUpdateOneToMany() {
+    // Arrange
+    final String expectedStringParent = "Test String";
+    final String expectedStringChild = "another test string";
+    final int expectedIntChild = 34;
+    final TestOneToMany.Child expectedChild = new TestOneToMany.Child(
+        "unexpected", expectedIntChild);
+
+    TestOneToMany testOneToMany = new TestOneToMany("Some Value", Arrays.asList(expectedChild));
+
+    // Act
+    shillelagh.insert(testOneToMany);
+
+    expectedChild.setTestString(expectedStringChild);
+    testOneToMany.setSomeValue(expectedStringParent);
+    shillelagh.update(testOneToMany);
+
+    // Assert
+    Cursor cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
+        "SELECT * FROM " + Shillelagh.$getTableName$(TestOneToMany.class), null);
+
+    assertThat(cursor.getCount()).isEqualTo(1);
+
+    assertThat(cursor.moveToFirst()).isTrue();
+    assertThat(cursor.getLong(0)).isEqualTo(1);
+    assertThat(cursor.getString(1)).isEqualTo(expectedStringParent);
+
+    cursor.close();
+
+    cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
+        String.format("SELECT * FROM %s WHERE com_example_shillelagh_model_testonetomany = %d",
+            Shillelagh.$getTableName$(TestOneToMany.Child.class), 1), null);
+
+    assertThat(cursor.getCount()).isEqualTo(1);
+
+    assertThat(cursor.moveToFirst()).isTrue();
+    assertThat(cursor.getLong(0)).isEqualTo(1);
+    assertThat(cursor.getString(1)).isEqualTo(expectedStringChild);
+    assertThat(cursor.getInt(2)).isEqualTo(expectedIntChild);
+    assertThat(cursor.getInt(3)).isEqualTo(1);
 
     cursor.close();
   }
