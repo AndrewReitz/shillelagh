@@ -60,7 +60,7 @@ enum SqliteType {
   @Override public String toString() {
     if (this == ONE_TO_MANY_CHILD) {
       return INTEGER.name();
-    } else if(this == ONE_TO_MANY) {
+    } else if (this == ONE_TO_MANY) {
       throw new RuntimeException("Should not be using ONE_TO_MANY to write sql");
     }
     return name();

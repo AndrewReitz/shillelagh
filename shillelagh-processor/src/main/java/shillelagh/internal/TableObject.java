@@ -209,8 +209,8 @@ class TableObject {
     javaWriter.emitStatement("db.insert(\"%s\", null, values)", tableName);
 
     if (!childColumns.isEmpty()) {
-      javaWriter.emitStatement("long id = DatabaseUtils.longForQuery(db, " +
-          "\"SELECT ROWID FROM %s ORDER BY ROWID DESC LIMIT 1\", null)", tableName);
+      javaWriter.emitStatement("long id = DatabaseUtils.longForQuery(db, "
+          + "\"SELECT ROWID FROM %s ORDER BY ROWID DESC LIMIT 1\", null)", tableName);
     }
     for (TableColumn childColumn : childColumns) {
       javaWriter.emitStatement("%s%s.%s(id, element.%s, db)", childColumn.getType(),
@@ -379,8 +379,8 @@ class TableObject {
       }
     }
     javaWriter.emitStatement("db.insert(\"%s\", null, values)", getTableName())
-        .emitStatement("long id = DatabaseUtils.longForQuery(db, \"SELECT ROWID FROM %s " +
-            "ORDER BY ROWID DESC LIMIT 1\", null)", getTableName())
+        .emitStatement("long id = DatabaseUtils.longForQuery(db, \"SELECT ROWID FROM %s "
+            + "ORDER BY ROWID DESC LIMIT 1\", null)", getTableName())
         .emitStatement("child.%s = id", idColumnName)
         .endControlFlow()
         .endMethod();
