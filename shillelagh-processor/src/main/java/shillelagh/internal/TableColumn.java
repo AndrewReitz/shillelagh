@@ -72,6 +72,10 @@ class TableColumn {
     return typeString.equals("byte[]");
   }
 
+  boolean isBlob() {
+    return sqliteType == SqliteType.BLOB;
+  }
+
   boolean isOneToMany() {
     return sqliteType == SqliteType.ONE_TO_MANY;
   }

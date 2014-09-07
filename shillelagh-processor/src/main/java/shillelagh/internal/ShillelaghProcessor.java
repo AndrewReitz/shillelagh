@@ -178,14 +178,14 @@ public final class ShillelaghProcessor extends AbstractProcessor {
         : elementUtils.getBinaryName((TypeElement) typeElement).toString();
 
     TableColumn tableColumn = new TableColumn(columnElement, type);
-    if (tableColumn.getSqlType() == SqliteType.BLOB && !tableColumn.isByteArray()) {
+    if (tableColumn.isBlob() && !tableColumn.isByteArray()) {
       if (!checkForSuperType(columnElement, Serializable.class)
           && !columnElement.asType().toString().equals("java.lang.Byte[]")) {
         logger.e(String.format(
             "%s in %s is not Serializable and will not be able to be converted to a byte array",
             columnElement.toString(), tableObject.getTableName()));
       }
-    } else if (tableColumn.getSqlType() == SqliteType.ONE_TO_MANY) {
+    } else if (tableColumn.isOneToMany()) {
       // List<T> should only have one generic type. Get that type and make sure
       // it has @Table annotation
       TypeMirror typeMirror = ((DeclaredType) columnElement.asType()).getTypeArguments().get(0);

@@ -35,6 +35,7 @@ class TableObject {
   private static final String SERIALIZE_FUNCTION = "serialize";
   private static final String DESERIALIZE_FUNCTION = "deserialize";
   private static final String GET_ID_FUNCTION = "getId";
+  private static final String SELECT_ALL_FUNCTION = "selectAll";
   private static final String PARENT_INSERT_FUNCTION = "parentInsert";
 
   /** Used as a template to create a new table */
@@ -137,6 +138,7 @@ class TableObject {
 
     if (this.isChildTable) {
       emitParentInsert(javaWriter);
+      emitSelectAll(javaWriter);
     } else {
       // Don't allow inserts directly on child objects
       emitInsert(javaWriter);
@@ -325,7 +327,10 @@ class TableObject {
               DESERIALIZE_FUNCTION, CursorFunctions.get(column.getType()), columnName);
         }
       } else if (column.isOneToMany()) {
-        // TODO
+        javaWriter.emitStatement("Cursor childCursor = %s%s.%s(db)", column.getType(),
+            $$SUFFIX, SELECT_ALL_FUNCTION)
+            .emitStatement("tableObject.%s = %s%s.%s(childCursor, db)",
+            column.getColumnName(), column.getType(), $$SUFFIX, $$MAP_OBJECT_FUNCTION);
       } else if (column.isOneToManyChild()) {
         // TODO Skip and have custom mapping?
       } else {
@@ -383,6 +388,14 @@ class TableObject {
             + "ORDER BY ROWID DESC LIMIT 1\", null)", getTableName())
         .emitStatement("child.%s = id", idColumnName)
         .endControlFlow()
+        .endMethod();
+  }
+
+  private void emitSelectAll(JavaWriter javaWriter) throws IOException {
+    logger.d("emitSelectAll");
+    javaWriter.beginMethod("Cursor", SELECT_ALL_FUNCTION, EnumSet.of(PUBLIC, STATIC),
+        "SQLiteDatabase", "db")
+        .emitStatement("return db.rawQuery(\"SELECT * FROM %s\", null)", getTableName())
         .endMethod();
   }
 
