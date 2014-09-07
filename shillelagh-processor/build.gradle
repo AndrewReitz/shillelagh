@@ -1,5 +1,8 @@
 apply plugin: 'java'
-apply plugin: 'nexus'
+apply plugin: 'maven-publish'
+apply from: '../gradle/javaDoc.gradle'
+apply from: '../gradle/bintray.gradle'
+apply from: '../gradle/artifactory.gradle'
 
 targetCompatibility = JavaVersion.VERSION_1_6
 sourceCompatibility = JavaVersion.VERSION_1_6
@@ -10,35 +13,47 @@ dependencies {
   compile 'com.squareup:javawriter:2.5.0'
 }
 
-modifyPom {
-  project {
-    name 'Shillelagh'
-    packaging 'jar'
-    description 'Shillelagh Sqlite Android library'
-    artifactId = 'shillelagh'
-    groupId group
-    version version
-    url 'https://github.com/pieces029/shillelagh'
+publishing {
+  publications {
+    mavenJava(MavenPublication) {
+      from components.java
 
-    scm {
-      url 'scm:https://github.com/pieces029/shillelagh'
-      connection 'scm:git:git@github.com:pieces029/shillelagh.git'
-      developerConnection 'scm:git:git@github.com:pieces029/shillelagh.git'
-    }
-
-    licenses {
-      license {
-        name 'The Apache Software License, Version 2.0'
-        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-        distribution 'repo'
+      artifact sourcesJar {
+        classifier "sources"
       }
-    }
 
-    developers {
-      developer {
-        id 'areitz'
-        name 'Andrew Reitz'
-        url "http://andrewreitz.com"
+      artifact javadocJar {
+        classifier "javadoc"
+      }
+
+      groupId 'com.andrewreitz'
+      artifactId 'shillelagh'
+
+      pom.withXml {
+        def Node root = asNode()
+        root.appendNode('name', 'Shillelagh Processor')
+        root.appendNode('description', 'Shillelagh Sqlite Android library')
+        root.appendNode('url', 'https://github.com/pieces029/shillelagh')
+
+        def issues = root.appendNode('issueManagement')
+        issues.appendNode('system', 'github')
+        issues.appendNode('url', 'https://github.com/pieces029/shillelagh/issues')
+
+        def scm = root.appendNode('scm')
+        scm.appendNode('url', 'scm:https://github.com/pieces029/shillelagh')
+        scm.appendNode('connection', 'scm:git:git@github.com:pieces029/shillelagh.git')
+        scm.appendNode('developerConnection', 'scm:git:git@github.com:pieces029/shillelagh.git')
+
+        def license = root.appendNode('licenses').appendNode('license');
+        license.appendNode('name', 'The Apache Software License, Version 2.0')
+        license.appendNode('url', 'http://www.apache.org/licenses/LICENSE-2.0.txt')
+        license.appendNode('distribution', 'repo')
+
+        def dev = root.appendNode('developers').appendNode('developer');
+        dev.appendNode('id', 'areitz')
+        dev.appendNode('name', 'Andrew Reitz')
+        dev.appendNode('email', 'andrew@andrewreitz.com')
+        dev.appendNode('organizationUrl', 'http://andrewreitz.com')
       }
     }
   }

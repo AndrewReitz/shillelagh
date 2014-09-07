@@ -1,0 +1,20 @@
+// Handles publication of distributions to Bintray
+
+apply plugin: 'com.jfrog.bintray'
+
+bintray {
+  user = bintrayUser
+  key = bintrayPassword
+  publications = ['mavenJava']
+  pkg {
+    repo = 'maven'
+    name = 'Shillelagh'
+    desc = 'Quick and Easy Android ORM'
+    websiteUrl = 'https://github.com/pieces029/shillelagh'
+    issueTrackerUrl = 'https://github.com/pieces029/shillelagh/issues'
+    vcsUrl = 'https://github.com/pieces029/shillelagh.git'
+    licenses = ['Apache-2.0']
+    labels = ['Android', 'ORM', 'Database', 'SQLite']
+    publicDownloadNumbers = true
+  }
+}
