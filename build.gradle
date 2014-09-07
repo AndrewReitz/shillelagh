@@ -1,26 +1,49 @@
 buildscript {
   repositories {
-    mavenCentral()
     jcenter()
     maven { url 'http://repo.springsource.org/plugins-release' }
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:0.11.+'
-    classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.7'
-    classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.1'
+    classpath 'com.android.tools.build:gradle:0.12.+'
+    classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.6'
+    classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.5'
+    classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:2.2.5'
+    classpath "org._10ne.gradle:rest-gradle-plugin:0.3.1"
   }
 }
 
+ext.snapshot = !project.hasProperty('release')
+
 allprojects {
   repositories {
-    mavenCentral()
+    jcenter()
   }
 
-  version = '0.0.2-SNAPSHOT'
+  version = "0.2.0${project.hasProperty('release')? '' : '-SNAPSHOT'}"
   group = 'com.andrewreitz'
+
   ext {
     minSdkVersion = 14
     targetSdkVersion = 19
     versionCode = 1
   }
+
+  apply plugin: 'idea'
+  apply plugin: 'checkstyle'
+
+  checkstyle {
+    configFile = new File(rootDir, "checkstyle.xml")
+  }
+}
+
+apply plugin: "org.10ne.rest"
+
+task bintraySign(type: org._10ne.gradle.rest.RestTask) {
+  description = "Sign the release build on bintray"
+  httpMethod = 'post'
+  uri = "https://api.bintray.com/gpg/pieces/maven/Shillelagh/versions/${version}"
+  username = bintrayUser
+  password = bintrayPassword
+  requestBody = [passphrase: signingPassword]
+  contentType = groovyx.net.http.ContentType.JSON
 }

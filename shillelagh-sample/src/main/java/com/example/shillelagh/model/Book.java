@@ -5,10 +5,9 @@ import java.util.Date;
 import shillelagh.Field;
 import shillelagh.Table;
 
-@Table
-public class Book extends Base {
+@Table public class Book extends Base {
   @Field String title;
-//  @Field Author author;
+  @Field Author author;
   @Field Date published;
 
   public String getTitle() {
@@ -19,13 +18,13 @@ public class Book extends Base {
     this.title = title;
   }
 
-//  public Author getAuthor() {
-//    return author;
-//  }
-//
-//  public void setAuthor(Author author) {
-//    this.author = author;
-//  }
+  public Author getAuthor() {
+    return author;
+  }
+
+  public void setAuthor(Author author) {
+    this.author = author;
+  }
 
   public Date getPublished() {
     return published;
@@ -36,6 +35,7 @@ public class Book extends Base {
   }
 
   @Override public String toString() {
-    return String.format("Title: %s, Published: %s", title, published);
+    return String.format("Title: %s, Author: %s, Published: %s", title,
+        author.getName(), published);
   }
 }

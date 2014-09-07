@@ -1,0 +1,10 @@
+signing.keyId=gpgid
+signing.password=passwordhere
+signing.secretKeyRingFile=/home/user/.gnupg/secring.gpg
+
+sonatypeUsername=usernamehere
+sonatypePassword=passwordhere
+
+# Used for debugging
+#org.gradle.daemon=true
+#org.gradle.jvmargs=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005

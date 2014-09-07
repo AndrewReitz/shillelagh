@@ -1,23 +1,24 @@
-apply plugin: 'android'
+apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion "19.1.0"
+  compileSdkVersion 19
+  buildToolsVersion "19.1.0"
 
-    defaultConfig {
-        minSdkVersion minSdkVersion
-        targetSdkVersion targetSdkVersion
+  defaultConfig {
+    minSdkVersion minSdkVersion
+    targetSdkVersion targetSdkVersion
 
-        versionCode versionCode
-        versionName version
-    }
+    versionCode versionCode
+    versionName version
+  }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
-    }
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_7
+    targetCompatibility JavaVersion.VERSION_1_7
+  }
 }
 
 dependencies {
-    compile project(':shillelagh')
+  compile project(':shillelagh')
+  provided project(':shillelagh-processor')
 }

@@ -1,6 +1,4 @@
 apply plugin: 'java'
-apply plugin: 'propdeps'
-apply plugin: 'propdeps-idea'
 apply plugin: 'maven-publish'
 apply from: '../gradle/javaDoc.gradle'
 apply from: '../gradle/bintray.gradle'
@@ -10,7 +8,9 @@ targetCompatibility = JavaVersion.VERSION_1_6
 sourceCompatibility = JavaVersion.VERSION_1_6
 
 dependencies {
-  provided 'com.google.android:android:4.1.1.4'
+  compile project(':shillelagh')
+  compile 'com.google.guava:guava:18.0'
+  compile 'com.squareup:javawriter:2.5.0'
 }
 
 publishing {
@@ -31,7 +31,7 @@ publishing {
 
       pom.withXml {
         def Node root = asNode()
-        root.appendNode('name', 'Shillelagh')
+        root.appendNode('name', 'Shillelagh Processor')
         root.appendNode('description', 'Shillelagh Sqlite Android library')
         root.appendNode('url', 'https://github.com/pieces029/shillelagh')
 

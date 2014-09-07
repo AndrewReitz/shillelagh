@@ -9,7 +9,7 @@ was build around simplicity when using sqlite.
 
 Quick and dirty.
 - Create your model objects, the ones you want to persist
-- Add the `@Table` annotation to the model class, and make sure you have a field `long id`
+- Add the `@Table` annotation to the model class, and make sure you have a field `@Id long id`
 - Create your SQLiteOpenHelper and use `Shillelagh.createTable` to make your tables
 - Create an instance of `Shillelagh`
 - Create and save your objects!
@@ -25,6 +25,11 @@ Supported Types (and corresponding primitives)
 - String
 - Date
 - Boolean
+
+Must Provide Empty Constructors. Can be package protected
+Don't forget to update your database version if you change your models (Also create migration scripts)
+
+NOTES: Inner classes MUST be marked static
 
 ## TODO
 - Relationship Support

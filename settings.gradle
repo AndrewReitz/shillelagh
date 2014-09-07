@@ -1,2 +1,2 @@
-include ':shillelagh', ':shillelagh-sample', ':shillelagh-tests'
+include ':shillelagh', ':shillelagh-processor', ':shillelagh-sample', ':shillelagh-tests'
 rootProject.name = 'shillelagh-parent'

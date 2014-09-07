@@ -1,4 +1,4 @@
-package com.example.shillelagh;
+package shillelagh.crud;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -13,6 +13,7 @@ import java.io.File;
 import shillelagh.Shillelagh;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static shillelagh.Shillelagh.getTableName;
 
 public class DropTableTest extends AndroidTestCase {
 
@@ -27,6 +28,7 @@ public class DropTableTest extends AndroidTestCase {
     databaseFile = new File(dbDir, "database_test.db");
 
     if (databaseFile.exists()) {
+      //noinspection ResultOfMethodCallIgnored
       databaseFile.delete();
     }
     database = SQLiteDatabase.openOrCreateDatabase(databaseFile.getPath(), null);
@@ -37,17 +39,19 @@ public class DropTableTest extends AndroidTestCase {
   @Override
   protected void tearDown() throws Exception {
     database.close();
+    //noinspection ResultOfMethodCallIgnored
     databaseFile.delete();
     super.tearDown();
   }
 
   public void testShouldDropTable() {
     // Arrange
+    String tableName = getTableName(TestPrimitiveTable.class);
     String tableCheckQuery = String.format("SELECT DISTINCT tbl_name FROM " +
-        "sqlite_master WHERE tbl_name = \'%s\'", TestPrimitiveTable.class.getSimpleName());
+        "sqlite_master WHERE tbl_name = \'%s\'", tableName);
     String create = String.format("CREATE TABLE %s (id INTEGER PRIMARY KEY AUTOINCREMENT, aShort " +
         "INTEGER, anInt INTEGER, aLong INTEGER, aFloat REAL, aDouble REAL, aBoolean INTEGER);",
-        TestPrimitiveTable.class.getSimpleName());
+        tableName);
     database.execSQL(create);
 
     // Act

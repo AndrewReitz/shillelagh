@@ -37,6 +37,7 @@ public class MainActivity extends Activity {
     Book book = new Book();
     book.setPublished(Calendar.getInstance().getTime());
     book.setTitle("The Helping Phriendly Book");
+    book.setAuthor(author1);
 
     shillelagh.insert(author1);
     shillelagh.insert(author2);
@@ -47,7 +48,7 @@ public class MainActivity extends Activity {
     shillelagh.update(author1);
 
     Cursor cursor = shillelagh.rawQuery("SELECT * FROM Author WHERE name = \'" + author1.getName() + "\'");
-    List<Author> authors = Shillelagh.map(Author.class, cursor);
+    List<Author> authors = shillelagh.map(Author.class, cursor);
     for(Author a : authors) {
       Log.d(TAG, String.format("Author single select: %s", a.getName()));
     }
@@ -58,7 +59,7 @@ public class MainActivity extends Activity {
     }
 
     Cursor bookCurson = shillelagh.rawQuery("SELECT * FROM Book");
-    List<Book> books = Shillelagh.map(Book.class, bookCurson);
+    List<Book> books = shillelagh.map(Book.class, bookCurson);
     for(Book b : books) {
       Log.d(TAG, String.format("Book: %s", b));
       shillelagh.delete(Book.class, b.getId());
