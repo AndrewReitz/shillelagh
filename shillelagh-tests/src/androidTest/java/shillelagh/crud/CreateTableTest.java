@@ -1,4 +1,4 @@
-package com.example.shillelagh;
+package shillelagh.crud;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -17,8 +17,8 @@ import java.io.File;
 
 import shillelagh.Shillelagh;
 
-import static com.example.shillelagh.TestUtils.getTableName;
 import static org.fest.assertions.api.Assertions.assertThat;
+import static shillelagh.Shillelagh.getTableName;
 
 public class CreateTableTest extends AndroidTestCase {
 

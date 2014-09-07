@@ -1,10 +1,11 @@
-package com.example.shillelagh;
+package shillelagh.crud;
 
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.test.AndroidTestCase;
 
+import com.example.shillelagh.TestSQLiteOpenHelper;
 import com.example.shillelagh.model.TestBlobs;
 import com.example.shillelagh.model.TestBoxedPrimitivesTable;
 import com.example.shillelagh.model.TestJavaObjectsTable;
@@ -21,8 +22,8 @@ import java.util.List;
 
 import shillelagh.Shillelagh;
 
-import static com.example.shillelagh.TestUtils.getTableName;
 import static org.fest.assertions.api.Assertions.assertThat;
+import static shillelagh.Shillelagh.getTableName;
 
 /** Tests for mapping db objects to jave objects in Shillelagh */
 public class MapTest extends AndroidTestCase {
