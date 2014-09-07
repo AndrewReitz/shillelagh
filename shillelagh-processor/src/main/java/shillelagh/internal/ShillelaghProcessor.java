@@ -30,7 +30,7 @@ import shillelagh.Shillelagh;
 import shillelagh.Table;
 
 public final class ShillelaghProcessor extends AbstractProcessor {
-  static final boolean DEBUG = true;
+  static final boolean DEBUG = false;
 
   private Map<String, TableObject> oneToManyCache;
 
