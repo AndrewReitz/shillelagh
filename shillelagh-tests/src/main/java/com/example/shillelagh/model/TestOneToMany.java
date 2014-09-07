@@ -23,6 +23,10 @@ import shillelagh.Table;
     this.someValue = someValue;
   }
 
+  public List<Child> getChildren() {
+    return children;
+  }
+
   @Table public static class Child {
     @Id long id;
     @Field String testString;
