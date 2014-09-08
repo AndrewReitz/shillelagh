@@ -102,10 +102,12 @@ class TableObject {
     while (iterator.hasNext()) {
       TableColumn column = iterator.next();
       if (column.isOneToMany()) {
-        // remove the extra ", " after one to many
-        int length = sb.length();
-        sb.replace(length - 2, length, "");
-        break;
+        if (!iterator.hasNext()) {
+          // remove the extra ", " after one to many
+          int length = sb.length();
+          sb.replace(length - 2, length, "");
+        }
+        continue;
       }
       sb.append(column);
       if (iterator.hasNext()) {
