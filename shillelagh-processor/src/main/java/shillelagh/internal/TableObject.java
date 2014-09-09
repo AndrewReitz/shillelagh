@@ -142,11 +142,9 @@ class TableObject {
     if (this.isChildTable) {
       emitParentInsert(javaWriter);
       emitSelectAll(javaWriter);
-    } else {
-      // Don't allow inserts directly on child objects
-      emitInsert(javaWriter);
-      emitOneToOneInsert(javaWriter);
     }
+    emitInsert(javaWriter);
+    emitOneToOneInsert(javaWriter);
     emitGetId(javaWriter);
     emitCreateTable(javaWriter);
     emitDropTable(javaWriter);
@@ -210,7 +208,7 @@ class TableObject {
             "values.put(\"%s\", element.%s.getTime())", columnName, columnName);
       } else if (column.isOneToMany()) {
         childColumns.add(column);
-      } else {
+      } else if (!column.isOneToManyChild()) {
         javaWriter.emitStatement("values.put(\"%s\", element.%s)", columnName, columnName);
       }
     }
