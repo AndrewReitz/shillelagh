@@ -34,6 +34,7 @@ import java.util.List;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import shillelagh.Shillelagh;
 
@@ -90,9 +91,14 @@ public class MainActivity extends Activity {
         .toObservable()
         .observeOn(AndroidSchedulers.mainThread())
         .subscribeOn(Schedulers.io())
-        .subscribe(new Action1<Chapter>() {
-          @Override public void call(Chapter chapter) {
-            Log.d(TAG, chapter.getChapter());
+        .map(new Func1<Chapter, String>() {
+          @Override public String call(Chapter chapter) {
+            return chapter.getChapter();
+          }
+        })
+        .subscribe(new Action1<String>() {
+          @Override public void call(String title) {
+            Log.d(TAG, title);
           }
         });
   }

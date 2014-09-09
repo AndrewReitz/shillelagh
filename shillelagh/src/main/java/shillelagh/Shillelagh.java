@@ -49,7 +49,7 @@ public final class Shillelagh {
   public static final String $$MAP_OBJECT_FUNCTION = "map";
   public static final String $$MAP_SINGLE_FUNCTION = "singleMap";
 
-  private static final boolean HAS_RX_JAVA = hasRxJavaOnClasspath();
+  static final boolean HAS_RX_JAVA = hasRxJavaOnClasspath();
 
   private static final Map<Class<?>, Class<?>> CACHED_CLASSES
       = new LinkedHashMap<Class<?>, Class<?>>();
@@ -258,6 +258,21 @@ public final class Shillelagh {
     return map(tableClass, results);
   }
 
+  public <T> Observable<T> createQuery(final Class<? extends T> tableClass, final boolean distinct,
+                                 final String[] columns, final String selection,
+                                 final String[] selectionArgs, final String groupBy,
+                                 final String having, final String orderBy,
+                                 final String limit
+  ) {
+    final Shillelagh shillelagh = this;
+    return getObservable(tableClass, new QueryBuilder.CursorLoader() {
+      @Override public Cursor getCursor() {
+        return shillelagh.query(distinct, getTableName(tableClass), columns, selection,
+            selectionArgs, groupBy, having, orderBy, limit);
+      }
+    });
+  }
+
   /**
    * The equivalent of calling
    * {@link SQLiteDatabase#query(boolean, String, String[], String, String[], String, String,
@@ -310,17 +325,30 @@ public final class Shillelagh {
    * String, String)} and then calling {@link Shillelagh#map(Class, android.database.Cursor)}
    * on the result.
    */
-  public <T extends List<M>, M> T query(Class<? extends M> tableObject,  String[] columns,
+  public <T extends List<M>, M> T query(Class<? extends M> tableObject, String[] columns,
                                         String selection, String[] selectionArgs, String groupBy,
                                         String having, String orderBy) {
-    final Cursor results = sqliteOpenHelper.getReadableDatabase()
-        .query(getTableName(tableObject), columns, selection,
-            selectionArgs, groupBy, having, orderBy);
+    final Cursor results = query(getTableName(tableObject), columns, selection,
+        selectionArgs, groupBy, having, orderBy);
     return map(tableObject, results);
   }
 
-  /** Equivalent to calling {@link SQLiteDatabase#query(String, String[], String, String[], String,
-   *  String, String, String)} */
+  public <T> Observable<T> createQuery(final Class<? extends T> tableObject, final String[] columns,
+                                 final String selection, final String[] selectionArgs, final String groupBy,
+                                 final String having, final String orderBy) {
+    final Shillelagh shillelagh = this;
+    return getObservable(tableObject, new QueryBuilder.CursorLoader() {
+      @Override public Cursor getCursor() {
+        return shillelagh.query(getTableName(tableObject), columns, selection,
+            selectionArgs, groupBy, having, orderBy);
+      }
+    });
+  }
+
+  /**
+   * Equivalent to calling {@link SQLiteDatabase#query(String, String[], String, String[], String,
+   * String, String, String)}
+   */
   public Cursor query(String table, String[] columns, String selection, String[] selectionArgs,
                       String groupBy, String having, String orderBy, String limit) {
     return sqliteOpenHelper.getReadableDatabase().query(table, columns, selection, selectionArgs,
@@ -336,11 +364,24 @@ public final class Shillelagh {
                                         String selection, String[] selectionArgs, String groupBy,
                                         String having, String orderBy, String limit
   ) {
-    final Cursor results = sqliteOpenHelper.getReadableDatabase()
-        .query(getTableName(tableObject), columns, selection,
-            selectionArgs, groupBy, having, orderBy, limit);
+    final Cursor results = query(getTableName(tableObject), columns, selection,
+        selectionArgs, groupBy, having, orderBy, limit);
 
     return map(tableObject, results);
+  }
+
+  public <T> Observable<T> createQuery(final Class<? extends T> tableObject, final String[] columns,
+                                 final String selection, final String[] selectionArgs,
+                                 final String groupBy, final String having,
+                                 final String orderBy, final String limit
+  ) {
+    final Shillelagh shillelagh = this;
+    return getObservable(tableObject, new QueryBuilder.CursorLoader() {
+      @Override public Cursor getCursor() {
+        return shillelagh.query(getTableName(tableObject), columns, selection,
+            selectionArgs, groupBy, having, orderBy, limit);
+      }
+    });
   }
 
   /**
@@ -362,6 +403,16 @@ public final class Shillelagh {
     return this.rawQuery(tableObject, sql, null, sqlArgs);
   }
 
+  public <T> Observable<T> createQuery(Class<? extends T> tableObject, final String sql,
+                                       final Object... sqlArgs) {
+    final Shillelagh shillelagh = this;
+    return getObservable(tableObject, new QueryBuilder.CursorLoader() {
+      @Override public Cursor getCursor() {
+        return shillelagh.rawQuery(sql, sqlArgs);
+      }
+    });
+  }
+
   /** Equivalent to calling {@link SQLiteDatabase#rawQuery(String, String[])} */
   public Cursor rawQuery(String sql, String[] selectionArgs, Object... sqlArgs) {
     return sqliteOpenHelper.getReadableDatabase()
@@ -378,6 +429,16 @@ public final class Shillelagh {
     final Cursor result = sqliteOpenHelper.getReadableDatabase()
         .rawQuery(formatString(sql, sqlArgs), selectionArgs);
     return map(tableObject, result);
+  }
+
+  public <T> Observable<T> createQuery(Class<? extends T> tableObject, final String sql,
+                                    final String[] selectionArgs, final Object... sqlArgs) {
+    final Shillelagh shillelagh = this;
+    return getObservable(tableObject, new QueryBuilder.CursorLoader() {
+      @Override public Cursor getCursor() {
+        return shillelagh.rawQuery(sql, selectionArgs, sqlArgs);
+      }
+    });
   }
 
   /**
@@ -499,55 +560,20 @@ public final class Shillelagh {
     return false;
   }
 
-  public static class QueryBuilder<T> {
-    private final StringBuilder query;
-
-    private final Class<? extends T> tableObject;
-    private final Shillelagh shillelagh;
-
-    QueryBuilder(Class<? extends T> tableObject, Shillelagh shillelagh) {
-      this.tableObject = tableObject;
-      this.shillelagh = shillelagh;
-
-      query = new StringBuilder("SELECT * FROM ")
-          .append(getTableName(tableObject));
-    }
-
-    public QueryBuilder where(String columnName, String value) {
-      query.append(" ")
-          .append(columnName)
-          .append(" = ")
-          .append(value);
-      return this;
-    }
-
-    public List<T> toList() {
-      return shillelagh.rawQuery(tableObject, query.toString());
-    }
-
-    public Observable<T> toObservable() {
-      if (!HAS_RX_JAVA) {
-        throw new RuntimeException(
-            "RxJava not available! Add RxJava to your build to use this feature");
-      }
-
-      return Observable.create(new Observable.OnSubscribe<T>() {
-        @Override public void call(Subscriber<? super T> subscriber) {
-          final Cursor cursor = shillelagh.rawQuery(query.toString());
-          if (cursor.moveToFirst()) {
-            while (!cursor.isAfterLast()) {
-              if (!subscriber.isUnsubscribed()) {
-                subscriber.onNext(shillelagh.singleMap(tableObject, cursor));
-                cursor.moveToNext();
-              }
+  <T> Observable<T> getObservable(final Class<? extends T> tableObject,
+                                  final QueryBuilder.CursorLoader cursorLoader) {
+    return Observable.create(new Observable.OnSubscribe<T>() {
+      @Override public void call(Subscriber<? super T> subscriber) {
+        final Cursor cursor = cursorLoader.getCursor();
+        if (cursor.moveToFirst()) {
+          while (!cursor.isAfterLast()) {
+            if (!subscriber.isUnsubscribed()) {
+              subscriber.onNext(singleMap(tableObject, cursor));
+              cursor.moveToNext();
             }
           }
         }
-      });
-    }
-
-    public Cursor toCursor() {
-      return shillelagh.rawQuery(query.toString());
-    }
+      }
+    });
   }
 }
