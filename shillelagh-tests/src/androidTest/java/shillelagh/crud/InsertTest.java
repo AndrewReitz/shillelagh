@@ -186,7 +186,6 @@ public class InsertTest extends AndroidTestCase {
     final TestOneToOne expectedOneToOne = new TestOneToOne(expectedChild);
 
     // Act
-    shillelagh.insert(expectedChild);
     shillelagh.insert(expectedOneToOne);
 
     // Assert

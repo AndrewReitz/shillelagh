@@ -19,7 +19,7 @@ allprojects {
     jcenter()
   }
 
-  version = "0.2.0${project.hasProperty('release')? '' : '-SNAPSHOT'}"
+  version = "0.2.1${project.hasProperty('release')? '' : '-SNAPSHOT'}"
   group = 'com.andrewreitz'
 
   ext {

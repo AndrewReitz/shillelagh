@@ -1,9 +1,8 @@
-signing.keyId=gpgid
-signing.password=passwordhere
-signing.secretKeyRingFile=/home/user/.gnupg/secring.gpg
+# Copy me to gradle.properties
+bintrayUser=username
+bintrayPassword=password
 
-sonatypeUsername=usernamehere
-sonatypePassword=passwordhere
+signingPassword=signingpassword
 
 # Used for debugging
 #org.gradle.daemon=true

@@ -27,7 +27,7 @@ publishing {
       }
 
       groupId 'com.andrewreitz'
-      artifactId 'shillelagh'
+      artifactId 'shillelagh-processor'
 
       pom.withXml {
         def Node root = asNode()

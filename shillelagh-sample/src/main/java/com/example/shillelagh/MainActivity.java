@@ -8,16 +8,23 @@ import android.util.Log;
 
 import com.example.shillelagh.model.Author;
 import com.example.shillelagh.model.Book;
+import com.example.shillelagh.model.Chapter;
+import com.example.shillelagh.model.Image;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import shillelagh.Shillelagh;
 
+import static shillelagh.Shillelagh.getTableName;
+
 public class MainActivity extends Activity {
 
-  private static final String TAG = "ShillelaghTest";
+  private static final String TAG = "ShillelaghExample";
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -25,42 +32,36 @@ public class MainActivity extends Activity {
     ShillelaghApp shillelaghApp = ShillelaghApp.get(this);
     Shillelagh shillelagh = shillelaghApp.getShillelagh();
 
-    Author author1 = new Author();
-    author1.setName("Icculus");
+    Author author1 = new Author("Icculus");
 
-    Author author2 = new Author();
-    author2.setName("Col. Forbin");
+    final List<Chapter> chapters = Arrays.asList(
+        new Chapter("Chapter 1"),
+        new Chapter("Chapter 2"),
+        new Chapter("Chapter 3")
+    );
 
-    Author author3 = new Author();
-    author3.setName("Tela");
+    final byte[] imageData = { 1, 2, 3, 4, 5 };
+    final Image image = new Image("Awesome Image", new GregorianCalendar(2000, 1, 1).getTime(),
+        imageData);
 
-    Book book = new Book();
-    book.setPublished(Calendar.getInstance().getTime());
-    book.setTitle("The Helping Phriendly Book");
-    book.setAuthor(author1);
+    final Date published = Calendar.getInstance().getTime();
+    Book book = new Book("The Helping Phriendly Book", author1, published, chapters, image);
 
-    shillelagh.insert(author1);
-    shillelagh.insert(author2);
-    shillelagh.insert(author3);
     shillelagh.insert(book);
 
     author1.setName("Wilson");
     shillelagh.update(author1);
 
-    Cursor cursor = shillelagh.rawQuery("SELECT * FROM Author WHERE name = \'" + author1.getName() + "\'");
+    Cursor cursor = shillelagh.rawQuery("SELECT * FROM " + getTableName(Author.class)
+        + " WHERE name = \'" + author1.getName() + "\'");
     List<Author> authors = shillelagh.map(Author.class, cursor);
-    for(Author a : authors) {
+    for (Author a : authors) {
       Log.d(TAG, String.format("Author single select: %s", a.getName()));
     }
 
-    authors = shillelagh.rawQuery(Author.class, "SELECT * FROM Author");
-    for(Author a : authors) {
-      Log.d(TAG, String.format("Author: %s", a.getName()));
-    }
-
-    Cursor bookCurson = shillelagh.rawQuery("SELECT * FROM Book");
+    Cursor bookCurson = shillelagh.rawQuery("SELECT * FROM " + getTableName(Book.class));
     List<Book> books = shillelagh.map(Book.class, bookCurson);
-    for(Book b : books) {
+    for (Book b : books) {
       Log.d(TAG, String.format("Book: %s", b));
       shillelagh.delete(Book.class, b.getId());
     }

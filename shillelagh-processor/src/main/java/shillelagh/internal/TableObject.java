@@ -37,6 +37,7 @@ class TableObject {
   private static final String GET_ID_FUNCTION = "getId";
   private static final String SELECT_ALL_FUNCTION = "selectAll";
   private static final String PARENT_INSERT_FUNCTION = "parentInsert";
+  private static final String INSERT_ONE_TO_ONE = "insertOneToOne";
 
   /** Used as a template to create a new table */
   private static final String CREATE_TABLE_DEFAULT = "CREATE TABLE %s "
@@ -101,10 +102,12 @@ class TableObject {
     while (iterator.hasNext()) {
       TableColumn column = iterator.next();
       if (column.isOneToMany()) {
-        // remove the extra ", " after one to many
-        int length = sb.length();
-        sb.replace(length - 2, length, "");
-        break;
+        if (!iterator.hasNext()) {
+          // remove the extra ", " after one to many
+          int length = sb.length();
+          sb.replace(length - 2, length, "");
+        }
+        continue;
       }
       sb.append(column);
       if (iterator.hasNext()) {
@@ -139,10 +142,9 @@ class TableObject {
     if (this.isChildTable) {
       emitParentInsert(javaWriter);
       emitSelectAll(javaWriter);
-    } else {
-      // Don't allow inserts directly on child objects
-      emitInsert(javaWriter);
     }
+    emitInsert(javaWriter);
+    emitOneToOneInsert(javaWriter);
     emitGetId(javaWriter);
     emitCreateTable(javaWriter);
     emitDropTable(javaWriter);
@@ -193,18 +195,20 @@ class TableObject {
     List<TableColumn> childColumns = Lists.newLinkedList();
     for (TableColumn column : columns) {
       String columnName = column.getColumnName();
-      if (column.getSqlType() == SqliteType.BLOB && !column.isByteArray()) {
+      if (column.isBlob() && !column.isByteArray()) {
         javaWriter.emitStatement("values.put(\"%s\", %s(element.%s))", columnName,
             SERIALIZE_FUNCTION, columnName);
       } else if (column.isOneToOne()) {
-        javaWriter.emitStatement("values.put(\"%s\", %s%s.%s(element.%s))", columnName,
-            column.getType(), $$SUFFIX, GET_ID_FUNCTION, columnName);
+        javaWriter.emitStatement("%s%s.%s(element.%s, db)", column.getType(),
+            $$SUFFIX, INSERT_ONE_TO_ONE, column.getColumnName())
+            .emitStatement("values.put(\"%s\", %s%s.%s(element.%s))", columnName,
+                column.getType(), $$SUFFIX, GET_ID_FUNCTION, columnName);
       } else if (column.isDate()) {
         javaWriter.emitStatement(
             "values.put(\"%s\", element.%s.getTime())", columnName, columnName);
       } else if (column.isOneToMany()) {
         childColumns.add(column);
-      } else {
+      } else if (!column.isOneToManyChild()) {
         javaWriter.emitStatement("values.put(\"%s\", element.%s)", columnName, columnName);
       }
     }
@@ -330,7 +334,7 @@ class TableObject {
         javaWriter.emitStatement("Cursor childCursor = %s%s.%s(db)", column.getType(),
             $$SUFFIX, SELECT_ALL_FUNCTION)
             .emitStatement("tableObject.%s = %s%s.%s(childCursor, db)",
-            column.getColumnName(), column.getType(), $$SUFFIX, $$MAP_OBJECT_FUNCTION);
+                column.getColumnName(), column.getType(), $$SUFFIX, $$MAP_OBJECT_FUNCTION);
       } else if (column.isOneToManyChild()) {
         // TODO Skip and have custom mapping?
       } else {
@@ -396,6 +400,17 @@ class TableObject {
     javaWriter.beginMethod("Cursor", SELECT_ALL_FUNCTION, EnumSet.of(PUBLIC, STATIC),
         "SQLiteDatabase", "db")
         .emitStatement("return db.rawQuery(\"SELECT * FROM %s\", null)", getTableName())
+        .endMethod();
+  }
+
+  private void emitOneToOneInsert(JavaWriter javaWriter) throws IOException {
+    logger.d("emitOneToOneInsert");
+    javaWriter.beginMethod("void", INSERT_ONE_TO_ONE, EnumSet.of(PUBLIC, STATIC), getTargetClass(),
+        "element", "SQLiteDatabase", "db")
+        .emitStatement("%s(element, db)", $$INSERT_OBJECT_FUNCTION)
+        .emitStatement("long id = DatabaseUtils.longForQuery(db, \"%s\", null)",
+            String.format(GET_ID_OF_LAST_INSERTED_ROW_SQL, getTableName()))
+        .emitStatement("element.%s = id", idColumnName)
         .endMethod();
   }
 

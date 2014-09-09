@@ -228,7 +228,6 @@ public class UpdateTest extends AndroidTestCase {
     final TestOneToOne insertTestOneToOne = new TestOneToOne(insertTestChild);
 
     // Act
-    shillelagh.insert(insertTestChild);
     shillelagh.insert(insertTestOneToOne);
     shillelagh.insert(expectedChild);
 

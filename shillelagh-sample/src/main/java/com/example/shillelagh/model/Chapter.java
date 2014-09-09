@@ -5,30 +5,26 @@ import shillelagh.OrmOnly;
 import shillelagh.Table;
 
 @Table
-public class Author extends Base {
-  @Field String name;
+public class Chapter extends Base {
+  @Field String chapter;
 
   /**
    * Used internally by Shillelagh. OrmOnly Annotation is only a documentation annotation, and
    * is not required for Shillelagh usage.
    */
-  @OrmOnly Author() { }
+  @OrmOnly Chapter() { }
 
-  public Author(String name) {
-    this.name = name;
+  public Chapter(String chapter) {
+    this.chapter = chapter;
   }
 
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
+  public String getChapter() {
+    return chapter;
   }
 
   @Override public String toString() {
-    return "Author{" +
-        "name='" + name + '\'' +
+    return "Chapter{" +
+        "chapter='" + chapter + '\'' +
         '}';
   }
 }
