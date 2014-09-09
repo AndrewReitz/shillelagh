@@ -4,8 +4,8 @@
 
 ** Currently a work in progress. Please submit any feature requests **
 
-Shillelagh is an sqlite library. It was build to make life easier. The entire library 
-was build around simplicity when using sqlite. 
+Shillelagh is an sqlite library. It was built to make life easier. The entire library 
+was built around simplicity when using sqlite in Android. 
 
 Quick and dirty.
 - Create your model objects, the ones you want to persist
@@ -15,6 +15,8 @@ Quick and dirty.
 - Create and save your objects!
 
 For how to use see the [example](https://github.com/pieces029/shillelagh/tree/master/shillelagh-sample). 
+
+# Supported Types
 
 Supported Types (and corresponding primitives)
 - Integer
@@ -26,30 +28,57 @@ Supported Types (and corresponding primitives)
 - Date
 - Boolean
 
-Must Provide Empty Constructors. Can be package protected
-Don't forget to update your database version if you change your models (Also create migration scripts)
+## One to Many and One to One
 
-NOTES: Inner classes MUST be marked static
+One to one and one to many relationships are supported. You will need to make sure that the child 
+objects are annotated like any other tables. For one to many, make sure you use a list, arrays 
+are currently not supported.
+
+## Blobs
+
+Byte arrays are supported with nothing out of the ordinary needing to be done. If you would like to 
+save another object type as a blob, you will need to tell Shillelagh that it should be serialized
+by adding `@Field(isBlob = true)` to the annotation. These objects MUST also implement the 
+Serializable interface.
+
+## Other Notes
+
+- Empty constructors must be provided at package protected level or higher. There is the `@OrmOnly`
+ annotation provided to indicate to others that the constructor is only visible for Shillelagh
+- Inner classes MUST be marked static.
+- Don't forget to update your database version if you change your models 
+(Also create migration scripts).
 
 ## TODO
-- Relationship Support
+- Async Calls
+- Better ways to retrieve data
 - Constraint Support
-- More Unit Tests
-- Documentation
+- More Unit Tests!
 
 # Download
 
-Download [the latest JAR](http://repository.sonatype.org/service/local/artifact/maven/redirect?r=central-proxy&g=com.andrewreitz&a=shillelagh&v=LATEST) or grab via Maven:
+You will need to include the shillelagh jar in your application's runtime and shillelagh-processor 
+jar in your application compile time. You can download the jars 
+[here](//bintray.com/pieces/maven/Shillelagh/view) or use Maven/Gradle configurations below.
+
+## Maven
 ```xml
   <dependency>
     <groupId>com.andrewreitz</groupId>
     <artifactId>shillelagh</artifactId>
-    <version>0.1.0</version>
+    <version>0.2.0</version>
+  </dependency>
+  <dependency>
+    <groupId>com.andrewreitz</groupId>
+    <artifactId>shillelagh-processor</artifactId>
+    <version>0.2.0</version>
+    <optional>true</optional>
   </dependency>
 ```
-or Gradle:
+## Gradle:
 ```groovy
-  compile 'com.andrewreitz:shillelagh:0.1.0'
+  compile 'com.andrewreitz:shillelagh:0.2.0'
+  provided 'com.andrewreitz:shillelagh:0.2.0'
 ```
 
 # License
