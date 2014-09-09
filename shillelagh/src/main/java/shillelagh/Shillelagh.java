@@ -264,6 +264,11 @@ public final class Shillelagh {
                                  final String having, final String orderBy,
                                  final String limit
   ) {
+    if (!HAS_RX_JAVA) {
+      throw new RuntimeException(
+          "RxJava not available! Add RxJava to your build to use this feature");
+    }
+
     final Shillelagh shillelagh = this;
     return getObservable(tableClass, new QueryBuilder.CursorLoader() {
       @Override public Cursor getCursor() {
@@ -336,6 +341,11 @@ public final class Shillelagh {
   public <T> Observable<T> createQuery(final Class<? extends T> tableObject, final String[] columns,
                                  final String selection, final String[] selectionArgs, final String groupBy,
                                  final String having, final String orderBy) {
+    if (!HAS_RX_JAVA) {
+      throw new RuntimeException(
+          "RxJava not available! Add RxJava to your build to use this feature");
+    }
+
     final Shillelagh shillelagh = this;
     return getObservable(tableObject, new QueryBuilder.CursorLoader() {
       @Override public Cursor getCursor() {
@@ -375,6 +385,10 @@ public final class Shillelagh {
                                  final String groupBy, final String having,
                                  final String orderBy, final String limit
   ) {
+    if (!HAS_RX_JAVA) {
+      throw new RuntimeException(
+          "RxJava not available! Add RxJava to your build to use this feature");
+    }
     final Shillelagh shillelagh = this;
     return getObservable(tableObject, new QueryBuilder.CursorLoader() {
       @Override public Cursor getCursor() {
@@ -405,6 +419,11 @@ public final class Shillelagh {
 
   public <T> Observable<T> createQuery(Class<? extends T> tableObject, final String sql,
                                        final Object... sqlArgs) {
+    if (!HAS_RX_JAVA) {
+      throw new RuntimeException(
+          "RxJava not available! Add RxJava to your build to use this feature");
+    }
+
     final Shillelagh shillelagh = this;
     return getObservable(tableObject, new QueryBuilder.CursorLoader() {
       @Override public Cursor getCursor() {
@@ -433,6 +452,11 @@ public final class Shillelagh {
 
   public <T> Observable<T> createQuery(Class<? extends T> tableObject, final String sql,
                                     final String[] selectionArgs, final Object... sqlArgs) {
+    if (!HAS_RX_JAVA) {
+      throw new RuntimeException(
+          "RxJava not available! Add RxJava to your build to use this feature");
+    }
+
     final Shillelagh shillelagh = this;
     return getObservable(tableObject, new QueryBuilder.CursorLoader() {
       @Override public Cursor getCursor() {
