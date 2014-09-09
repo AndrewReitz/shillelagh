@@ -30,6 +30,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import rx.Observable;
+import rx.Subscriber;
+
 public final class Shillelagh {
 
   /**
@@ -44,6 +47,9 @@ public final class Shillelagh {
   public static final String $$DELETE_OBJECT_FUNCTION = "deleteObject";
   public static final String $$GET_OBJECT_BY_ID = "getById";
   public static final String $$MAP_OBJECT_FUNCTION = "map";
+  public static final String $$MAP_SINGLE_FUNCTION = "singleMap";
+
+  private static final boolean HAS_RX_JAVA = hasRxJavaOnClasspath();
 
   private static final Map<Class<?>, Class<?>> CACHED_CLASSES
       = new LinkedHashMap<Class<?>, Class<?>>();
@@ -193,6 +199,21 @@ public final class Shillelagh {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  public <T> T singleMap(Class<? extends T> tableClass, Cursor cursor) {
+    try {
+      final Class<?> shillelagh = findShillelaghForClass(tableClass);
+      final Method mapMethod = findMethodForClass(shillelagh, $$MAP_SINGLE_FUNCTION,
+          /* cursor is interface so can't resolve automatically */
+          new Class<?>[]{Cursor.class, SQLiteDatabase.class});
+      return (T) mapMethod.invoke(null, cursor, getReadableDatabase());
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException("Unable to map cursor to " + tableClass, e);
+    }
+  }
+
   /** Get the table name of the class */
   public static String getTableName(Class<?> clazz) {
     return clazz.getCanonicalName().replace(".", "_");
@@ -200,6 +221,9 @@ public final class Shillelagh {
 
   // Shillelagh Selectors
 
+  public <T> QueryBuilder<T> createQuery(Class<? extends T> tableObject) {
+    return new QueryBuilder<T>(tableObject, this);
+  }
 
   // End Shillelagh Selectors
 
@@ -291,7 +315,7 @@ public final class Shillelagh {
                                         String having, String orderBy) {
     final Cursor results = sqliteOpenHelper.getReadableDatabase()
         .query(getTableName(tableObject), columns, selection,
-        selectionArgs, groupBy, having, orderBy);
+            selectionArgs, groupBy, having, orderBy);
     return map(tableObject, results);
   }
 
@@ -314,7 +338,7 @@ public final class Shillelagh {
   ) {
     final Cursor results = sqliteOpenHelper.getReadableDatabase()
         .query(getTableName(tableObject), columns, selection,
-        selectionArgs, groupBy, having, orderBy, limit);
+            selectionArgs, groupBy, having, orderBy, limit);
 
     return map(tableObject, results);
   }
@@ -466,14 +490,27 @@ public final class Shillelagh {
     return args.length == 0 ? message : String.format(message, args);
   }
 
-  public static class QueryBuilder {
-    private final StringBuilder query = new StringBuilder("SELECT * FROM ");
+  private static boolean hasRxJavaOnClasspath() {
+    try {
+      Class.forName("rx.Observable");
+      return true;
+    } catch (ClassNotFoundException ignored) {
+    }
+    return false;
+  }
 
-    private final Class<?> clazz;
+  public static class QueryBuilder<T> {
+    private final StringBuilder query;
 
-    QueryBuilder(Class<?> clazz, Shillelagh shillelagh) {
-      this.clazz = clazz;
-      query.append(getTableName(clazz));
+    private final Class<? extends T> tableObject;
+    private final Shillelagh shillelagh;
+
+    QueryBuilder(Class<? extends T> tableObject, Shillelagh shillelagh) {
+      this.tableObject = tableObject;
+      this.shillelagh = shillelagh;
+
+      query = new StringBuilder("SELECT * FROM ")
+          .append(getTableName(tableObject));
     }
 
     public QueryBuilder where(String columnName, String value) {
@@ -484,16 +521,33 @@ public final class Shillelagh {
       return this;
     }
 
-    public <T extends List> T toList() {
-      return null;
+    public List<T> toList() {
+      return shillelagh.rawQuery(tableObject, query.toString());
     }
 
-    public <T> T toObservable() {
-      return null;
+    public Observable<T> toObservable() {
+      if (!HAS_RX_JAVA) {
+        throw new RuntimeException(
+            "RxJava not available! Add RxJava to your build to use this feature");
+      }
+
+      return Observable.create(new Observable.OnSubscribe<T>() {
+        @Override public void call(Subscriber<? super T> subscriber) {
+          final Cursor cursor = shillelagh.rawQuery(query.toString());
+          if (cursor.moveToFirst()) {
+            while (!cursor.isAfterLast()) {
+              if (!subscriber.isUnsubscribed()) {
+                subscriber.onNext(shillelagh.singleMap(tableObject, cursor));
+                cursor.moveToNext();
+              }
+            }
+          }
+        }
+      });
     }
 
-    public <T> T toCursor() {
-      return null;
+    public Cursor toCursor() {
+      return shillelagh.rawQuery(query.toString());
     }
   }
 }

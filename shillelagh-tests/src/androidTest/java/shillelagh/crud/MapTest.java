@@ -242,6 +242,7 @@ public class MapTest extends AndroidTestCase {
     assertThat(result.size()).isEqualTo(1);
     TestOneToMany resultRow = result.get(0);
     assertThat(resultRow).isEqualsToByComparingFields(parent);
+    assertThat(resultRow.getChildren().size()).isEqualTo(1);
     assertThat(resultRow.getChildren().get(0)).isEqualsToByComparingFields(child);
   }
 

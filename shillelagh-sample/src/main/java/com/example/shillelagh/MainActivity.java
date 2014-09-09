@@ -18,7 +18,6 @@ package com.example.shillelagh;
 
 import android.app.Activity;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -27,13 +26,15 @@ import com.example.shillelagh.model.Book;
 import com.example.shillelagh.model.Chapter;
 import com.example.shillelagh.model.Image;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 import shillelagh.Shillelagh;
 
 import static shillelagh.Shillelagh.getTableName;
@@ -84,5 +85,15 @@ public class MainActivity extends Activity {
     for (Author a : authors) {
       shillelagh.delete(a);
     }
+
+    shillelagh.createQuery(Chapter.class)
+        .toObservable()
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribeOn(Schedulers.io())
+        .subscribe(new Action1<Chapter>() {
+          @Override public void call(Chapter chapter) {
+            Log.d(TAG, chapter.getChapter());
+          }
+        });
   }
 }

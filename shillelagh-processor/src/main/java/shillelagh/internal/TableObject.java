@@ -33,6 +33,8 @@ import java.util.List;
 
 import javax.lang.model.element.Element;
 
+import shillelagh.Shillelagh;
+
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
@@ -42,6 +44,7 @@ import static shillelagh.Shillelagh.$$DROP_TABLE_FUNCTION;
 import static shillelagh.Shillelagh.$$GET_OBJECT_BY_ID;
 import static shillelagh.Shillelagh.$$INSERT_OBJECT_FUNCTION;
 import static shillelagh.Shillelagh.$$MAP_OBJECT_FUNCTION;
+import static shillelagh.Shillelagh.$$MAP_SINGLE_FUNCTION;
 import static shillelagh.Shillelagh.$$SUFFIX;
 import static shillelagh.Shillelagh.$$UPDATE_ID_FUNCTION;
 import static shillelagh.Shillelagh.$$UPDATE_OBJECT_FUNCTION;
@@ -169,6 +172,7 @@ class TableObject {
     emitDeleteWithId(javaWriter);
     emitDeleteWithObject(javaWriter);
     emitMapCursorToObject(javaWriter);
+    emitSingleMap(javaWriter);
     emitSelectById(javaWriter);
     emitByteArraySerialization(javaWriter);
     javaWriter.endType();
@@ -319,6 +323,19 @@ class TableObject {
         .emitStatement("List<%s> tableObjects = new LinkedList<%s>()", targetClass, targetClass)
         .beginControlFlow("if (cursor.moveToFirst())")
         .beginControlFlow("while (!cursor.isAfterLast())")
+        .emitStatement("%s tableObject = %s(cursor, db)", targetClass, $$MAP_SINGLE_FUNCTION)
+        .emitStatement("tableObjects.add(tableObject)")
+        .emitStatement("cursor.moveToNext()")
+        .endControlFlow()
+        .endControlFlow()
+        .emitStatement("return tableObjects")
+        .endMethod();
+  }
+
+  private void emitSingleMap(JavaWriter javaWriter) throws IOException {
+    String targetClass = getTargetClass();
+    javaWriter.beginMethod(targetClass, $$MAP_SINGLE_FUNCTION, EnumSet.of(PUBLIC, STATIC),
+        "Cursor", "cursor", "SQLiteDatabase", "db")
         .emitStatement("%s tableObject = new %s()", targetClass, getTargetClass())
         .emitStatement("tableObject.%s = cursor.getLong(cursor.getColumnIndex(\"%s\"))",
             idColumnName, idColumnName);
@@ -358,11 +375,8 @@ class TableObject {
             columnName, CursorFunctions.get(column.getType()), columnName);
       }
     }
-    javaWriter.emitStatement("tableObjects.add(tableObject)")
-        .emitStatement("cursor.moveToNext()")
-        .endControlFlow()
-        .endControlFlow()
-        .emitStatement("return tableObjects")
+
+    javaWriter.emitStatement("return tableObject")
         .endMethod();
   }
 
