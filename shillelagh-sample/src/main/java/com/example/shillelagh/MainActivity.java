@@ -68,15 +68,14 @@ public class MainActivity extends Activity {
     author1.setName("Wilson");
     shillelagh.update(author1);
 
-    Cursor cursor = shillelagh.rawQuery("SELECT * FROM " + getTableName(Author.class)
-        + " WHERE name = \'" + author1.getName() + "\'");
-    List<Author> authors = shillelagh.map(Author.class, cursor);
+    List<Author> authors = shillelagh.rawQuery(Author.class,
+        "SELECT * FROM %s WHERE name = \'%s\'", getTableName(Author.class), author1.getName());
     for (Author a : authors) {
       Log.d(TAG, String.format("Author single select: %s", a.getName()));
     }
 
-    Cursor bookCurson = shillelagh.rawQuery("SELECT * FROM " + getTableName(Book.class));
-    List<Book> books = shillelagh.map(Book.class, bookCurson);
+    Cursor bookCursor = shillelagh.rawQuery("SELECT * FROM %s", getTableName(Book.class));
+    List<Book> books = shillelagh.map(Book.class, bookCursor);
     for (Book b : books) {
       Log.d(TAG, String.format("Book: %s", b));
       shillelagh.delete(Book.class, b.getId());
