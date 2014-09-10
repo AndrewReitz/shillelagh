@@ -16,12 +16,16 @@
 
 package com.example.shillelagh;
 
+import android.annotation.TargetApi;
 import android.app.Application;
 import android.content.Context;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Build;
+import android.os.StrictMode;
 
 import shillelagh.Shillelagh;
 
+@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class ShillelaghApp extends Application {
 
   /** Shillelagh Singleton */
@@ -29,6 +33,17 @@ public class ShillelaghApp extends Application {
 
   @Override public void onCreate() {
     super.onCreate();
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+      StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+          .detectAll()
+          .penaltyLog()
+          .build());
+      StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+          .detectAll()
+          .penaltyLog()
+          .build());
+    }
 
     SQLiteOpenHelper sqliteOpenHelper = new ExampleSqliteHelper(this);
     shillelagh = new Shillelagh(sqliteOpenHelper);

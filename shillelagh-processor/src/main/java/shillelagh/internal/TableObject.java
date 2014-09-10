@@ -367,7 +367,8 @@ class TableObject {
         javaWriter.emitStatement("Cursor childCursor = %s%s.%s(db)", column.getType(),
             $$SUFFIX, SELECT_ALL_FUNCTION)
             .emitStatement("tableObject.%s = %s%s.%s(childCursor, db)",
-                column.getColumnName(), column.getType(), $$SUFFIX, $$MAP_OBJECT_FUNCTION);
+                column.getColumnName(), column.getType(), $$SUFFIX, $$MAP_OBJECT_FUNCTION)
+            .emitStatement("childCursor.close()");
       } else if (column.isOneToManyChild()) {
         // TODO Skip and have custom mapping?
       } else {
@@ -385,9 +386,11 @@ class TableObject {
     logger.d("emitSelectById");
     javaWriter.beginMethod(getTargetClass(), $$GET_OBJECT_BY_ID, EnumSet.of(PUBLIC, STATIC), "long",
         "id", "SQLiteDatabase", "db")
-        .emitStatement(
-            "return %s(db.rawQuery(\"SELECT * FROM %s WHERE %s  = id\", null), db).get(0)",
-            $$MAP_OBJECT_FUNCTION, getTableName(), idColumnName)
+        .emitStatement("Cursor cursor = db.rawQuery(\"SELECT * FROM %s WHERE %s  = id\", null)"
+            , getTableName(), idColumnName)
+        .emitStatement("%s value = %s(cursor, db).get(0)", getTargetClass(), $$MAP_OBJECT_FUNCTION)
+        .emitStatement("cursor.close()")
+        .emitStatement("return value")
         .endMethod();
   }
 

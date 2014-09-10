@@ -32,6 +32,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import rx.Notification;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
@@ -48,7 +49,7 @@ public class MainActivity extends Activity {
     super.onCreate(savedInstanceState);
 
     ShillelaghApp shillelaghApp = ShillelaghApp.get(this);
-    Shillelagh shillelagh = shillelaghApp.getShillelagh();
+    final Shillelagh shillelagh = shillelaghApp.getShillelagh();
 
     Author author1 = new Author("Icculus");
 
@@ -91,6 +92,11 @@ public class MainActivity extends Activity {
         .toObservable()
         .observeOn(AndroidSchedulers.mainThread())
         .subscribeOn(Schedulers.io())
+        .doOnNext(new Action1<Chapter>() {
+          @Override public void call(Chapter chapter) {
+            shillelagh.delete(chapter);
+          }
+        })
         .map(new Func1<Chapter, String>() {
           @Override public String call(Chapter chapter) {
             return chapter.getChapter();

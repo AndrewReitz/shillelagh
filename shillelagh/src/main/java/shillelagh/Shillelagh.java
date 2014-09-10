@@ -191,7 +191,9 @@ public final class Shillelagh {
       final Method mapMethod = findMethodForClass(shillelagh, $$MAP_OBJECT_FUNCTION,
           /* cursor is interface so can't resolve automatically */
           new Class<?>[]{Cursor.class, SQLiteDatabase.class});
-      return (T) mapMethod.invoke(null, cursor, getReadableDatabase());
+      final T results = (T) mapMethod.invoke(null, cursor, getReadableDatabase());
+      cursor.close();
+      return results;
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -447,7 +449,6 @@ public final class Shillelagh {
   ) {
     final Cursor result = sqliteOpenHelper.getReadableDatabase()
         .rawQuery(formatString(sql, sqlArgs), selectionArgs);
-    result.close();
     return map(tableObject, result);
   }
 
@@ -598,6 +599,7 @@ public final class Shillelagh {
             }
           }
         }
+        cursor.close();
         subscriber.onCompleted();
       }
     });
