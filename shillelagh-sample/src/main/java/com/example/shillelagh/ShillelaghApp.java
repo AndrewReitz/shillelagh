@@ -37,11 +37,11 @@ public class ShillelaghApp extends Application {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
       StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
           .detectAll()
-          .penaltyLog()
+          .penaltyDeath()
           .build());
       StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
           .detectAll()
-          .penaltyLog()
+          .penaltyDeath()
           .build());
     }
 
