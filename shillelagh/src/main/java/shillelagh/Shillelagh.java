@@ -447,6 +447,7 @@ public final class Shillelagh {
   ) {
     final Cursor result = sqliteOpenHelper.getReadableDatabase()
         .rawQuery(formatString(sql, sqlArgs), selectionArgs);
+    result.close();
     return map(tableObject, result);
   }
 
@@ -597,6 +598,7 @@ public final class Shillelagh {
             }
           }
         }
+        subscriber.onCompleted();
       }
     });
   }
