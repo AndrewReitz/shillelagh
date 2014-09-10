@@ -28,7 +28,7 @@ artifactory {
       password = bintrayPassword
     }
     defaults {
-      publications('dist')
+      publications('mavenJava')
     }
   }
   resolve {
