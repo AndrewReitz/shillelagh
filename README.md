@@ -12,7 +12,9 @@ Quick and dirty.
 - Create an instance of `Shillelagh`
 - Create and save your objects!
 
-For how to use see the [example](https://github.com/pieces029/shillelagh/tree/master/shillelagh-sample). 
+For how to use see the 
+[example](//github.com/pieces029/shillelagh/tree/master/shillelagh-sample) or the 
+[JavaDocs](//pieces029.github.io/shillelagh). 
 
 # Supported Types
 
