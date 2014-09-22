@@ -18,7 +18,6 @@ package com.example.shillelagh;
 
 import android.app.Activity;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -27,13 +26,16 @@ import com.example.shillelagh.model.Book;
 import com.example.shillelagh.model.Chapter;
 import com.example.shillelagh.model.Image;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 import shillelagh.Shillelagh;
 
 import static shillelagh.Shillelagh.getTableName;
@@ -46,7 +48,7 @@ public class MainActivity extends Activity {
     super.onCreate(savedInstanceState);
 
     ShillelaghApp shillelaghApp = ShillelaghApp.get(this);
-    Shillelagh shillelagh = shillelaghApp.getShillelagh();
+    final Shillelagh shillelagh = shillelaghApp.getShillelagh();
 
     Author author1 = new Author("Icculus");
 
@@ -68,15 +70,14 @@ public class MainActivity extends Activity {
     author1.setName("Wilson");
     shillelagh.update(author1);
 
-    Cursor cursor = shillelagh.rawQuery("SELECT * FROM " + getTableName(Author.class)
-        + " WHERE name = \'" + author1.getName() + "\'");
-    List<Author> authors = shillelagh.map(Author.class, cursor);
+    List<Author> authors = shillelagh.rawQuery(Author.class,
+        "SELECT * FROM %s WHERE name = \'%s\'", getTableName(Author.class), author1.getName());
     for (Author a : authors) {
       Log.d(TAG, String.format("Author single select: %s", a.getName()));
     }
 
-    Cursor bookCurson = shillelagh.rawQuery("SELECT * FROM " + getTableName(Book.class));
-    List<Book> books = shillelagh.map(Book.class, bookCurson);
+    Cursor bookCursor = shillelagh.rawQuery("SELECT * FROM %s", getTableName(Book.class));
+    List<Book> books = shillelagh.map(Book.class, bookCursor);
     for (Book b : books) {
       Log.d(TAG, String.format("Book: %s", b));
       shillelagh.delete(Book.class, b.getId());
@@ -85,5 +86,24 @@ public class MainActivity extends Activity {
     for (Author a : authors) {
       shillelagh.delete(a);
     }
+
+    shillelagh.get(Chapter.class)
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribeOn(Schedulers.io())
+        .doOnNext(new Action1<Chapter>() {
+          @Override public void call(Chapter chapter) {
+            shillelagh.delete(chapter);
+          }
+        })
+        .map(new Func1<Chapter, String>() {
+          @Override public String call(Chapter chapter) {
+            return chapter.getChapter();
+          }
+        })
+        .subscribe(new Action1<String>() {
+          @Override public void call(String title) {
+            Log.d(TAG, title);
+          }
+        });
   }
 }

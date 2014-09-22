@@ -27,6 +27,7 @@ sourceCompatibility = JavaVersion.VERSION_1_6
 
 dependencies {
   provided 'com.google.android:android:4.1.1.4'
+  optional 'com.netflix.rxjava:rxjava-core:0.20.4'
 }
 
 publishing {

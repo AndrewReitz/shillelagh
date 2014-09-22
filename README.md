@@ -2,8 +2,6 @@
 
 ![Library Icon](AndroidShillelagh.png)
 
-** Currently a work in progress. Please submit any feature requests **
-
 Shillelagh is an sqlite library. It was built to make life easier. The entire library 
 was built around simplicity when using sqlite in Android. 
 
@@ -49,12 +47,6 @@ Serializable interface.
 - Don't forget to update your database version if you change your models 
 (Also create migration scripts).
 
-## TODO
-- Async Calls
-- Better ways to retrieve data
-- Constraint Support
-- More Unit Tests!
-
 # Download
 
 You will need to include the shillelagh jar in your application's runtime and shillelagh-processor 
@@ -66,19 +58,19 @@ jar in your application compile time. You can download the jars
   <dependency>
     <groupId>com.andrewreitz</groupId>
     <artifactId>shillelagh</artifactId>
-    <version>0.2.0</version>
+    <version>0.3.0</version>
   </dependency>
   <dependency>
     <groupId>com.andrewreitz</groupId>
     <artifactId>shillelagh-processor</artifactId>
-    <version>0.2.0</version>
+    <version>0.3.0</version>
     <optional>true</optional>
   </dependency>
 ```
 ## Gradle:
 ```groovy
-  compile 'com.andrewreitz:shillelagh:0.2.0'
-  provided 'com.andrewreitz:shillelagh:0.2.0'
+  compile 'com.andrewreitz:shillelagh:0.3.0'
+  provided 'com.andrewreitz:shillelagh:0.3.0'
 ```
 
 # License

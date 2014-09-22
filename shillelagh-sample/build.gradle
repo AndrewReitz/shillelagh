@@ -29,12 +29,15 @@ android {
   }
 
   compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_7
-    targetCompatibility JavaVersion.VERSION_1_7
+    sourceCompatibility JavaVersion.VERSION_1_6
+    targetCompatibility JavaVersion.VERSION_1_6
   }
 }
 
 dependencies {
   compile project(':shillelagh')
   provided project(':shillelagh-processor')
+
+  compile 'com.netflix.rxjava:rxjava-core:0.20.4'
+  compile 'com.netflix.rxjava:rxjava-android:0.20.4'
 }

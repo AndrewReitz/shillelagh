@@ -14,27 +14,14 @@
  * limitations under the License.
  */
 
-// handles distribution of snapshots to Artifactory (oss.jfrog.org)
+package shillelagh;
 
-apply plugin: 'artifactory-publish'
+import android.database.Cursor;
 
-artifactory {
-  contextUrl = 'http://oss.jfrog.org/artifactory'
-  publish {
-    contextUrl = 'http://oss.jfrog.org/artifactory'
-    repository {
-      repoKey = 'oss-snapshot-local'
-      username = bintrayUser
-      password = bintrayPassword
-    }
-    defaults {
-      publications('mavenJava')
-    }
-  }
-  resolve {
-    contextUrl = 'http://oss.jfrog.org/artifactory'
-    repository {
-      repoKey = 'libs-release'
-    }
-  }
+/**
+ * Interface for getting a cursor so that the cursor has different
+ * ways of being loaded in observables.
+ */
+interface CursorLoader {
+  Cursor getCursor();
 }
