@@ -32,7 +32,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import rx.Notification;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
@@ -88,8 +87,7 @@ public class MainActivity extends Activity {
       shillelagh.delete(a);
     }
 
-    shillelagh.createQuery(Chapter.class)
-        .toObservable()
+    shillelagh.get(Chapter.class)
         .observeOn(AndroidSchedulers.mainThread())
         .subscribeOn(Schedulers.io())
         .doOnNext(new Action1<Chapter>() {

@@ -201,6 +201,14 @@ public final class Shillelagh {
     }
   }
 
+  /**
+   * Map the cursor at it's current position to a single value. This does not close the cursor
+   * or move the cursor ahead.
+   *
+   * @param tableClass The class to map to.
+   * @param cursor The cursor to get the values from it's current position.
+   * @return The mapped value.
+   */
   @SuppressWarnings("unchecked")
   public <T> T singleMap(Class<? extends T> tableClass, Cursor cursor) {
     try {
@@ -223,6 +231,26 @@ public final class Shillelagh {
 
   // Shillelagh Selectors
 
+  /**
+   * Get an observable with the loaded class data
+   *
+   * @param tableClass The class to get the data for.
+   * @return Observable with loaded data.
+   */
+  public <T> Observable<T> get(final Class<T> tableClass) {
+    if (!HAS_RX_JAVA) {
+      throw new RuntimeException(
+          "RxJava not available! Add RxJava to your build to use this feature");
+    }
+
+    return getObservable(tableClass, new CursorLoader() {
+      @Override public Cursor getCursor() {
+        return rawQuery("SELECT * FROM %s", getTableName(tableClass));
+      }
+    });
+  }
+
+  /** Work in progress. */
   public <T> QueryBuilder<T> createQuery(Class<? extends T> tableObject) {
     return new QueryBuilder<T>(tableObject, this);
   }
@@ -272,7 +300,7 @@ public final class Shillelagh {
     }
 
     final Shillelagh shillelagh = this;
-    return getObservable(tableClass, new QueryBuilder.CursorLoader() {
+    return getObservable(tableClass, new CursorLoader() {
       @Override public Cursor getCursor() {
         return shillelagh.query(distinct, getTableName(tableClass), columns, selection,
             selectionArgs, groupBy, having, orderBy, limit);
@@ -349,7 +377,7 @@ public final class Shillelagh {
     }
 
     final Shillelagh shillelagh = this;
-    return getObservable(tableObject, new QueryBuilder.CursorLoader() {
+    return getObservable(tableObject, new CursorLoader() {
       @Override public Cursor getCursor() {
         return shillelagh.query(getTableName(tableObject), columns, selection,
             selectionArgs, groupBy, having, orderBy);
@@ -392,7 +420,7 @@ public final class Shillelagh {
           "RxJava not available! Add RxJava to your build to use this feature");
     }
     final Shillelagh shillelagh = this;
-    return getObservable(tableObject, new QueryBuilder.CursorLoader() {
+    return getObservable(tableObject, new CursorLoader() {
       @Override public Cursor getCursor() {
         return shillelagh.query(getTableName(tableObject), columns, selection,
             selectionArgs, groupBy, having, orderBy, limit);
@@ -427,7 +455,7 @@ public final class Shillelagh {
     }
 
     final Shillelagh shillelagh = this;
-    return getObservable(tableObject, new QueryBuilder.CursorLoader() {
+    return getObservable(tableObject, new CursorLoader() {
       @Override public Cursor getCursor() {
         return shillelagh.rawQuery(sql, sqlArgs);
       }
@@ -460,7 +488,7 @@ public final class Shillelagh {
     }
 
     final Shillelagh shillelagh = this;
-    return getObservable(tableObject, new QueryBuilder.CursorLoader() {
+    return getObservable(tableObject, new CursorLoader() {
       @Override public Cursor getCursor() {
         return shillelagh.rawQuery(sql, selectionArgs, sqlArgs);
       }
@@ -587,7 +615,7 @@ public final class Shillelagh {
   }
 
   <T> Observable<T> getObservable(final Class<? extends T> tableObject,
-                                  final QueryBuilder.CursorLoader cursorLoader) {
+                                  final CursorLoader cursorLoader) {
     return Observable.create(new Observable.OnSubscribe<T>() {
       @Override public void call(Subscriber<? super T> subscriber) {
         final Cursor cursor = cursorLoader.getCursor();

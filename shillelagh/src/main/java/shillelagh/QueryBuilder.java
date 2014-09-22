@@ -25,6 +25,7 @@ import rx.Observable;
 import static shillelagh.Shillelagh.HAS_RX_JAVA;
 import static shillelagh.Shillelagh.getTableName;
 
+/** Work in progress */
 public final class QueryBuilder<T> {
   private final StringBuilder query;
 
@@ -66,9 +67,5 @@ public final class QueryBuilder<T> {
 
   public Cursor toCursor() {
     return shillelagh.rawQuery(query.toString());
-  }
-
-  interface CursorLoader {
-    Cursor getCursor();
   }
 }
