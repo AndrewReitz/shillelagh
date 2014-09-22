@@ -1,3 +1,6 @@
+import groovyx.net.http.ContentType
+import org._10ne.gradle.rest.RestTask
+
 /*
  * Copyright ${year} Andrew Reitz
  *
@@ -33,7 +36,7 @@ allprojects {
     jcenter()
   }
 
-  version = "0.2.1${project.hasProperty('release') ? '' : '-SNAPSHOT'}"
+  version = "0.3.0${project.hasProperty('release') ? '' : '-SNAPSHOT'}"
   group = 'com.andrewreitz'
 
   ext {
@@ -53,12 +56,12 @@ allprojects {
 
 apply plugin: "org.10ne.rest"
 
-task bintraySign(type: org._10ne.gradle.rest.RestTask) {
+task bintraySign(type: RestTask) {
   description = "Sign the release build on bintray"
   httpMethod = 'post'
   uri = "https://api.bintray.com/gpg/pieces/maven/Shillelagh/versions/${version}"
   username = bintrayUser
   password = bintrayPassword
   requestBody = [passphrase: signingPassword]
-  contentType = groovyx.net.http.ContentType.JSON
+  contentType = ContentType.JSON
 }
