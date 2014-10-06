@@ -2,6 +2,7 @@
 
 ![Library Icon](AndroidShillelagh.png)
 
+
 Shillelagh is an sqlite library. It was built to make life easier. The entire library 
 was built around simplicity when using sqlite in Android. 
 
