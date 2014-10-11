@@ -51,8 +51,8 @@ public final class Shillelagh {
 
   static final boolean HAS_RX_JAVA = hasRxJavaOnClasspath();
 
-  private static final Map<Class<?>, Class<?>> CACHED_CLASSES
-      = new LinkedHashMap<Class<?>, Class<?>>();
+  private static final Map<Class<?>, Class<?>> CACHED_CLASSES =
+      new LinkedHashMap<Class<?>, Class<?>>();
   private static final Map<String, Method> CACHED_METHODS = new LinkedHashMap<String, Method>();
 
   private static final String TAG = Shillelagh.class.getSimpleName();
@@ -80,8 +80,8 @@ public final class Shillelagh {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new RuntimeException("Unable to create table for " + tableClass
-          + ". Are you missing @Table annotation?", e);
+      throw new RuntimeException(
+          "Unable to create table for " + tableClass + ". Are you missing @Table annotation?", e);
     }
   }
 
@@ -96,8 +96,8 @@ public final class Shillelagh {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new RuntimeException("Unable to drop table for " + tableClass
-          + ". Are you missing @Table annotation?", e);
+      throw new RuntimeException(
+          "Unable to drop table for " + tableClass + ". Are you missing @Table annotation?", e);
     }
   }
 
@@ -113,7 +113,8 @@ public final class Shillelagh {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new RuntimeException("Unable to insert into " + tableObject.getClass().getName()
+      throw new RuntimeException("Unable to insert into "
+          + tableObject.getClass().getName()
           + ". Did you forget to call Shillelagh.createTable "
           + "or are you missing @Table annotation?", e);
     }
@@ -133,7 +134,8 @@ public final class Shillelagh {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new RuntimeException("Unable to update " + tableObject.getClass().getName()
+      throw new RuntimeException("Unable to update "
+          + tableObject.getClass().getName()
           + ". Are you missing @Table annotation?", e);
     }
   }
@@ -160,14 +162,13 @@ public final class Shillelagh {
    * Deletes a row in the table with the corresponding ID.
    *
    * @param tableClass The class which was used to generate the table that
-   *                   you want to delete the corresponding row out of.
-   * @param id         the id of the row you want to match
+   * you want to delete the corresponding row out of.
+   * @param id the id of the row you want to match
    */
   public void delete(final Class<?> tableClass, final long id) {
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableClass);
-      executeMethod(
-          shillelagh, $$DELETE_OBJECT_FUNCTION, id,
+      executeMethod(shillelagh, $$DELETE_OBJECT_FUNCTION, id,
           sqliteOpenHelper.getWritableDatabase());
     } catch (RuntimeException e) {
       throw e;
@@ -180,7 +181,7 @@ public final class Shillelagh {
    * Maps data from the cursor to it's corresponding model object.
    *
    * @param tableClass Class the data from the cursor should be mapped to. This class must have the
-   * @param cursor     Cursor of data pulled from the tableClass's generated table.
+   * @param cursor Cursor of data pulled from the tableClass's generated table.
    * @return List of tableClass objects mapped from the cursor.
    * @see shillelagh.Table annotation on it
    */
@@ -190,7 +191,7 @@ public final class Shillelagh {
       final Class<?> shillelagh = findShillelaghForClass(tableClass);
       final Method mapMethod = findMethodForClass(shillelagh, $$MAP_OBJECT_FUNCTION,
           /* cursor is interface so can't resolve automatically */
-          new Class<?>[]{Cursor.class, SQLiteDatabase.class});
+          new Class<?>[] { Cursor.class, SQLiteDatabase.class });
       final T results = (T) mapMethod.invoke(null, cursor, getReadableDatabase());
       cursor.close();
       return results;
@@ -215,7 +216,7 @@ public final class Shillelagh {
       final Class<?> shillelagh = findShillelaghForClass(tableClass);
       final Method mapMethod = findMethodForClass(shillelagh, $$MAP_SINGLE_FUNCTION,
           /* cursor is interface so can't resolve automatically */
-          new Class<?>[]{Cursor.class, SQLiteDatabase.class});
+          new Class<?>[] { Cursor.class, SQLiteDatabase.class });
       return (T) mapMethod.invoke(null, cursor, getReadableDatabase());
     } catch (RuntimeException e) {
       throw e;
@@ -263,12 +264,10 @@ public final class Shillelagh {
    * Equivalent to calling {@link SQLiteDatabase#query(boolean, String, String[], String, String[],
    * String, String, String, String)}
    */
-  public Cursor query(boolean distinct, String table, String[] columns,
-                      String selection, String[] selectionArgs, String groupBy,
-                      String having, String orderBy, String limit) {
+  public Cursor query(boolean distinct, String table, String[] columns, String selection,
+      String[] selectionArgs, String groupBy, String having, String orderBy, String limit) {
     return sqliteOpenHelper.getReadableDatabase()
-        .query(distinct, table, columns, selection, selectionArgs,
-            groupBy, having, orderBy, limit);
+        .query(distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy, limit);
   }
 
   /**
@@ -278,22 +277,18 @@ public final class Shillelagh {
    * {@link Shillelagh#map(Class, android.database.Cursor)}
    */
   public <T extends List<M>, M> T query(Class<? extends M> tableClass, boolean distinct,
-                                        String[] columns, String selection, String[] selectionArgs,
-                                        String groupBy, String having, String orderBy, String limit
-  ) {
+      String[] columns, String selection, String[] selectionArgs, String groupBy, String having,
+      String orderBy, String limit) {
     Cursor results = sqliteOpenHelper.getReadableDatabase()
-        .query(distinct, getTableName(tableClass), columns, selection, selectionArgs,
-            groupBy, having, orderBy, limit);
+        .query(distinct, getTableName(tableClass), columns, selection, selectionArgs, groupBy,
+            having, orderBy, limit);
 
     return map(tableClass, results);
   }
 
   public <T> Observable<T> createQuery(final Class<? extends T> tableClass, final boolean distinct,
-                                 final String[] columns, final String selection,
-                                 final String[] selectionArgs, final String groupBy,
-                                 final String having, final String orderBy,
-                                 final String limit
-  ) {
+      final String[] columns, final String selection, final String[] selectionArgs,
+      final String groupBy, final String having, final String orderBy, final String limit) {
     if (!HAS_RX_JAVA) {
       throw new RuntimeException(
           "RxJava not available! Add RxJava to your build to use this feature");
@@ -316,13 +311,12 @@ public final class Shillelagh {
    * Only available for API 16+
    */
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-  public Cursor query(boolean distinct, String table, String[] columns,
-                      String selection, String[] selectionArgs, String groupBy,
-                      String having, String orderBy, String limit,
-                      CancellationSignal cancellationSignal) {
+  public Cursor query(boolean distinct, String table, String[] columns, String selection,
+      String[] selectionArgs, String groupBy, String having, String orderBy, String limit,
+      CancellationSignal cancellationSignal) {
     return sqliteOpenHelper.getReadableDatabase()
-        .query(distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy,
-            limit, cancellationSignal);
+        .query(distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy, limit,
+            cancellationSignal);
   }
 
   /**
@@ -335,9 +329,8 @@ public final class Shillelagh {
    */
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
   public <T extends List<M>, M> T query(Class<? extends M> tableObject, boolean distinct,
-                                        String[] columns, String selection, String[] selectionArgs,
-                                        String groupBy, String having, String orderBy, String limit,
-                                        CancellationSignal cancellationSignal) {
+      String[] columns, String selection, String[] selectionArgs, String groupBy, String having,
+      String orderBy, String limit, CancellationSignal cancellationSignal) {
     Cursor results = sqliteOpenHelper.getReadableDatabase()
         .query(distinct, getTableName(tableObject), columns, selection, selectionArgs, groupBy,
             having, orderBy, limit, cancellationSignal);
@@ -348,11 +341,10 @@ public final class Shillelagh {
    * Equivalent to calling {@link SQLiteDatabase#query(String, String[], String, String[], String,
    * String, String)}
    */
-  public Cursor query(String table, String[] columns, String selection,
-                      String[] selectionArgs, String groupBy, String having,
-                      String orderBy) {
-    return sqliteOpenHelper.getReadableDatabase().query(table, columns, selection,
-        selectionArgs, groupBy, having, orderBy);
+  public Cursor query(String table, String[] columns, String selection, String[] selectionArgs,
+      String groupBy, String having, String orderBy) {
+    return sqliteOpenHelper.getReadableDatabase()
+        .query(table, columns, selection, selectionArgs, groupBy, having, orderBy);
   }
 
   /**
@@ -361,16 +353,16 @@ public final class Shillelagh {
    * on the result.
    */
   public <T extends List<M>, M> T query(Class<? extends M> tableObject, String[] columns,
-                                        String selection, String[] selectionArgs, String groupBy,
-                                        String having, String orderBy) {
-    final Cursor results = query(getTableName(tableObject), columns, selection,
-        selectionArgs, groupBy, having, orderBy);
+      String selection, String[] selectionArgs, String groupBy, String having, String orderBy) {
+    final Cursor results =
+        query(getTableName(tableObject), columns, selection, selectionArgs, groupBy, having,
+            orderBy);
     return map(tableObject, results);
   }
 
   public <T> Observable<T> createQuery(final Class<? extends T> tableObject, final String[] columns,
-                                 final String selection, final String[] selectionArgs, final String groupBy,
-                                 final String having, final String orderBy) {
+      final String selection, final String[] selectionArgs, final String groupBy,
+      final String having, final String orderBy) {
     if (!HAS_RX_JAVA) {
       throw new RuntimeException(
           "RxJava not available! Add RxJava to your build to use this feature");
@@ -379,8 +371,8 @@ public final class Shillelagh {
     final Shillelagh shillelagh = this;
     return getObservable(tableObject, new CursorLoader() {
       @Override public Cursor getCursor() {
-        return shillelagh.query(getTableName(tableObject), columns, selection,
-            selectionArgs, groupBy, having, orderBy);
+        return shillelagh.query(getTableName(tableObject), columns, selection, selectionArgs,
+            groupBy, having, orderBy);
       }
     });
   }
@@ -390,9 +382,9 @@ public final class Shillelagh {
    * String, String, String)}
    */
   public Cursor query(String table, String[] columns, String selection, String[] selectionArgs,
-                      String groupBy, String having, String orderBy, String limit) {
-    return sqliteOpenHelper.getReadableDatabase().query(table, columns, selection, selectionArgs,
-        groupBy, having, orderBy, limit);
+      String groupBy, String having, String orderBy, String limit) {
+    return sqliteOpenHelper.getReadableDatabase()
+        .query(table, columns, selection, selectionArgs, groupBy, having, orderBy, limit);
   }
 
   /**
@@ -401,20 +393,18 @@ public final class Shillelagh {
    * and then calling {@link Shillelagh#map(Class, android.database.Cursor)} on the result.
    */
   public <T extends List<M>, M> T query(Class<? extends M> tableObject, String[] columns,
-                                        String selection, String[] selectionArgs, String groupBy,
-                                        String having, String orderBy, String limit
-  ) {
-    final Cursor results = query(getTableName(tableObject), columns, selection,
-        selectionArgs, groupBy, having, orderBy, limit);
+      String selection, String[] selectionArgs, String groupBy, String having, String orderBy,
+      String limit) {
+    final Cursor results =
+        query(getTableName(tableObject), columns, selection, selectionArgs, groupBy, having,
+            orderBy, limit);
 
     return map(tableObject, results);
   }
 
   public <T> Observable<T> createQuery(final Class<? extends T> tableObject, final String[] columns,
-                                 final String selection, final String[] selectionArgs,
-                                 final String groupBy, final String having,
-                                 final String orderBy, final String limit
-  ) {
+      final String selection, final String[] selectionArgs, final String groupBy,
+      final String having, final String orderBy, final String limit) {
     if (!HAS_RX_JAVA) {
       throw new RuntimeException(
           "RxJava not available! Add RxJava to your build to use this feature");
@@ -422,8 +412,8 @@ public final class Shillelagh {
     final Shillelagh shillelagh = this;
     return getObservable(tableObject, new CursorLoader() {
       @Override public Cursor getCursor() {
-        return shillelagh.query(getTableName(tableObject), columns, selection,
-            selectionArgs, groupBy, having, orderBy, limit);
+        return shillelagh.query(getTableName(tableObject), columns, selection, selectionArgs,
+            groupBy, having, orderBy, limit);
       }
     });
   }
@@ -433,8 +423,7 @@ public final class Shillelagh {
    * args are null.
    */
   public Cursor rawQuery(String sql, Object... sqlArgs) {
-    return sqliteOpenHelper.getReadableDatabase()
-        .rawQuery(formatString(sql, sqlArgs), null);
+    return sqliteOpenHelper.getReadableDatabase().rawQuery(formatString(sql, sqlArgs), null);
   }
 
   /**
@@ -443,12 +432,12 @@ public final class Shillelagh {
    * {@link Shillelagh#map(Class, android.database.Cursor)}
    */
   public <T extends List<M>, M> T rawQuery(Class<? extends M> tableObject, String sql,
-                                           Object... sqlArgs) {
+      Object... sqlArgs) {
     return this.rawQuery(tableObject, sql, null, sqlArgs);
   }
 
   public <T> Observable<T> createQuery(Class<? extends T> tableObject, final String sql,
-                                       final Object... sqlArgs) {
+      final Object... sqlArgs) {
     if (!HAS_RX_JAVA) {
       throw new RuntimeException(
           "RxJava not available! Add RxJava to your build to use this feature");
@@ -473,15 +462,14 @@ public final class Shillelagh {
    * and then passing the result to {@link Shillelagh#map(Class, android.database.Cursor)}
    */
   public <T extends List<M>, M> T rawQuery(Class<? extends M> tableObject, String sql,
-                                           String[] selectionArgs, Object... sqlArgs
-  ) {
-    final Cursor result = sqliteOpenHelper.getReadableDatabase()
-        .rawQuery(formatString(sql, sqlArgs), selectionArgs);
+      String[] selectionArgs, Object... sqlArgs) {
+    final Cursor result =
+        sqliteOpenHelper.getReadableDatabase().rawQuery(formatString(sql, sqlArgs), selectionArgs);
     return map(tableObject, result);
   }
 
   public <T> Observable<T> createQuery(Class<? extends T> tableObject, final String sql,
-                                    final String[] selectionArgs, final Object... sqlArgs) {
+      final String[] selectionArgs, final Object... sqlArgs) {
     if (!HAS_RX_JAVA) {
       throw new RuntimeException(
           "RxJava not available! Add RxJava to your build to use this feature");
@@ -501,8 +489,8 @@ public final class Shillelagh {
    * Only available for API 16+
    */
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-  public Cursor rawQuery(String sql, String[] selectionArgs,
-                         CancellationSignal cancellationSignal, Object... sqlArgs) {
+  public Cursor rawQuery(String sql, String[] selectionArgs, CancellationSignal cancellationSignal,
+      Object... sqlArgs) {
     return sqliteOpenHelper.getReadableDatabase()
         .rawQuery(formatString(sql, sqlArgs), selectionArgs, cancellationSignal);
   }
@@ -515,9 +503,7 @@ public final class Shillelagh {
    */
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
   public <T extends List<M>, M> T rawQuery(Class<? extends M> tableObject, String sql,
-                                           String[] selectionArgs,
-                                           CancellationSignal cancellationSignal, Object... sqlArgs
-  ) {
+      String[] selectionArgs, CancellationSignal cancellationSignal, Object... sqlArgs) {
     final Cursor results = sqliteOpenHelper.getReadableDatabase()
         .rawQuery(formatString(sql, sqlArgs), selectionArgs, cancellationSignal);
     return map(tableObject, results);
@@ -568,16 +554,15 @@ public final class Shillelagh {
   }
 
   /** Finds a method in a class using reflection */
-  private static Method findMethodForClass(Class<?> shillelagh,
-                                           String methodName, Object... params
-  ) throws NoSuchMethodException {
+  private static Method findMethodForClass(Class<?> shillelagh, String methodName, Object... params)
+      throws NoSuchMethodException {
     Class<?>[] paramTypes = getParamTypes(params);
     return findMethodForClass(shillelagh, methodName, paramTypes);
   }
 
   /** Finds a method in a class using reflection */
   private static Method findMethodForClass(Class<?> shillelagh, String methodName,
-                                           Class<?>[] paramTypes) throws NoSuchMethodException {
+      Class<?>[] paramTypes) throws NoSuchMethodException {
     String fqMethodName = shillelagh.getCanonicalName() + "#" + methodName;
     Method method = CACHED_METHODS.get(fqMethodName);
     if (method != null) {
@@ -615,7 +600,7 @@ public final class Shillelagh {
   }
 
   <T> Observable<T> getObservable(final Class<? extends T> tableObject,
-                                  final CursorLoader cursorLoader) {
+      final CursorLoader cursorLoader) {
     return Observable.create(new Observable.OnSubscribe<T>() {
       @Override public void call(Subscriber<? super T> subscriber) {
         final Cursor cursor = cursorLoader.getCursor();
