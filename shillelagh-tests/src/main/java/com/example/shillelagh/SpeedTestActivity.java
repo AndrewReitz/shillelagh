@@ -24,20 +24,44 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.widget.TextView;
 import com.example.shillelagh.model.TestPrimitiveTable;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 import java.util.Random;
+import java.util.Stack;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
-import rx.observers.EmptyObserver;
 import rx.schedulers.Schedulers;
 import shillelagh.Shillelagh;
 
 public class SpeedTestActivity extends Activity {
+
+  private final Observable<Queue<TestPrimitiveTable>> insertValues =
+      Observable.create(new Observable.OnSubscribe<Queue<TestPrimitiveTable>>() {
+        @Override public void call(Subscriber<? super Queue<TestPrimitiveTable>> subscriber) {
+
+          Queue<TestPrimitiveTable> values = new LinkedList<TestPrimitiveTable>();
+          final Random random = new Random(System.currentTimeMillis());
+          for (int i = 0; i < 50000; i++) {
+            TestPrimitiveTable value = new TestPrimitiveTable();
+            value.setaBoolean(false);
+            value.setaDouble(random.nextDouble());
+            value.setaFloat(random.nextFloat());
+            value.setAnInt(random.nextInt());
+            value.setaLong(random.nextLong());
+            value.setaShort((short) random.nextInt(Short.MAX_VALUE));
+            values.add(value);
+          }
+
+          subscriber.onNext(values);
+          subscriber.onCompleted();
+        }
+      }).cache();
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -46,8 +70,11 @@ public class SpeedTestActivity extends Activity {
     setupHeaders();
 
     final Shillelagh shillelagh = new Shillelagh(new TestSQLiteOpenHelper(this));
-    runWrites(shillelagh) //
-        .subscribeOn(Schedulers.computation()) //
+    insertValues.flatMap(new Func1<Queue<TestPrimitiveTable>, Observable<Integer>>() {
+      @Override public Observable<Integer> call(Queue<TestPrimitiveTable> testPrimitiveTables) {
+        return runWrites(shillelagh, testPrimitiveTables);
+      }
+    }).subscribeOn(Schedulers.computation()) //
         .observeOn(AndroidSchedulers.mainThread()) //
         .doOnNext(new Action1<Integer>() {
           @Override public void call(Integer writes) {
@@ -55,9 +82,14 @@ public class SpeedTestActivity extends Activity {
                 .setText(String.valueOf(writes));
           }
         }) //
-        .flatMap(new Func1<Integer, Observable<Integer>>() {
-          @Override public Observable<Integer> call(Integer integer) {
-            return runReads(shillelagh);
+        .flatMap(new Func1<Integer, Observable<Queue<TestPrimitiveTable>>>() {
+          @Override public Observable<Queue<TestPrimitiveTable>> call(Integer integer) {
+            return insertValues;
+          }
+        }) //
+        .flatMap(new Func1<Queue<TestPrimitiveTable>, Observable<Integer>>() {
+          @Override public Observable<Integer> call(Queue<TestPrimitiveTable> queue) {
+            return runReads(shillelagh, queue);
           }
         }) //
         .subscribeOn(Schedulers.computation()) //
@@ -94,23 +126,15 @@ public class SpeedTestActivity extends Activity {
         });
   }
 
-  private Observable<Integer> runWrites(final Shillelagh shillelagh) {
+  private Observable<Integer> runWrites(final Shillelagh shillelagh,
+      final Queue<TestPrimitiveTable> values) {
     return Observable.create(new Observable.OnSubscribe<Integer>() {
       @Override public void call(Subscriber<? super Integer> subscriber) {
-        final Random random = new Random(System.currentTimeMillis());
+        Queue<TestPrimitiveTable> valueQueue = new LinkedList<TestPrimitiveTable>(values);
         int inserts = 0;
         for (long stop = System.nanoTime() + TimeUnit.SECONDS.toNanos(1);
             System.nanoTime() < stop; ) {
-
-          TestPrimitiveTable value = new TestPrimitiveTable();
-          value.setaBoolean(false);
-          value.setaDouble(random.nextDouble());
-          value.setaFloat(random.nextFloat());
-          value.setAnInt(random.nextInt());
-          value.setaLong(random.nextLong());
-          value.setaShort((short) random.nextInt(Short.MAX_VALUE));
-
-          shillelagh.insert(value);
+          shillelagh.insert(valueQueue.poll());
           inserts++;
         }
 
@@ -120,27 +144,18 @@ public class SpeedTestActivity extends Activity {
     });
   }
 
-  private Observable<Integer> runReads(final Shillelagh shillelagh) {
-    // TODO there has got to be a better way.
+  private Observable<Integer> runReads(final Shillelagh shillelagh,
+      final Queue<TestPrimitiveTable> values) {
     return Observable.create(new Observable.OnSubscribe<Integer>() {
       @Override public void call(final Subscriber<? super Integer> subscriber) {
-        final Random random = new Random(System.currentTimeMillis());
-
         final String inserted = "inserted";
         final SharedPreferences sharedPreferences =
             PreferenceManager.getDefaultSharedPreferences(SpeedTestActivity.this);
 
         if (!sharedPreferences.getBoolean(inserted, false)) {
           // Insert a bunch
-          for (int i = 0; i < 50000; i++) {
-            TestPrimitiveTable value = new TestPrimitiveTable();
-            value.setaBoolean(false);
-            value.setaDouble(random.nextDouble());
-            value.setaFloat(random.nextFloat());
-            value.setAnInt(random.nextInt());
-            value.setaLong(random.nextLong());
-            value.setaShort((short) random.nextInt(Short.MAX_VALUE));
-            shillelagh.insert(value);
+          for (; !values.isEmpty(); ) {
+            shillelagh.insert(values.poll());
           }
           final SharedPreferences.Editor editor = sharedPreferences.edit();
           editor.putBoolean(inserted, true);
