@@ -20,13 +20,37 @@ import android.database.Cursor;
 
 import java.util.List;
 
+import java.util.Objects;
 import rx.Observable;
 
+import static shillelagh.QueryBuilder.Operator.AND;
+import static shillelagh.QueryBuilder.Operator.EQUAL;
+import static shillelagh.QueryBuilder.Operator.OR;
 import static shillelagh.Shillelagh.HAS_RX_JAVA;
 import static shillelagh.Shillelagh.getTableName;
 
 /** Work in progress */
 public final class QueryBuilder<T> {
+  public enum Operator {
+    EQUAL(" = "),
+    NOT_EQUAL(" != "),
+    GREATER_THAN_EQUAL(" >= "),
+    GREATHER_THAN(" > "),
+    LESS_THAN_EQUAL(" <= "),
+    LESS_THAN(" < "),
+    NOT(" NOT "),
+    LIKE(" LIKE "),
+    BETWEEN(" BETWEEN "),
+    AND(" AND "),
+    OR(" OR ");
+
+    private final String operator;
+
+    private Operator(String operator) {
+      this.operator = operator;
+    }
+  }
+
   private final StringBuilder query;
 
   private final Class<? extends T> tableObject;
@@ -36,15 +60,37 @@ public final class QueryBuilder<T> {
     this.tableObject = tableObject;
     this.shillelagh = shillelagh;
 
-    query = new StringBuilder("SELECT * FROM ")
-        .append(getTableName(tableObject));
+    query = new StringBuilder("SELECT * FROM") //
+        .append(getTableName(tableObject)); //
   }
 
-  public QueryBuilder where(String columnName, String value) {
-    query.append(" ")
-        .append(columnName)
-        .append(" = ")
+  public QueryBuilder<T> where(String columnName, Object value) {
+    query.append(" ") //
+        .append(columnName) //
+        .append(EQUAL.operator) //
         .append(value);
+    return this;
+  }
+
+  public QueryBuilder<T> and(String columnName, Object value) {
+    query.append(AND.operator) //
+        .append(columnName) //
+        .append(EQUAL.operator) //
+        .append(value);
+    return this;
+  }
+
+  public QueryBuilder<T> or(String columnName, Object value) {
+    query.append(OR.operator) //
+        .append(columnName) //
+        .append(EQUAL.operator) //
+        .append(value); //
+    return this;
+  }
+
+  public QueryBuilder orderBy(String columnName) {
+    query.append(" ORDER BY") //
+        .append(columnName); //
     return this;
   }
 

@@ -252,7 +252,7 @@ public final class Shillelagh {
   }
 
   /** Work in progress. */
-  public <T> QueryBuilder<T> createQuery(Class<? extends T> tableObject) {
+  public <T> QueryBuilder<T> selectFrom(Class<? extends T> tableObject) {
     return new QueryBuilder<T>(tableObject, this);
   }
 
