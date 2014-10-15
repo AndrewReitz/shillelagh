@@ -18,9 +18,9 @@ apply plugin: 'java'
 apply plugin: 'propdeps'
 apply plugin: 'propdeps-idea'
 apply plugin: 'maven-publish'
-apply from: '../gradle/javaDoc.gradle'
-apply from: '../gradle/bintray.gradle'
-apply from: '../gradle/artifactory.gradle'
+apply from: rootProject.file('gradle/javaDoc.gradle')
+apply from: rootProject.file('gradle/bintray.gradle')
+apply from: rootProject.file('gradle/artifactory.gradle')
 
 targetCompatibility = JavaVersion.VERSION_1_6
 sourceCompatibility = JavaVersion.VERSION_1_6
