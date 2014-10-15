@@ -25,8 +25,13 @@ apply from: '../gradle/artifactory.gradle'
 targetCompatibility = JavaVersion.VERSION_1_6
 sourceCompatibility = JavaVersion.VERSION_1_6
 
+def Properties props = new Properties()
+props.load(new FileInputStream(file('../local.properties')))
+def sdkDir = props["sdk.dir"]
+def androidTarget = 20
+
 dependencies {
-  provided 'com.google.android:android:4.1.1.4'
+  compile files("${sdkDir}/platforms/android-${androidTarget}/android.jar")
   optional 'com.netflix.rxjava:rxjava-core:0.20.4'
 }
 
