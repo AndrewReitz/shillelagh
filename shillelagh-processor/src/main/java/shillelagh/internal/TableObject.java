@@ -33,8 +33,6 @@ import java.util.List;
 
 import javax.lang.model.element.Element;
 
-import shillelagh.Shillelagh;
-
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;

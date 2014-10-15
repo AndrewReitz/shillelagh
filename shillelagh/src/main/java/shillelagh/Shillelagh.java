@@ -191,7 +191,7 @@ public final class Shillelagh {
       final Class<?> shillelagh = findShillelaghForClass(tableClass);
       final Method mapMethod = findMethodForClass(shillelagh, $$MAP_OBJECT_FUNCTION,
           /* cursor is interface so can't resolve automatically */
-          new Class<?>[] { Cursor.class, SQLiteDatabase.class });
+          new Class<?>[] {Cursor.class, SQLiteDatabase.class});
       final T results = (T) mapMethod.invoke(null, cursor, getReadableDatabase());
       cursor.close();
       return results;
@@ -216,7 +216,7 @@ public final class Shillelagh {
       final Class<?> shillelagh = findShillelaghForClass(tableClass);
       final Method mapMethod = findMethodForClass(shillelagh, $$MAP_SINGLE_FUNCTION,
           /* cursor is interface so can't resolve automatically */
-          new Class<?>[] { Cursor.class, SQLiteDatabase.class });
+          new Class<?>[] {Cursor.class, SQLiteDatabase.class});
       return (T) mapMethod.invoke(null, cursor, getReadableDatabase());
     } catch (RuntimeException e) {
       throw e;
