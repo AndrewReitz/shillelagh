@@ -41,7 +41,7 @@ allprojects {
 
   ext {
     snapshot = !project.hasProperty('release')
-    minSdkVersion = 8
+    minSdkVersion = 10
     targetSdkVersion = 20
     versionCode = 1
   }
