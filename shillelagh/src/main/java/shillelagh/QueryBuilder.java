@@ -20,7 +20,6 @@ import android.database.Cursor;
 
 import java.util.List;
 
-import java.util.Objects;
 import rx.Observable;
 
 import static shillelagh.QueryBuilder.Operator.AND;
