@@ -159,7 +159,7 @@ public class SpeedTestActivity extends Activity {
           }
           final SharedPreferences.Editor editor = sharedPreferences.edit();
           editor.putBoolean(inserted, true);
-          editor.apply();
+          editor.commit();
         }
 
         final AtomicInteger reads = new AtomicInteger(0);
