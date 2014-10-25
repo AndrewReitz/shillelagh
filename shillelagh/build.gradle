@@ -15,8 +15,6 @@
  */
 
 apply plugin: 'java'
-apply plugin: 'propdeps'
-apply plugin: 'propdeps-idea'
 apply plugin: 'maven-publish'
 apply from: rootProject.file('gradle/javaDoc.gradle')
 apply from: rootProject.file('gradle/bintray.gradle')
@@ -26,8 +24,8 @@ targetCompatibility = JavaVersion.VERSION_1_6
 sourceCompatibility = JavaVersion.VERSION_1_6
 
 dependencies {
-  optional 'com.google.android:android:4.1.1.4'
-  optional 'com.netflix.rxjava:rxjava-core:0.20.4'
+  compile 'com.google.android:android:+', optional
+  compile 'com.netflix.rxjava:rxjava-core:+', optional
 }
 
 publishing {

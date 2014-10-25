@@ -20,21 +20,20 @@ import org._10ne.gradle.rest.RestTask
 buildscript {
   repositories {
     jcenter()
-    maven { url 'http://repo.springsource.org/plugins-release' }
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:0.12.2'
-    classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.6'
-    classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.5'
-    classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:2.2.5'
+    classpath 'com.android.tools.build:gradle:0.13.3'
+    classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:1.12.3'
+    classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.6'
+    classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:3.0.1'
     classpath "org._10ne.gradle:rest-gradle-plugin:0.3.1"
   }
 }
 
 ext {
   snapshot = !project.hasProperty('release')
-  minSdkVersion = 8
-  targetSdkVersion = 19
+  minSdkVersion = 15
+  targetSdkVersion = 20
   versionCode = 1
 }
 
@@ -48,6 +47,7 @@ allprojects {
 
   apply plugin: 'idea'
   apply plugin: 'checkstyle'
+  apply plugin: 'optional-base'
 
   checkstyle {
     configFile = new File(rootDir, "checkstyle.xml")
