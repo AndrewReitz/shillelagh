@@ -37,7 +37,7 @@ import java.util.Date;
 
 import shillelagh.Shillelagh;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static shillelagh.Shillelagh.getTableName;
 
 public class InsertTest extends AndroidTestCase {
