@@ -17,8 +17,8 @@
 apply plugin: 'com.android.application'
 
 android {
-  compileSdkVersion 19
-  buildToolsVersion "19.1.0"
+  compileSdkVersion 21
+  buildToolsVersion "21.0.2"
 
   defaultConfig {
     minSdkVersion rootProject.ext.minSdkVersion
@@ -38,6 +38,5 @@ dependencies {
   compile project(':shillelagh')
   provided project(':shillelagh-processor')
 
-  compile 'com.netflix.rxjava:rxjava-core:0.20.4'
-  compile 'com.netflix.rxjava:rxjava-android:0.20.4'
+  compile 'com.netflix.rxjava:rxjava-android:0.20.6'
 }
