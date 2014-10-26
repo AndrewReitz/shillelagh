@@ -38,7 +38,7 @@ import java.util.List;
 
 import shillelagh.Shillelagh;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static shillelagh.Shillelagh.getTableName;
 
 /** Tests for mapping db objects to jave objects in Shillelagh */
