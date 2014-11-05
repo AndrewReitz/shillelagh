@@ -198,7 +198,7 @@ public class InsertTest extends AndroidTestCase {
   public void testOneToOneInsertion() {
     // Arrange
     final String expected = "TEST STRING";
-    final TestOneToOne.Child expectedChild = new TestOneToOne.Child(expected);
+    final TestOneToOne.OneToOneChild expectedChild = new TestOneToOne.OneToOneChild(expected);
     final TestOneToOne expectedOneToOne = new TestOneToOne(expectedChild);
 
     // Act
@@ -217,7 +217,7 @@ public class InsertTest extends AndroidTestCase {
     cursor.close();
 
     cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
-        "SELECT * FROM " + getTableName(TestOneToOne.Child.class), null);
+        "SELECT * FROM " + getTableName(TestOneToOne.OneToOneChild.class), null);
 
     assertThat(cursor.getCount()).isEqualTo(1);
     assertThat(cursor.moveToFirst()).isTrue();
@@ -233,11 +233,13 @@ public class InsertTest extends AndroidTestCase {
     // Arrange
     String childExpectedString1 = "some test string";
     int childExpectedInt1 = 123;
-    TestOneToMany.Child child1 = new TestOneToMany.Child(childExpectedString1, childExpectedInt1);
+    TestOneToMany.OneToManyChild
+        child1 = new TestOneToMany.OneToManyChild(childExpectedString1, childExpectedInt1);
 
     String childExpectedString2 = "some other string";
     int childExpectedInt2 = -1;
-    TestOneToMany.Child child2 = new TestOneToMany.Child(childExpectedString2, childExpectedInt2);
+    TestOneToMany.OneToManyChild
+        child2 = new TestOneToMany.OneToManyChild(childExpectedString2, childExpectedInt2);
 
     String someValueExpected = "some value";
     TestOneToMany testOneToMany = new TestOneToMany(someValueExpected,
@@ -259,7 +261,7 @@ public class InsertTest extends AndroidTestCase {
     cursor.close();
 
     cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
-        "SELECT * FROM " + getTableName(TestOneToMany.Child.class), null);
+        "SELECT * FROM " + getTableName(TestOneToMany.OneToManyChild.class), null);
 
     assertThat(cursor.getCount()).isEqualTo(2);
 

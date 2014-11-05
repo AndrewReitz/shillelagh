@@ -183,7 +183,7 @@ public class MapTest extends AndroidTestCase {
   public void testMapOneToOne() {
     // Arrange
     final String expected = "TEST STRING";
-    final TestOneToOne.Child expectedChild = new TestOneToOne.Child(expected);
+    final TestOneToOne.OneToOneChild expectedChild = new TestOneToOne.OneToOneChild(expected);
     final TestOneToOne expectedOneToOne = new TestOneToOne(expectedChild);
 
     final ContentValues childContentValues = new ContentValues();
@@ -196,7 +196,7 @@ public class MapTest extends AndroidTestCase {
 
     // Act
     sqliteOpenHelper.getWritableDatabase()
-        .insert(getTableName(TestOneToOne.Child.class), null, childContentValues);
+        .insert(getTableName(TestOneToOne.OneToOneChild.class), null, childContentValues);
     sqliteOpenHelper.getWritableDatabase()
         .insert(tableName, null, oneToOneContentValues);
     Cursor cursor = sqliteOpenHelper.getReadableDatabase()
@@ -215,13 +215,14 @@ public class MapTest extends AndroidTestCase {
     final String childExpected = "TestString";
     final int childIntExpected = 12345;
     final String parentExpected = "SomeValue";
-    final TestOneToMany.Child child = new TestOneToMany.Child(childExpected, childIntExpected);
+    final TestOneToMany.OneToManyChild
+        child = new TestOneToMany.OneToManyChild(childExpected, childIntExpected);
     final TestOneToMany parent = new TestOneToMany(parentExpected, Arrays.asList(child));
 
     final ContentValues childContentValues = new ContentValues();
     childContentValues.put("testString", childExpected);
     childContentValues.put("testInt", childIntExpected);
-    childContentValues.put("com_example_shillelagh_model_testonetomany", 1);
+    childContentValues.put("TestOneToMany", 1);
 
     final ContentValues parentContentValues = new ContentValues();
     parentContentValues.put("someValue", parentExpected);
@@ -232,7 +233,7 @@ public class MapTest extends AndroidTestCase {
     sqliteOpenHelper.getWritableDatabase()
         .insert(tableName, null, parentContentValues);
     sqliteOpenHelper.getWritableDatabase()
-        .insert(getTableName(TestOneToMany.Child.class), null, childContentValues);
+        .insert(getTableName(TestOneToMany.OneToManyChild.class), null, childContentValues);
     Cursor cursor = sqliteOpenHelper.getReadableDatabase()
         .rawQuery("SELECT * FROM " + tableName, null);
 
@@ -241,9 +242,9 @@ public class MapTest extends AndroidTestCase {
     // Assert
     assertThat(result.size()).isEqualTo(1);
     TestOneToMany resultRow = result.get(0);
-    assertThat(resultRow).isEqualsToByComparingFields(parent);
+    assertThat(resultRow).isEqualToComparingFieldByField(parent);
     assertThat(resultRow.getChildren().size()).isEqualTo(1);
-    assertThat(resultRow.getChildren().get(0)).isEqualsToByComparingFields(child);
+    assertThat(resultRow.getChildren().get(0)).isEqualToComparingFieldByField(child);
   }
 
   private <K> byte[] serialize(K object) throws IOException {

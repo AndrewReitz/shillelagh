@@ -231,7 +231,7 @@ public final class Shillelagh {
 
   /** Get the table name of the class */
   public static String getTableName(Class<?> clazz) {
-    return clazz.getCanonicalName().replace(".", "_");
+    return clazz.getSimpleName();
   }
 
   // Shillelagh Selectors

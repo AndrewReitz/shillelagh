@@ -237,10 +237,10 @@ public class UpdateTest extends AndroidTestCase {
   public void testUpdateOneToOne() {
     // Arrange
     final String expectedString = "TEST STRING";
-    final TestOneToOne.Child expectedChild = new TestOneToOne.Child(expectedString);
+    final TestOneToOne.OneToOneChild expectedChild = new TestOneToOne.OneToOneChild(expectedString);
     final TestOneToOne expectedOneToOne = new TestOneToOne(expectedChild);
 
-    final TestOneToOne.Child insertTestChild = new TestOneToOne.Child("Unexpected");
+    final TestOneToOne.OneToOneChild insertTestChild = new TestOneToOne.OneToOneChild("Unexpected");
     final TestOneToOne insertTestOneToOne = new TestOneToOne(insertTestChild);
 
     // Act
@@ -264,7 +264,7 @@ public class UpdateTest extends AndroidTestCase {
 
     cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
         String.format("SELECT * FROM %s WHERE Id = %d",
-            getTableName(TestOneToOne.Child.class), 2), null);
+            getTableName(TestOneToOne.OneToOneChild.class), 2), null);
 
     assertThat(cursor.getCount()).isEqualTo(1);
 
@@ -280,7 +280,7 @@ public class UpdateTest extends AndroidTestCase {
     final String expectedStringParent = "Test String";
     final String expectedStringChild = "another test string";
     final int expectedIntChild = 34;
-    final TestOneToMany.Child expectedChild = new TestOneToMany.Child(
+    final TestOneToMany.OneToManyChild expectedChild = new TestOneToMany.OneToManyChild(
         "unexpected", expectedIntChild);
 
     TestOneToMany testOneToMany = new TestOneToMany("Some Value", Arrays.asList(expectedChild));
@@ -305,8 +305,8 @@ public class UpdateTest extends AndroidTestCase {
     cursor.close();
 
     cursor = sqliteOpenHelper.getReadableDatabase().rawQuery(
-        String.format("SELECT * FROM %s WHERE com_example_shillelagh_model_testonetomany = %d",
-            getTableName(TestOneToMany.Child.class), 1), null);
+        String.format("SELECT * FROM %s WHERE TestOneToMany = %d",
+            getTableName(TestOneToMany.OneToManyChild.class), 1), null);
 
     assertThat(cursor.getCount()).isEqualTo(1);
 

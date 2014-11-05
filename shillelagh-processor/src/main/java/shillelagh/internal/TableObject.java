@@ -105,7 +105,7 @@ class TableObject {
   }
 
   String getTableName() {
-    return element.toString().replace(".", "_");
+    return element.getSimpleName().toString();
   }
 
   String getTargetClass() {
