@@ -57,15 +57,15 @@ class TableObject {
   private static final String INSERT_ONE_TO_ONE = "insertOneToOne";
 
   /** Used as a template to create a new table */
-  private static final String CREATE_TABLE_DEFAULT = "CREATE TABLE %s "
-      + "(%s INTEGER PRIMARY KEY AUTOINCREMENT, %s);";
+  private static final String CREATE_TABLE_DEFAULT =
+      "CREATE TABLE %s " + "(%s INTEGER PRIMARY KEY AUTOINCREMENT, %s);";
 
   /**
    * SQL statement to select the id of the last inserted row. Does not end with ; in order to be
    * used with SQLiteDatabase#rawQuery(String, String[])
    */
-  private static final String GET_ID_OF_LAST_INSERTED_ROW_SQL
-      = "SELECT ROWID FROM %s ORDER BY ROWID DESC LIMIT 1";
+  private static final String GET_ID_OF_LAST_INSERTED_ROW_SQL =
+      "SELECT ROWID FROM %s ORDER BY ROWID DESC LIMIT 1";
 
   private final Element element;
   private final String classPackage;
@@ -146,14 +146,14 @@ class TableObject {
     JavaWriter javaWriter = new JavaWriter(writer);
     javaWriter.setCompressingTypes(false);
 
-    javaWriter.emitSingleLineComment("Generated code from Shillelagh. Do not modify!")
-        .emitPackage(classPackage)
-        /* Knows nothing of android types, must use strings. */
-        .emitImports("android.content.ContentValues", "android.database.Cursor",
-            "android.database.DatabaseUtils", "android.database.sqlite.SQLiteDatabase")
-        .emitImports(ShillelaghUtil.class, ByteArrayInputStream.class, ByteArrayOutputStream.class, IOException.class,
-            ObjectInputStream.class, ObjectOutputStream.class, LinkedList.class, Date.class,
-            List.class)
+    javaWriter.emitSingleLineComment("Generated code from Shillelagh. Do not modify!") //
+        .emitPackage(classPackage) //
+        /* Knows nothing of android types, must use strings. */ //
+        .emitImports("android.content.ContentValues", "android.database.Cursor", //
+            "android.database.DatabaseUtils", "android.database.sqlite.SQLiteDatabase") //
+        .emitImports(ShillelaghUtil.class, ByteArrayInputStream.class, ByteArrayOutputStream.class,
+            IOException.class, ObjectInputStream.class, ObjectOutputStream.class, LinkedList.class,
+            Date.class, List.class) //
         .beginType(className, "class", EnumSet.of(PUBLIC, FINAL));
 
     if (this.isChildTable) {
@@ -178,26 +178,22 @@ class TableObject {
   /** Create a way to get an id for foreign keys */
   private void emitGetId(JavaWriter javaWriter) throws IOException {
     logger.d("emitGetId");
-    javaWriter.beginMethod(
-        "long", GET_ID_FUNCTION, EnumSet.of(PUBLIC, STATIC), getTargetClass(), "value")
-        .emitStatement("return value.%s", idColumnName)
-        .endMethod();
+    javaWriter.beginMethod("long", GET_ID_FUNCTION, EnumSet.of(PUBLIC, STATIC), getTargetClass(),
+        "value").emitStatement("return value.%s", idColumnName).endMethod();
   }
 
   /** Creates the function for creating the table */
   private void emitCreateTable(JavaWriter javaWriter) throws IOException {
     logger.d("emitCreateTable");
-    javaWriter.beginMethod(
-        "void", $$CREATE_TABLE_FUNCTION, EnumSet.of(PUBLIC, STATIC), "SQLiteDatabase", "db")
-        .emitStatement("db.execSQL(\"%s\")", getSchema())
-        .endMethod();
+    javaWriter.beginMethod("void", $$CREATE_TABLE_FUNCTION, EnumSet.of(PUBLIC, STATIC),
+        "SQLiteDatabase", "db").emitStatement("db.execSQL(\"%s\")", getSchema()).endMethod();
   }
 
   /** Creates the function dropping the table */
   private void emitDropTable(JavaWriter javaWriter) throws IOException {
     logger.d("emitDropTable");
-    javaWriter.beginMethod(
-        "void", $$DROP_TABLE_FUNCTION, EnumSet.of(PUBLIC, STATIC), "SQLiteDatabase", "db")
+    javaWriter.beginMethod("void", $$DROP_TABLE_FUNCTION, EnumSet.of(PUBLIC, STATIC),
+        "SQLiteDatabase", "db")
         .emitStatement("db.execSQL(\"DROP TABLE IF EXISTS %s\")", getTableName())
         .endMethod();
   }
@@ -216,13 +212,13 @@ class TableObject {
         javaWriter.emitStatement("values.put(\"%s\", %s(element.%s))", columnName,
             SERIALIZE_FUNCTION, columnName);
       } else if (column.isOneToOne()) {
-        javaWriter.emitStatement("%s%s.%s(element.%s, db)", column.getType(),
-            $$SUFFIX, INSERT_ONE_TO_ONE, column.getColumnName())
-            .emitStatement("values.put(\"%s\", %s%s.%s(element.%s))", columnName,
-                column.getType(), $$SUFFIX, GET_ID_FUNCTION, columnName);
+        javaWriter.emitStatement("%s%s.%s(element.%s, db)", column.getType(), $$SUFFIX,
+            INSERT_ONE_TO_ONE, column.getColumnName())
+            .emitStatement("values.put(\"%s\", %s%s.%s(element.%s))", columnName, column.getType(),
+                $$SUFFIX, GET_ID_FUNCTION, columnName);
       } else if (column.isDate()) {
-        javaWriter.emitStatement(
-            "values.put(\"%s\", element.%s.getTime())", columnName, columnName);
+        javaWriter.emitStatement("values.put(\"%s\", element.%s.getTime())", columnName,
+            columnName);
       } else if (column.isOneToMany()) {
         childColumns.add(column);
       } else if (!column.isOneToManyChild()) {
@@ -236,8 +232,8 @@ class TableObject {
           + "\"SELECT ROWID FROM %s ORDER BY ROWID DESC LIMIT 1\", null)", tableName);
     }
     for (TableColumn childColumn : childColumns) {
-      javaWriter.emitStatement("%s%s.%s(id, element.%s, db)", childColumn.getType(),
-          $$SUFFIX, PARENT_INSERT_FUNCTION, childColumn.getColumnName());
+      javaWriter.emitStatement("%s%s.%s(id, element.%s, db)", childColumn.getType(), $$SUFFIX,
+          PARENT_INSERT_FUNCTION, childColumn.getColumnName());
     }
 
     javaWriter.endMethod();
@@ -304,8 +300,7 @@ class TableObject {
     logger.d("emitDeleteWithObject");
     javaWriter.beginMethod("void", $$DELETE_OBJECT_FUNCTION, EnumSet.of(PUBLIC, STATIC),
         getTargetClass(), "element", "SQLiteDatabase", "db")
-        .emitStatement(
-            "%s(element.%s, db)", $$DELETE_OBJECT_FUNCTION, idColumnName)
+        .emitStatement("%s(element.%s, db)", $$DELETE_OBJECT_FUNCTION, idColumnName)
         .endMethod();
   }
 
@@ -331,8 +326,8 @@ class TableObject {
 
   private void emitSingleMap(JavaWriter javaWriter) throws IOException {
     String targetClass = getTargetClass();
-    javaWriter.beginMethod(targetClass, $$MAP_SINGLE_FUNCTION, EnumSet.of(PUBLIC, STATIC),
-        "Cursor", "cursor", "SQLiteDatabase", "db")
+    javaWriter.beginMethod(targetClass, $$MAP_SINGLE_FUNCTION, EnumSet.of(PUBLIC, STATIC), "Cursor",
+        "cursor", "SQLiteDatabase", "db")
         .emitStatement("%s tableObject = new %s()", targetClass, getTargetClass())
         .emitStatement("tableObject.%s = cursor.getLong(cursor.getColumnIndex(\"%s\"))",
             idColumnName, idColumnName);
@@ -345,8 +340,8 @@ class TableObject {
             CursorFunctions.get(long.class.getName()), columnName);
       } else if (column.isOneToOne()) {
         javaWriter.emitStatement(
-            "tableObject.%s = %s%s.%s(cursor.%s(cursor.getColumnIndex(\"%s\")), db)",
-            columnName, column.getType(), $$SUFFIX, $$GET_OBJECT_BY_ID,
+            "tableObject.%s = %s%s.%s(cursor.%s(cursor.getColumnIndex(\"%s\")), db)", columnName,
+            column.getType(), $$SUFFIX, $$GET_OBJECT_BY_ID,
             CursorFunctions.get(Long.class.getName()), columnName);
       } else if (column.isBoolean()) {
         javaWriter.emitStatement("tableObject.%s = cursor.%s(cursor.getColumnIndex(\"%s\")) == 1",
@@ -356,15 +351,14 @@ class TableObject {
           javaWriter.emitStatement("tableObject.%s = cursor.%s(cursor.getColumnIndex(\"%s\"))",
               columnName, CursorFunctions.get(column.getType()), columnName);
         } else {
-          javaWriter.emitStatement(
-              "tableObject.%s = %s(cursor.%s(cursor.getColumnIndex(\"%s\")));", columnName,
-              DESERIALIZE_FUNCTION, CursorFunctions.get(column.getType()), columnName);
+          javaWriter.emitStatement("tableObject.%s = %s(cursor.%s(cursor.getColumnIndex(\"%s\")));",
+              columnName, DESERIALIZE_FUNCTION, CursorFunctions.get(column.getType()), columnName);
         }
       } else if (column.isOneToMany()) {
-        javaWriter.emitStatement("Cursor childCursor = %s%s.%s(db)", column.getType(),
-            $$SUFFIX, SELECT_ALL_FUNCTION)
-            .emitStatement("tableObject.%s = %s%s.%s(childCursor, db)",
-                column.getColumnName(), column.getType(), $$SUFFIX, $$MAP_OBJECT_FUNCTION)
+        javaWriter.emitStatement("Cursor childCursor = %s%s.%s(db)", column.getType(), $$SUFFIX,
+            SELECT_ALL_FUNCTION)
+            .emitStatement("tableObject.%s = %s%s.%s(childCursor, db)", column.getColumnName(),
+                column.getType(), $$SUFFIX, $$MAP_OBJECT_FUNCTION)
             .emitStatement("childCursor.close()");
       } else if (column.isOneToManyChild()) {
         // TODO Skip and have custom mapping?
@@ -374,8 +368,7 @@ class TableObject {
       }
     }
 
-    javaWriter.emitStatement("return tableObject")
-        .endMethod();
+    javaWriter.emitStatement("return tableObject").endMethod();
   }
 
   /** Creates function for getting an object by value */
@@ -383,8 +376,8 @@ class TableObject {
     logger.d("emitSelectById");
     javaWriter.beginMethod(getTargetClass(), $$GET_OBJECT_BY_ID, EnumSet.of(PUBLIC, STATIC), "long",
         "id", "SQLiteDatabase", "db")
-        .emitStatement("Cursor cursor = db.rawQuery(\"SELECT * FROM %s WHERE %s  = id\", null)"
-            , getTableName(), idColumnName)
+        .emitStatement("Cursor cursor = db.rawQuery(\"SELECT * FROM %s WHERE %s  = id\", null)",
+            getTableName(), idColumnName)
         .emitStatement("%s value = %s(cursor, db).get(0)", getTargetClass(), $$MAP_OBJECT_FUNCTION)
         .emitStatement("cursor.close()")
         .emitStatement("return value")
@@ -392,25 +385,23 @@ class TableObject {
   }
 
   private void emitParentInsert(JavaWriter javaWriter) throws IOException {
-    javaWriter.beginMethod("void", PARENT_INSERT_FUNCTION, EnumSet.of(PUBLIC, STATIC),
-        "long", "parentId", String.format("List<%s>", getTargetClass()), "children",
-        "SQLiteDatabase", "db")
+    javaWriter.beginMethod("void", PARENT_INSERT_FUNCTION, EnumSet.of(PUBLIC, STATIC), "long",
+        "parentId", String.format("List<%s>", getTargetClass()), "children", "SQLiteDatabase", "db")
         .beginControlFlow("for(%s child : children)", getTargetClass())
         .emitStatement("ContentValues values = new ContentValues()");
     for (TableColumn column : columns) {
       String columnName = column.getColumnName();
       if (column.getSqlType() == SqliteType.BLOB && !column.isByteArray()) {
-        javaWriter.emitStatement("values.put(\"%s\", %s(child.%s))", columnName,
-            SERIALIZE_FUNCTION, columnName);
+        javaWriter.emitStatement("values.put(\"%s\", %s(child.%s))", columnName, SERIALIZE_FUNCTION,
+            columnName);
       } else if (column.isOneToOne()) {
         javaWriter.emitStatement("values.put(\"%s\", %s%s.%s(child.%s))", columnName,
             column.getType(), $$SUFFIX, GET_ID_FUNCTION, columnName);
       } else if (column.isDate()) {
-        javaWriter.emitStatement(
-            "values.put(\"%s\", child.%s.getTime())", columnName, columnName);
+        javaWriter.emitStatement("values.put(\"%s\", child.%s.getTime())", columnName, columnName);
       } else if (column.getSqlType() == SqliteType.ONE_TO_MANY) {
-        javaWriter.emitStatement("%s.%s.%s(%s)", column.getType(), $$SUFFIX,
-            PARENT_INSERT_FUNCTION, columnName);
+        javaWriter.emitStatement("%s.%s.%s(%s)", column.getType(), $$SUFFIX, PARENT_INSERT_FUNCTION,
+            columnName);
       } else if (column.getSqlType() == SqliteType.ONE_TO_MANY_CHILD) {
         javaWriter.emitStatement("values.put(\"%s\", %s)", columnName, "parentId");
       } else {
