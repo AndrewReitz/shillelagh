@@ -49,8 +49,8 @@ import static shillelagh.Shillelagh.$$UPDATE_OBJECT_FUNCTION;
 
 class TableObject {
 
-  private static final String SERIALIZE_FUNCTION = "serialize";
-  private static final String DESERIALIZE_FUNCTION = "deserialize";
+  private static final String SERIALIZE_FUNCTION = "ShillelaghUtil.serialize";
+  private static final String DESERIALIZE_FUNCTION = "ShillelaghUtil.deserialize";
   private static final String GET_ID_FUNCTION = "getId";
   private static final String SELECT_ALL_FUNCTION = "selectAll";
   private static final String PARENT_INSERT_FUNCTION = "parentInsert";
@@ -113,7 +113,7 @@ class TableObject {
   }
 
   /** Get table schema */
-  String getSchema() {
+  private String getSchema() {
     StringBuilder sb = new StringBuilder();
     Iterator<TableColumn> iterator = columns.iterator();
     while (iterator.hasNext()) {
@@ -148,10 +148,10 @@ class TableObject {
 
     javaWriter.emitSingleLineComment("Generated code from Shillelagh. Do not modify!")
         .emitPackage(classPackage)
-        /* Knows nothing of android types */
+        /* Knows nothing of android types, must use strings. */
         .emitImports("android.content.ContentValues", "android.database.Cursor",
             "android.database.DatabaseUtils", "android.database.sqlite.SQLiteDatabase")
-        .emitImports(ByteArrayInputStream.class, ByteArrayOutputStream.class, IOException.class,
+        .emitImports(ShillelaghUtil.class, ByteArrayInputStream.class, ByteArrayOutputStream.class, IOException.class,
             ObjectInputStream.class, ObjectOutputStream.class, LinkedList.class, Date.class,
             List.class)
         .beginType(className, "class", EnumSet.of(PUBLIC, FINAL));
@@ -172,7 +172,6 @@ class TableObject {
     emitMapCursorToObject(javaWriter);
     emitSingleMap(javaWriter);
     emitSelectById(javaWriter);
-    emitByteArraySerialization(javaWriter);
     javaWriter.endType();
   }
 
@@ -445,35 +444,7 @@ class TableObject {
         .endMethod();
   }
 
-  /** Creates functions for serialization to and from byte arrays */
-  private void emitByteArraySerialization(JavaWriter javaWriter) throws IOException {
-    logger.d("emitByteArraySerialization");
-    javaWriter.beginMethod("<K> byte[]", SERIALIZE_FUNCTION, EnumSet.of(STATIC), "K", "object")
-        .beginControlFlow("try")
-        .emitStatement("ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()")
-        .emitStatement(
-            "ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream)")
-        .emitStatement("objectOutputStream.writeObject(object)")
-        .emitStatement("return byteArrayOutputStream.toByteArray()")
-        .nextControlFlow("catch (IOException e)")
-        .emitStatement("throw new RuntimeException(e)")
-        .endControlFlow()
-        .endMethod()
-        .beginMethod("<K> K", DESERIALIZE_FUNCTION, EnumSet.of(STATIC), "byte[]", "bytes")
-        .beginControlFlow("try")
-        .emitStatement(
-            "ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes)")
-        .emitStatement(
-            "ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream)")
-        .emitStatement("return (K) objectInputStream.readObject()")
-        .nextControlFlow("catch (IOException e)")
-        .emitStatement("throw new RuntimeException(e)")
-        .nextControlFlow("catch (ClassNotFoundException e)")
-        .emitStatement("throw new RuntimeException(e)")
-        .endControlFlow()
-        .endMethod();
-  }
-
+  /** Retruns the create statement for this table object */
   @Override public String toString() {
     return getSchema();
   }

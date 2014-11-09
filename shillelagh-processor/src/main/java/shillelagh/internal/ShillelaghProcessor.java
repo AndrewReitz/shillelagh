@@ -140,12 +140,13 @@ public final class ShillelaghProcessor extends AbstractProcessor {
       Element element = tableObject.getOriginatingElement();
 
       try {
+        // Write out the create statement.
         JavaFileManager.Location location = StandardLocation.SOURCE_OUTPUT;
         String path = getPackageName(element);
         String file = tableObject.getTableName() + ".sql";
         FileObject resource = filer.createResource(location, path, file, element);
         Writer writer = resource.openWriter();
-        writer.write(tableObject.getSchema());
+        writer.write(tableObject.toString());
         writer.flush();
         writer.close();
       } catch (IOException e) {
