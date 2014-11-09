@@ -26,11 +26,11 @@ import shillelagh.Table;
 @Table public class TestOneToMany {
   @Id long id;
   @Field String someValue;
-  @Field List<Child> children;
+  @Field List<OneToManyChild> children;
 
   @OrmOnly TestOneToMany() {}
 
-  public TestOneToMany(String someValue, List<Child> children) {
+  public TestOneToMany(String someValue, List<OneToManyChild> children) {
     this.someValue = someValue;
     this.children = children;
   }
@@ -39,18 +39,18 @@ import shillelagh.Table;
     this.someValue = someValue;
   }
 
-  public List<Child> getChildren() {
+  public List<OneToManyChild> getChildren() {
     return children;
   }
 
-  @Table public static class Child {
+  @Table public static class OneToManyChild {
     @Id long id;
     @Field String testString;
     @Field int testInt;
 
-    @OrmOnly Child() { }
+    @OrmOnly OneToManyChild() { }
 
-    public Child(String testString, int testInt) {
+    public OneToManyChild(String testString, int testInt) {
       this.testString = testString;
       this.testInt = testInt;
     }

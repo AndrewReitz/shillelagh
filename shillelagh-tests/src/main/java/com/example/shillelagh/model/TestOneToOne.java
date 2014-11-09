@@ -23,11 +23,11 @@ import shillelagh.Table;
 
 @Table public class TestOneToOne {
   @Id long id;
-  @Field Child child;
+  @Field OneToOneChild child;
 
   @OrmOnly TestOneToOne() { }
 
-  public TestOneToOne(Child child) {
+  public TestOneToOne(OneToOneChild child) {
     this.child = child;
   }
 
@@ -39,15 +39,15 @@ import shillelagh.Table;
     this.id = id;
   }
 
-  public void setChild(Child child) {
+  public void setChild(OneToOneChild child) {
     this.child = child;
   }
 
-  public Child getChild() {
+  public OneToOneChild getChild() {
     return child;
   }
 
-  @Table public static class Child {
+  @Table public static class OneToOneChild {
     @Id long id;
     @Field String childName;
 
@@ -59,9 +59,9 @@ import shillelagh.Table;
       this.id = id;
     }
 
-    @OrmOnly Child() {}
+    @OrmOnly OneToOneChild() {}
 
-    public Child(String childName) {
+    public OneToOneChild(String childName) {
       this.childName = childName;
     }
 

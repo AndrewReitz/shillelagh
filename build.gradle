@@ -22,7 +22,7 @@ buildscript {
     jcenter()
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:0.13.3'
+    classpath 'com.android.tools.build:gradle:0.14.0'
     classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:1.12.3'
     classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.6'
     classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:3.0.1'
@@ -33,7 +33,7 @@ buildscript {
 ext {
   snapshot = !project.hasProperty('release')
   minSdkVersion = 15
-  targetSdkVersion = 20
+  targetSdkVersion = 21
   versionCode = 1
 }
 

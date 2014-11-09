@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
-apply plugin: 'com.android.application'
+package shillelagh;
 
-android {
-  compileSdkVersion 21
-  buildToolsVersion "21.1.0"
+/** Operators used for building queries */
+enum Operator {
+  BETWEEN(" BETWEEN "),
+  ORDER_BY(" ORDER BY "),
+  WHERE(" WHERE "),
+  OR(" OR "),
+  AND(" AND "),
+  EQUAL(" = "),
+  NOT_EQUAL(" != "),
+  GREATER_THAN_EQUAL(" >= "),
+  GREATER_THAN(" > "),
+  LESS_THAN_EQUAL(" <= "),
+  LESS_THAN(" < "),
+  IS(" IS "),
+  NOT(" NOT "),
+  LIKE(" LIKE "),
+  NULL(" NULL ");
 
-  defaultConfig {
-    minSdkVersion rootProject.ext.minSdkVersion
-    targetSdkVersion rootProject.ext.targetSdkVersion
+  final String operator;
 
-    versionCode versionCode
-    versionName version
+  private Operator(String operator) {
+    this.operator = operator;
   }
-
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_6
-    targetCompatibility JavaVersion.VERSION_1_6
-  }
-}
-
-dependencies {
-  compile project(':shillelagh')
-  provided project(':shillelagh-processor')
-
-  compile 'com.netflix.rxjava:rxjava-android:0.20.6'
 }

@@ -14,29 +14,23 @@
  * limitations under the License.
  */
 
-apply plugin: 'com.android.application'
+package shillelagh;
 
-android {
-  compileSdkVersion 21
-  buildToolsVersion "21.1.0"
-
-  defaultConfig {
-    minSdkVersion rootProject.ext.minSdkVersion
-    targetSdkVersion rootProject.ext.targetSdkVersion
-
-    versionCode versionCode
-    versionName version
+/** Builder for queries after the order by statement has been called */
+public final class OrderByBuilder<T> extends Builder<T> {
+  OrderByBuilder(Shillelagh shillelagh, Class<? extends T> tableObject, StringBuilder query) {
+    super(shillelagh, tableObject, query);
   }
 
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_6
-    targetCompatibility JavaVersion.VERSION_1_6
+  /** Order the results in ascending order */
+  public Builder<T> ascending() {
+    this.query.append(" ASC");
+    return this;
   }
-}
 
-dependencies {
-  compile project(':shillelagh')
-  provided project(':shillelagh-processor')
-
-  compile 'com.netflix.rxjava:rxjava-android:0.20.6'
+  /** Order the results in descending order */
+  public Builder<T> descending() {
+    this.query.append(" DESC");
+    return new Builder<T>(shillelagh, tableObject, query);
+  }
 }
