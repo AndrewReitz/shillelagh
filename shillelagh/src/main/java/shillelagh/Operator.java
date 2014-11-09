@@ -26,7 +26,7 @@ enum Operator {
   EQUAL(" = "),
   NOT_EQUAL(" != "),
   GREATER_THAN_EQUAL(" >= "),
-  GREATHER_THAN(" > "),
+  GREATER_THAN(" > "),
   LESS_THAN_EQUAL(" <= "),
   LESS_THAN(" < "),
   IS(" IS "),

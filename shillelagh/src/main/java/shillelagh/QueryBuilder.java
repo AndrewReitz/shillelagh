@@ -20,7 +20,7 @@ import static shillelagh.Operator.AND;
 import static shillelagh.Operator.BETWEEN;
 import static shillelagh.Operator.EQUAL;
 import static shillelagh.Operator.GREATER_THAN_EQUAL;
-import static shillelagh.Operator.GREATHER_THAN;
+import static shillelagh.Operator.GREATER_THAN;
 import static shillelagh.Operator.IS;
 import static shillelagh.Operator.LESS_THAN;
 import static shillelagh.Operator.LESS_THAN_EQUAL;
@@ -57,7 +57,7 @@ public final class QueryBuilder<T> extends Builder<T> {
   }
 
   public QueryBuilder<T> isGreaterThan(Object value) {
-    query.append(GREATHER_THAN.operator).append(valueOf(columnName, value));
+    query.append(GREATER_THAN.operator).append(valueOf(columnName, value));
     return this;
   }
 
