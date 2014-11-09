@@ -256,8 +256,8 @@ public final class Shillelagh {
   }
 
   /** Work in progress. */
-  public <T> QueryBuilder<T> selectFrom(Class<? extends T> tableObject) {
-    return new QueryBuilder<T>(tableObject, this);
+  public <T> WhereBuilder<T> selectFrom(Class<? extends T> tableObject) {
+    return new WhereBuilder<T>(tableObject, this);
   }
 
   // End Shillelagh Selectors
@@ -546,7 +546,7 @@ public final class Shillelagh {
   }
 
   /**
-   * Gets the Class objects of a list of parameters, this is used for figuring out the parameters
+   * Gets the Class objects of a list of parameters, this isEqualTo used for figuring out the parameters
    * types of a method
    */
   private static Class<?>[] getParamTypes(Object... params) {
