@@ -16,10 +16,6 @@
 
 package shillelagh;
 
-import android.database.Cursor;
-import java.util.List;
-import rx.Observable;
-
 import static shillelagh.Operator.AND;
 import static shillelagh.Operator.BETWEEN;
 import static shillelagh.Operator.EQUAL;
@@ -34,24 +30,15 @@ import static shillelagh.Operator.NOT_EQUAL;
 import static shillelagh.Operator.NULL;
 import static shillelagh.Operator.OR;
 import static shillelagh.Operator.ORDER_BY;
-import static shillelagh.Shillelagh.HAS_RX_JAVA;
 
-/** Work in progress */
-public final class QueryBuilder<T> {
-
-  private final StringBuilder query;
-
-  private final Class<? extends T> tableObject;
-  private final Shillelagh shillelagh;
-
+/** A builder for building your queries. */
+public final class QueryBuilder<T> extends Builder<T> {
   private final String columnName;
 
   QueryBuilder(Class<? extends T> tableObject, Shillelagh shillelagh, String columnName,
       StringBuilder query) {
-    this.tableObject = tableObject;
-    this.shillelagh = shillelagh;
+    super(shillelagh, tableObject, query);
     this.columnName = columnName;
-    this.query = query;
   }
 
   public QueryBuilder<T> isEqualTo(Object value) {
@@ -124,46 +111,10 @@ public final class QueryBuilder<T> {
     return this;
   }
 
-  public QueryBuilder orderBy(String columnName) {
+  public OrderByBuilder<T> orderBy(String columnName) {
     checkColumnName(columnName);
     query.append(ORDER_BY.operator).append(columnName);
-    return this;
-  }
-
-  public List<T> toList() {
-    return shillelagh.rawQuery(tableObject, query.toString());
-  }
-
-  public Observable<T> toObservable() {
-    if (!HAS_RX_JAVA) {
-      throw new RuntimeException(
-          "RxJava not available! Add RxJava to your build to use this feature");
-    }
-
-    return shillelagh.getObservable(tableObject, new CursorLoader() {
-      @Override public Cursor getCursor() {
-        return shillelagh.rawQuery(query.toString());
-      }
-    });
-  }
-
-  public Cursor toCursor() {
-    return shillelagh.rawQuery(query.toString());
-  }
-
-  /** Returns the created query as a string */
-  @Override public String toString() {
-    return query.toString().trim();
-  }
-
-  /** Check to ensure that the column name provided isEqualTo valid */
-  private void checkColumnName(String columnName) {
-    try {
-      tableObject.getDeclaredField(columnName);
-    } catch (NoSuchFieldException e) {
-      throw new RuntimeException(
-          String.format("%s isEqualTo not a field found in %s", columnName, tableObject));
-    }
+    return new OrderByBuilder<T>(shillelagh, tableObject, query);
   }
 
   /** Forces the value to be wrapped with ' if it isEqualTo for a string field. */

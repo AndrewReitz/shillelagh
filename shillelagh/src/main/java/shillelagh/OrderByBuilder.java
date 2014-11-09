@@ -16,58 +16,21 @@
 
 package shillelagh;
 
-import android.database.Cursor;
-import java.util.List;
-import rx.Observable;
-
-import static shillelagh.Shillelagh.HAS_RX_JAVA;
-
-public final class OrderByBuilder<T> {
-
-  private final StringBuilder query;
-
-  private final Class<? extends T> tableObject;
-  private final Shillelagh shillelagh;
-
+/** Builder for queries after the order by statement has been called */
+public final class OrderByBuilder<T> extends Builder<T> {
   OrderByBuilder(Shillelagh shillelagh, Class<? extends T> tableObject, StringBuilder query) {
-    this.shillelagh = shillelagh;
-    this.tableObject = tableObject;
-    this.query = query;
+    super(shillelagh, tableObject, query);
   }
 
-  public OrderByBuilder<T> ascending() {
+  /** Order the results in ascending order */
+  public Builder<T> ascending() {
     this.query.append(" ASC");
     return this;
   }
 
-  public OrderByBuilder<T> descending() {
+  /** Order the results in descending order */
+  public Builder<T> descending() {
     this.query.append(" DESC");
-    return this;
-  }
-
-  public List<T> toList() {
-    return shillelagh.rawQuery(tableObject, query.toString());
-  }
-
-  public Observable<T> toObservable() {
-    if (!HAS_RX_JAVA) {
-      throw new RuntimeException(
-          "RxJava not available! Add RxJava to your build to use this feature");
-    }
-
-    return shillelagh.getObservable(tableObject, new CursorLoader() {
-      @Override public Cursor getCursor() {
-        return shillelagh.rawQuery(query.toString());
-      }
-    });
-  }
-
-  public Cursor toCursor() {
-    return shillelagh.rawQuery(query.toString());
-  }
-
-  /** Returns the created query as a string */
-  @Override public String toString() {
-    return query.toString().trim();
+    return new Builder<T>(shillelagh, tableObject, query);
   }
 }

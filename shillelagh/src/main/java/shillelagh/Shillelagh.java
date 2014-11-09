@@ -23,13 +23,11 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Build;
 import android.os.CancellationSignal;
 import android.util.Log;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
 import rx.Observable;
 import rx.Subscriber;
 
@@ -257,7 +255,7 @@ public final class Shillelagh {
 
   /** Work in progress. */
   public <T> WhereBuilder<T> selectFrom(Class<? extends T> tableObject) {
-    return new WhereBuilder<T>(tableObject, this);
+    return new WhereBuilder<T>(this, tableObject);
   }
 
   // End Shillelagh Selectors
@@ -290,6 +288,11 @@ public final class Shillelagh {
     return map(tableClass, results);
   }
 
+  /**
+   * Equivalent to calling
+   * {@link SQLiteDatabase#query(boolean, String, String[], String, String[], String, String,
+   * String, String)} then wrapping the cursor in an {@link Observable}.
+   */
   public <T> Observable<T> createQuery(final Class<? extends T> tableClass, final boolean distinct,
       final String[] columns, final String selection, final String[] selectionArgs,
       final String groupBy, final String having, final String orderBy, final String limit) {
@@ -364,6 +367,10 @@ public final class Shillelagh {
     return map(tableObject, results);
   }
 
+  /**
+   * Equivalent to calling {@link SQLiteDatabase#query(String, String[], String, String[], String,
+   * String, String)} and then wrapping the result in an {@link Observable}.
+   */
   public <T> Observable<T> createQuery(final Class<? extends T> tableObject, final String[] columns,
       final String selection, final String[] selectionArgs, final String groupBy,
       final String having, final String orderBy) {
@@ -406,6 +413,11 @@ public final class Shillelagh {
     return map(tableObject, results);
   }
 
+  /**
+   * Equivalent to calling {@link SQLiteDatabase#query(String, String[], String, String[], String,
+   * String, String, String)}
+   * and then wrapping the result in an {@link Observable}.
+   */
   public <T> Observable<T> createQuery(final Class<? extends T> tableObject, final String[] columns,
       final String selection, final String[] selectionArgs, final String groupBy,
       final String having, final String orderBy, final String limit) {
@@ -440,6 +452,10 @@ public final class Shillelagh {
     return this.rawQuery(tableObject, sql, null, sqlArgs);
   }
 
+  /**
+   * Equivalent to calling {@link SQLiteDatabase#rawQuery(String, String[])} where the selection
+   * args are null and then wrapping the result in an {@link Observable}.
+   */
   public <T> Observable<T> createQuery(Class<? extends T> tableObject, final String sql,
       final Object... sqlArgs) {
     if (!HAS_RX_JAVA) {
@@ -472,6 +488,10 @@ public final class Shillelagh {
     return map(tableObject, result);
   }
 
+  /**
+   * Equivalent to calling {@link SQLiteDatabase#rawQuery(String, String[])}
+   * and then wrapping the result in an {@link Observable}.
+   */
   public <T> Observable<T> createQuery(Class<? extends T> tableObject, final String sql,
       final String[] selectionArgs, final Object... sqlArgs) {
     if (!HAS_RX_JAVA) {
@@ -513,10 +533,12 @@ public final class Shillelagh {
     return map(tableObject, results);
   }
 
+  /** @see SQLiteOpenHelper#getReadableDatabase() */
   public SQLiteDatabase getReadableDatabase() {
     return sqliteOpenHelper.getReadableDatabase();
   }
 
+  /** @see SQLiteOpenHelper#getWritableDatabase() */
   public SQLiteDatabase getWritableDatabase() {
     return sqliteOpenHelper.getWritableDatabase();
   }
@@ -546,7 +568,8 @@ public final class Shillelagh {
   }
 
   /**
-   * Gets the Class objects of a list of parameters, this isEqualTo used for figuring out the parameters
+   * Gets the Class objects of a list of parameters, this isEqualTo used for figuring out the
+   * parameters
    * types of a method
    */
   private static Class<?>[] getParamTypes(Object... params) {
@@ -578,11 +601,6 @@ public final class Shillelagh {
     method = shillelagh.getMethod(methodName, paramTypes);
     CACHED_METHODS.put(fqMethodName, method);
     return method;
-  }
-
-  private static void executeSql(SQLiteDatabase database, String query) {
-    log("Running SQL Statement: %s", query);
-    database.execSQL(query);
   }
 
   private static void log(String format, Object... args) {
