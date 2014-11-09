@@ -113,7 +113,7 @@ class TableObject {
   }
 
   /** Get table schema */
-  private String getSchema() {
+  String getSchema() {
     StringBuilder sb = new StringBuilder();
     Iterator<TableColumn> iterator = columns.iterator();
     while (iterator.hasNext()) {

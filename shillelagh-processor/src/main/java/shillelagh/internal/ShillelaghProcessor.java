@@ -38,8 +38,11 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
+import javax.tools.FileObject;
+import javax.tools.JavaFileManager;
 import javax.tools.JavaFileObject;
 
+import javax.tools.StandardLocation;
 import shillelagh.Field;
 import shillelagh.Id;
 import shillelagh.Shillelagh;
@@ -73,7 +76,7 @@ public final class ShillelaghProcessor extends AbstractProcessor {
   }
 
   @Override public boolean process(Set<? extends TypeElement> annotations,
-                                   RoundEnvironment roundEnvironment) {
+      RoundEnvironment roundEnvironment) {
 
     long startTime = System.currentTimeMillis();
 
@@ -125,14 +128,32 @@ public final class ShillelaghProcessor extends AbstractProcessor {
     for (Map.Entry<String, TableObject> entry : oneToManyCache.entrySet()) {
       logger.d("Entry: " + entry.getKey() + " " + entry.getValue());
       TableObject tableObject = tableObjectCache.get(entry.getKey());
-      tableObject.addColumn(new TableColumn(entry.getValue().getTableName().toLowerCase(),
-          Integer.class.getName(), SqliteType.ONE_TO_MANY_CHILD));
+      tableObject.addColumn(
+          new TableColumn(entry.getValue().getTableName().toLowerCase(), Integer.class.getName(),
+              SqliteType.ONE_TO_MANY_CHILD));
       tableObject.setIsChildTable(true);
     }
 
     for (TableObject tableObject : tableObjectCache.values()) {
       logger.d("Writing for " + tableObject.getTableName());
+
       Element element = tableObject.getOriginatingElement();
+
+      try {
+        JavaFileManager.Location location = StandardLocation.SOURCE_OUTPUT;
+        String path = getPackageName(element);
+        String file = tableObject.getTableName() + ".sql";
+        FileObject resource = filer.createResource(location, path, file, element);
+        Writer writer = resource.openWriter();
+        writer.write(tableObject.getSchema());
+        writer.flush();
+        writer.close();
+      } catch (IOException e) {
+        logger.e(
+            String.format("Unable to write schema for %s, message: %s", tableObject.getTableName(),
+                e.getMessage()));
+      }
+
       try {
         JavaFileObject jfo = filer.createSourceFile(tableObject.getFqcn(), element);
         Writer writer = jfo.openWriter();
@@ -140,8 +161,8 @@ public final class ShillelaghProcessor extends AbstractProcessor {
         writer.flush();
         writer.close();
       } catch (IOException e) {
-        logger.e(String.format(
-            "Unable to write shillelagh classes for type %s: %s", element, e.getMessage()));
+        logger.e(String.format("Unable to write shillelagh classes for type %s: %s", element,
+            e.getMessage()));
       }
     }
 
@@ -171,8 +192,8 @@ public final class ShillelaghProcessor extends AbstractProcessor {
     // Check if user wants to use an id other than _id
     Id idAnnotation = element.getAnnotation(Id.class);
     if (idAnnotation != null) {
-      if (element.asType().getKind() != TypeKind.LONG
-          && !("java.lang.Long".equals(element.asType().toString()))) {
+      if (element.asType().getKind() != TypeKind.LONG && !("java.lang.Long".equals(
+          element.asType().toString()))) {
         logger.e("@Id must be on a long");
       }
       // Id attribute set and continue
@@ -195,8 +216,9 @@ public final class ShillelaghProcessor extends AbstractProcessor {
 
     TableColumn tableColumn = new TableColumn(columnElement, type);
     if (tableColumn.isBlob() && !tableColumn.isByteArray()) {
-      if (!checkForSuperType(columnElement, Serializable.class)
-          && !columnElement.asType().toString().equals("java.lang.Byte[]")) {
+      if (!checkForSuperType(columnElement, Serializable.class) && !columnElement.asType()
+          .toString()
+          .equals("java.lang.Byte[]")) {
         logger.e(String.format(
             "%s in %s is not Serializable and will not be able to be converted to a byte array",
             columnElement.toString(), tableObject.getTableName()));
@@ -213,11 +235,12 @@ public final class ShillelaghProcessor extends AbstractProcessor {
       TypeElement childColumnElement = elementUtils.getTypeElement(typeMirror.toString());
       tableColumn.setType(getClassName(childColumnElement, getPackageName(childColumnElement)));
     } else if (tableColumn.getSqlType() == SqliteType.UNKNOWN) {
-      @SuppressWarnings("ConstantConditions")
-      Table annotation = typeElement.getAnnotation(Table.class);
+      @SuppressWarnings("ConstantConditions") Table annotation =
+          typeElement.getAnnotation(Table.class);
       if (annotation == null) {
-        logger.e(String.format("%s in %s needs to be marked as a blob or should be "
-            + "annotated with @Table", columnElement.toString(), tableObject.getTableName()));
+        logger.e(String.format(
+            "%s in %s needs to be marked as a blob or should be " + "annotated with @Table",
+            columnElement.toString(), tableObject.getTableName()));
       }
       tableColumn.setOneToOne(true);
     }
