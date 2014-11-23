@@ -137,7 +137,8 @@ final class TableObject {
       }
     }
 
-    return String.format(CREATE_TABLE_DEFAULT, getTableName(), idColumn.getColumnName(), sb.toString());
+    return String.format(CREATE_TABLE_DEFAULT, getTableName(), idColumn.getColumnName(),
+        sb.toString());
   }
 
   /** Get the fully qualified class name */
@@ -298,7 +299,8 @@ final class TableObject {
     logger.d("emitDeleteWithId");
     javaWriter.beginMethod("void", $$DELETE_OBJECT_FUNCTION, EnumSet.of(PUBLIC, STATIC), "Long",
         "id", "SQLiteDatabase", "db")
-        .emitStatement("db.delete(\"%s\", \"%s = \" + id, null)", getTableName(), idColumn.getColumnName())
+        .emitStatement("db.delete(\"%s\", \"%s = \" + id, null)", getTableName(),
+            idColumn.getColumnName())
         .endMethod();
   }
 
@@ -336,8 +338,8 @@ final class TableObject {
     javaWriter.beginMethod(targetClass, $$MAP_SINGLE_FUNCTION, EnumSet.of(PUBLIC, STATIC), "Cursor",
         "cursor", "SQLiteDatabase", "db")
         .emitStatement("%s tableObject = new %s()", targetClass, getTargetClass())
-        .emitStatement("tableObject.%s = cursor.getLong(cursor.getColumnIndex(\"%s\"))", idColumn.getMemberName(),
-            idColumn.getColumnName());
+        .emitStatement("tableObject.%s = cursor.getLong(cursor.getColumnIndex(\"%s\"))",
+            idColumn.getMemberName(), idColumn.getColumnName());
 
     for (TableColumn column : columns) {
       String columnName = column.getColumnName();
@@ -360,7 +362,8 @@ final class TableObject {
               columnMember, CursorFunctions.get(column.getType()), columnName);
         } else {
           javaWriter.emitStatement("tableObject.%s = %s(cursor.%s(cursor.getColumnIndex(\"%s\")));",
-              columnMember, DESERIALIZE_FUNCTION, CursorFunctions.get(column.getType()), columnName);
+              columnMember, DESERIALIZE_FUNCTION, CursorFunctions.get(column.getType()),
+              columnName);
         }
       } else if (column.isOneToMany()) {
         javaWriter.emitStatement("Cursor childCursor = %s%s.%s(db)", column.getType(), $$SUFFIX,
@@ -407,7 +410,8 @@ final class TableObject {
         javaWriter.emitStatement("values.put(\"%s\", %s%s.%s(child.%s))", columnName,
             column.getType(), $$SUFFIX, GET_ID_FUNCTION, columnMember);
       } else if (column.isDate()) {
-        javaWriter.emitStatement("values.put(\"%s\", child.%s.getTime())", columnName, columnMember);
+        javaWriter.emitStatement("values.put(\"%s\", child.%s.getTime())", columnName,
+            columnMember);
       } else if (column.getSqlType() == SqliteType.ONE_TO_MANY) {
         javaWriter.emitStatement("%s.%s.%s(%s)", column.getType(), $$SUFFIX, PARENT_INSERT_FUNCTION,
             columnName);
