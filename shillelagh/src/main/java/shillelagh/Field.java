@@ -23,9 +23,11 @@ import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /** All Database fields must be marked with this annotation. */
-@Retention(SOURCE)
-@Target(FIELD)
+@Retention(SOURCE) @Target(FIELD)
 public @interface Field {
+  /** Set the name of the column that shillelagh will use to read and write to the database as. */
+  String columnName() default "";
+
   /** Tells if the field should be converted to a byte array and stored as a blob */
   boolean isBlob() default false;
 }

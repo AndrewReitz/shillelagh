@@ -49,7 +49,7 @@ import shillelagh.Shillelagh;
 import shillelagh.Table;
 
 public final class ShillelaghProcessor extends AbstractProcessor {
-  static final boolean DEBUG = false;
+  static final boolean DEBUG = true;
 
   private Map<String, TableObject> oneToManyCache;
 
@@ -89,12 +89,14 @@ public final class ShillelaghProcessor extends AbstractProcessor {
         String targetType = element.toString();
         String classPackage = getPackageName(element);
         String className = getClassName((TypeElement) element, classPackage) + Shillelagh.$$SUFFIX;
-        TableObject tableObject = new TableObject(element, classPackage, className, logger);
+        TableObject tableObject = new TableObject(element, classPackage, className, logger,
+            element.getAnnotation(Table.class).tableName());
         logger.d("Element: " + element.toString());
         logger.d("TargetType: " + targetType);
         logger.d("ClassPackage: " + classPackage);
         logger.d("ClassName: " + className);
 
+        // Look for fields and ids on internal elements (Fields).
         for (Element innerElement : element.getEnclosedElements()) {
           logger.d("Inner Elements: " + innerElement.getSimpleName().toString());
           logger.d(innerElement.getKind().toString());
@@ -197,8 +199,13 @@ public final class ShillelaghProcessor extends AbstractProcessor {
           element.asType().toString()))) {
         logger.e("@Id must be on a long");
       }
+
       // Id attribute set and continue
-      tableObject.setIdColumnName(element.getSimpleName().toString());
+      String columnName = Strings.isBlank(idAnnotation.columnName()) //
+          ? element.getSimpleName().toString() //
+          : idAnnotation.columnName();
+
+      tableObject.setIdColumnName(columnName);
     }
   }
 
@@ -210,12 +217,12 @@ public final class ShillelaghProcessor extends AbstractProcessor {
     Field fieldAnnotation = columnElement.getAnnotation(Field.class);
     if (fieldAnnotation == null) return;
 
-    /* Convert the element from a field to a type */
+    // Convert the element from a field to a type
     final Element typeElement = typeUtils.asElement(columnElement.asType());
     final String type = typeElement == null ? columnElement.asType().toString()
         : elementUtils.getBinaryName((TypeElement) typeElement).toString();
 
-    TableColumn tableColumn = new TableColumn(columnElement, type);
+    TableColumn tableColumn = new TableColumn(columnElement, type, fieldAnnotation.columnName());
     if (tableColumn.isBlob() && !tableColumn.isByteArray()) {
       if (!checkForSuperType(columnElement, Serializable.class) && !columnElement.asType()
           .toString()

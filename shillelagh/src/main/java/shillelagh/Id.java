@@ -25,4 +25,6 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 /** Declare a field to be the database ID column. This MUST be placed on a long. */
 @Retention(SOURCE) @Target(FIELD)
 public @interface Id {
+  /** Set the name of the column that shillelagh will use to read and write to the database as. */
+  String columnName() default "";
 }

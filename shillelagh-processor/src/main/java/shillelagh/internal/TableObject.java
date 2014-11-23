@@ -32,6 +32,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.lang.model.element.Element;
+import shillelagh.Table;
 
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PUBLIC;
@@ -47,7 +48,7 @@ import static shillelagh.Shillelagh.$$SUFFIX;
 import static shillelagh.Shillelagh.$$UPDATE_ID_FUNCTION;
 import static shillelagh.Shillelagh.$$UPDATE_OBJECT_FUNCTION;
 
-class TableObject {
+final class TableObject {
 
   private static final String SERIALIZE_FUNCTION = "ShillelaghUtil.serialize";
   private static final String DESERIALIZE_FUNCTION = "ShillelaghUtil.deserialize";
@@ -71,17 +72,22 @@ class TableObject {
   private final String classPackage;
   private final String className;
   private final ShillelaghLogger logger;
+  private final String tableName;
 
   private boolean isChildTable = false;
   private String idColumnName;
 
   private final List<TableColumn> columns = Lists.newLinkedList();
 
-  TableObject(Element element, String classPackage, String className, ShillelaghLogger logger) {
+  TableObject(Element element, String classPackage, String className, ShillelaghLogger logger,
+      String tableName) {
     this.element = element;
     this.classPackage = classPackage;
     this.className = className;
     this.logger = logger;
+    this.tableName = Strings.isBlank(tableName) //
+        ? element.getSimpleName().toString() //
+        : tableName;
   }
 
   void setIdColumnName(String idColumnName) {
@@ -105,7 +111,7 @@ class TableObject {
   }
 
   String getTableName() {
-    return element.getSimpleName().toString();
+    return tableName;
   }
 
   String getTargetClass() {

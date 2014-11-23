@@ -30,4 +30,9 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
  */
 @Retention(CLASS) @Target(TYPE)
 public @interface Table {
+  /**
+   * Define the name of the table to be used by shillelagh. By default shillelagh uses the classes
+   * name
+   */
+  String tableName() default "";
 }

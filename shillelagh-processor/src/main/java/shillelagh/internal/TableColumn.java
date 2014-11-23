@@ -36,10 +36,11 @@ class TableColumn {
    *
    * @param element element to construct this object from
    * @param type Type that created this column should map back to in java as a String.
-   *             Ex. "java.lang.Integer"
+   * Ex. "java.lang.Integer"
+   * @param columnName The name of this column.
    */
-  TableColumn(Element element, String type) {
-    this.columnName = element.getSimpleName().toString();
+  TableColumn(Element element, String type, String columnName) {
+    this.columnName = Strings.isBlank(columnName) ? element.getSimpleName().toString() : columnName;
     this.sqliteType = SqliteType.from(element);
     this.type = type;
   }
