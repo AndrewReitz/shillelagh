@@ -170,7 +170,7 @@ public final class ShillelaghProcessor extends AbstractProcessor {
     }
 
     long endTime = System.currentTimeMillis() - startTime;
-    logger.n("Shillelagh took %d milliseconds", endTime);
+    logger.d("Shillelagh took %d milliseconds", endTime);
 
     return true;
   }
