@@ -31,7 +31,10 @@ import com.example.shillelagh.model.TestPrimitiveTable;
 
 import java.io.File;
 
+import shillelagh.Column;
+import shillelagh.Id;
 import shillelagh.Shillelagh;
+import shillelagh.Table;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static shillelagh.Shillelagh.getTableName;
@@ -322,9 +325,8 @@ public class CreateTableTest extends AndroidTestCase {
 
     // Act
     Shillelagh.createTable(database, TestOneToMany.OneToManyChild.class);
-    final Cursor cursor =
-        database.rawQuery(String.format(TABLE_INFO_QUERY, getTableName(TestOneToMany.OneToManyChild.class)),
-            null);
+    final Cursor cursor = database.rawQuery(
+        String.format(TABLE_INFO_QUERY, getTableName(TestOneToMany.OneToManyChild.class)), null);
 
     // Assert
     assertThat(cursor.getCount()).isEqualTo(4);
@@ -363,9 +365,8 @@ public class CreateTableTest extends AndroidTestCase {
 
     // Act
     Shillelagh.createTable(database, TestOneToOne.OneToOneChild.class);
-    final Cursor cursor =
-        database.rawQuery(String.format(TABLE_INFO_QUERY, getTableName(TestOneToOne.OneToOneChild.class)),
-            null);
+    final Cursor cursor = database.rawQuery(
+        String.format(TABLE_INFO_QUERY, getTableName(TestOneToOne.OneToOneChild.class)), null);
 
     // Assert
     assertThat(cursor.getCount()).isEqualTo(2);
@@ -396,5 +397,36 @@ public class CreateTableTest extends AndroidTestCase {
     }
 
     throw new AssertionError("Expected Exception Not Thrown");
+  }
+
+  public void testCreateTableWithCustomNames() {
+    // Act
+    Shillelagh.createTable(database, TestCustomNames.class);
+    final Cursor cursor = database.rawQuery(
+        String.format(TABLE_INFO_QUERY, getTableName(TestCustomNames.class)), null);
+
+    // Assert
+    assertThat(cursor.getCount()).isEqualTo(2);
+
+    assertThat(cursor.moveToNext()).isTrue();
+    assertThat(cursor.getString(TABLE_INFO_NAME_COLUMN)).isEqualTo("MyIdColumn");
+    assertThat(cursor.getString(TABLE_INFO_TYPE_COLUMN)).isEqualTo(SQL_INTEGER);
+    assertThat(cursor.getString(TABLE_INFO_NULLABLE_COLUMN)).isEqualTo("0");
+    assertThat(cursor.getString(TABLE_INFO_PRIMARAY_KEY_COLUMN)).isEqualTo("1");
+
+    assertThat(cursor.moveToNext()).isTrue();
+    assertThat(cursor.getString(TABLE_INFO_NAME_COLUMN)).isEqualTo("MyColumn");
+    assertThat(cursor.getString(TABLE_INFO_TYPE_COLUMN)).isEqualTo(SQL_TEXT);
+    assertThat(cursor.getString(TABLE_INFO_NULLABLE_COLUMN)).isEqualTo("0");
+    assertThat(cursor.getString(TABLE_INFO_PRIMARAY_KEY_COLUMN)).isEqualTo("0");
+
+    assertThat(cursor.moveToNext()).isFalse();
+    cursor.close();
+  }
+
+  @Table(name = "MyTable")
+  static final class TestCustomNames {
+    @Id(name = "MyIdColumn") long id;
+    @Column(name = "MyColumn") String someColumn;
   }
 }

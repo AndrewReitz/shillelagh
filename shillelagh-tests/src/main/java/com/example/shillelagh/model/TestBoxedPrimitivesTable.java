@@ -16,7 +16,7 @@
 
 package com.example.shillelagh.model;
 
-import shillelagh.Field;
+import shillelagh.Column;
 import shillelagh.Id;
 import shillelagh.Table;
 
@@ -24,12 +24,12 @@ import shillelagh.Table;
 public class TestBoxedPrimitivesTable {
   @Id Long _id;
 
-  @Field Boolean aBoolean;
-  @Field Double aDouble;
-  @Field Float aFloat;
-  @Field Integer anInteger;
-  @Field Long aLong;
-  @Field Short aShort;
+  @Column Boolean aBoolean;
+  @Column Double aDouble;
+  @Column Float aFloat;
+  @Column Integer anInteger;
+  @Column Long aLong;
+  @Column Short aShort;
 
   public Long getId() {
     return _id;

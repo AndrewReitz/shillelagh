@@ -40,7 +40,7 @@ are currently not supported.
 
 Byte arrays are supported with nothing out of the ordinary needing to be done. If you would like to 
 save another object type as a blob, you will need to tell Shillelagh that it should be serialized
-by adding `@Field(isBlob = true)` to the annotation. These objects MUST also implement the 
+by adding `@Column(isBlob = true)` to the annotation. These objects MUST also implement the
 Serializable interface.
 
 ## Other Notes

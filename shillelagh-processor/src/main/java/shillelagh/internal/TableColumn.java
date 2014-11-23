@@ -26,6 +26,10 @@ import static shillelagh.internal.SqliteType.INTEGER;
 class TableColumn {
   private final SqliteType sqliteType;
   private final String columnName;
+
+  /** The name of the member variable this column should read/write. */
+  private final String memberName;
+
   private String type;
 
   /** Indicates if column is a one to one mapping */
@@ -41,6 +45,7 @@ class TableColumn {
    */
   TableColumn(Element element, String type, String columnName) {
     this.columnName = Strings.isBlank(columnName) ? element.getSimpleName().toString() : columnName;
+    this.memberName = element.getSimpleName().toString();
     this.sqliteType = SqliteType.from(element);
     this.type = type;
   }
@@ -52,14 +57,19 @@ class TableColumn {
    * @param type the type this column should map back from sql to in java
    * @param sqliteType the sqlite type this column will be
    */
-  TableColumn(String columnName, String type, SqliteType sqliteType) {
+  TableColumn(String columnName, String memberName, String type, SqliteType sqliteType) {
     this.columnName = columnName;
+    this.memberName = memberName;
     this.type = type;
     this.sqliteType = sqliteType;
   }
 
   String getColumnName() {
     return columnName;
+  }
+
+  String getMemberName() {
+    return memberName;
   }
 
   SqliteType getSqlType() {

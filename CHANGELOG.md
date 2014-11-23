@@ -2,8 +2,8 @@
 
 ## Version 0.5.0
 
-- Added ability to define column names, id column names, and table names
-TODO write tests!
+- Added ability to define column, id, and table names.
+- Renamed `Field` annotation to `Column`.
 
 ## Version 0.4.0 (11-27-2014)
 

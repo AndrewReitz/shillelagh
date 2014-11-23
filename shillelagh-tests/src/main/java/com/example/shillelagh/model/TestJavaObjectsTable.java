@@ -18,7 +18,7 @@ package com.example.shillelagh.model;
 
 import java.util.Date;
 
-import shillelagh.Field;
+import shillelagh.Column;
 import shillelagh.Id;
 import shillelagh.Table;
 
@@ -26,8 +26,8 @@ import shillelagh.Table;
 public class TestJavaObjectsTable {
   @Id long id;
 
-  @Field String aString;
-  @Field Date aDate;
+  @Column String aString;
+  @Column Date aDate;
 
   public long getId() {
     return id;

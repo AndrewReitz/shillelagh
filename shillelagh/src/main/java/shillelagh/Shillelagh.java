@@ -228,8 +228,14 @@ public final class Shillelagh {
   }
 
   /** Get the table name of the class */
-  public static String getTableName(Class<?> clazz) {
-    return clazz.getSimpleName();
+  public static String getTableName(Class<?> tableClass) {
+    final Table annotation = tableClass.getAnnotation(Table.class);
+    if (annotation == null) {
+      throw new IllegalArgumentException("Class is not a table object.");
+    }
+    return annotation.name().trim().length() == 0 //
+        ? tableClass.getSimpleName() //
+        : annotation.name();
   }
 
   // Shillelagh Selectors

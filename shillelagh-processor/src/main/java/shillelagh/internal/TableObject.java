@@ -32,7 +32,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.lang.model.element.Element;
-import shillelagh.Table;
 
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PUBLIC;
@@ -75,7 +74,7 @@ final class TableObject {
   private final String tableName;
 
   private boolean isChildTable = false;
-  private String idColumnName;
+  private TableColumn idColumn;
 
   private final List<TableColumn> columns = Lists.newLinkedList();
 
@@ -90,12 +89,12 @@ final class TableObject {
         : tableName;
   }
 
-  void setIdColumnName(String idColumnName) {
-    this.idColumnName = idColumnName;
+  void setIdColumn(TableColumn idColumn) {
+    this.idColumn = idColumn;
   }
 
-  String getIdColumnName() {
-    return idColumnName;
+  TableColumn getIdColumn() {
+    return idColumn;
   }
 
   void setIsChildTable(boolean isChildTable) {
@@ -138,7 +137,7 @@ final class TableObject {
       }
     }
 
-    return String.format(CREATE_TABLE_DEFAULT, getTableName(), idColumnName, sb.toString());
+    return String.format(CREATE_TABLE_DEFAULT, getTableName(), idColumn.getColumnName(), sb.toString());
   }
 
   /** Get the fully qualified class name */
@@ -185,7 +184,7 @@ final class TableObject {
   private void emitGetId(JavaWriter javaWriter) throws IOException {
     logger.d("emitGetId");
     javaWriter.beginMethod("long", GET_ID_FUNCTION, EnumSet.of(PUBLIC, STATIC), getTargetClass(),
-        "value").emitStatement("return value.%s", idColumnName).endMethod();
+        "value").emitStatement("return value.%s", idColumn.getMemberName()).endMethod();
   }
 
   /** Creates the function for creating the table */
@@ -214,21 +213,22 @@ final class TableObject {
     List<TableColumn> childColumns = Lists.newLinkedList();
     for (TableColumn column : columns) {
       String columnName = column.getColumnName();
+      String memberName = column.getMemberName();
       if (column.isBlob() && !column.isByteArray()) {
         javaWriter.emitStatement("values.put(\"%s\", %s(element.%s))", columnName,
-            SERIALIZE_FUNCTION, columnName);
+            SERIALIZE_FUNCTION, memberName);
       } else if (column.isOneToOne()) {
         javaWriter.emitStatement("%s%s.%s(element.%s, db)", column.getType(), $$SUFFIX,
             INSERT_ONE_TO_ONE, column.getColumnName())
             .emitStatement("values.put(\"%s\", %s%s.%s(element.%s))", columnName, column.getType(),
-                $$SUFFIX, GET_ID_FUNCTION, columnName);
+                $$SUFFIX, GET_ID_FUNCTION, memberName);
       } else if (column.isDate()) {
         javaWriter.emitStatement("values.put(\"%s\", element.%s.getTime())", columnName,
-            columnName);
+            memberName);
       } else if (column.isOneToMany()) {
         childColumns.add(column);
       } else if (!column.isOneToManyChild()) {
-        javaWriter.emitStatement("values.put(\"%s\", element.%s)", columnName, columnName);
+        javaWriter.emitStatement("values.put(\"%s\", element.%s)", columnName, memberName);
       }
     }
     javaWriter.emitStatement("db.insert(\"%s\", null, values)", tableName);
@@ -239,7 +239,7 @@ final class TableObject {
     }
     for (TableColumn childColumn : childColumns) {
       javaWriter.emitStatement("%s%s.%s(id, element.%s, db)", childColumn.getType(), $$SUFFIX,
-          PARENT_INSERT_FUNCTION, childColumn.getColumnName());
+          PARENT_INSERT_FUNCTION, childColumn.getMemberName());
     }
 
     javaWriter.endMethod();
@@ -254,15 +254,16 @@ final class TableObject {
 
     for (TableColumn column : columns) {
       String columnName = column.getColumnName();
+      String memberName = column.getMemberName();
       if (column.getSqlType() == SqliteType.BLOB && !column.isByteArray()) {
         javaWriter.emitStatement("values.put(\"%s\", %s(element.%s))", columnName,
-            SERIALIZE_FUNCTION, columnName);
+            SERIALIZE_FUNCTION, memberName);
       } else if (column.isOneToOne()) {
         javaWriter.emitStatement("values.put(\"%s\", %s%s.%s(element.%s))", columnName,
-            column.getType(), $$SUFFIX, GET_ID_FUNCTION, columnName);
+            column.getType(), $$SUFFIX, GET_ID_FUNCTION, memberName);
       } else if (column.isDate()) {
         javaWriter.emitStatement("values.put(\"%s\", element.%s.getTime())", columnName,
-            columnName);
+            memberName);
       } else if (column.isOneToMany()) {
         javaWriter.beginControlFlow("for (%s child : element.%s)",
             column.getType().replace("$", "."), column.getColumnName())
@@ -272,11 +273,11 @@ final class TableObject {
       } else if (column.isOneToManyChild()) {
         // TODO: actually no way of actually updating this value directly add a wrapper?
       } else {
-        javaWriter.emitStatement("values.put(\"%s\", element.%s)", columnName, columnName);
+        javaWriter.emitStatement("values.put(\"%s\", element.%s)", columnName, memberName);
       }
     }
     javaWriter.emitStatement("db.update(\"%s\", values, \"%s = \" + element.%s, null)",
-        getTableName(), idColumnName, idColumnName);
+        getTableName(), idColumn.getColumnName(), idColumn.getMemberName());
     javaWriter.endMethod();
   }
 
@@ -288,7 +289,7 @@ final class TableObject {
         getTargetClass(), "element", "SQLiteDatabase", "db")
         .emitStatement("long id = DatabaseUtils.longForQuery(db, \"%s\", null)",
             String.format(GET_ID_OF_LAST_INSERTED_ROW_SQL, getTableName()))
-        .emitStatement("element.%s = id", idColumnName)
+        .emitStatement("element.%s = id", idColumn.getMemberName())
         .endMethod();
   }
 
@@ -297,7 +298,7 @@ final class TableObject {
     logger.d("emitDeleteWithId");
     javaWriter.beginMethod("void", $$DELETE_OBJECT_FUNCTION, EnumSet.of(PUBLIC, STATIC), "Long",
         "id", "SQLiteDatabase", "db")
-        .emitStatement("db.delete(\"%s\", \"%s = \" + id, null)", getTableName(), idColumnName)
+        .emitStatement("db.delete(\"%s\", \"%s = \" + id, null)", getTableName(), idColumn.getColumnName())
         .endMethod();
   }
 
@@ -306,7 +307,7 @@ final class TableObject {
     logger.d("emitDeleteWithObject");
     javaWriter.beginMethod("void", $$DELETE_OBJECT_FUNCTION, EnumSet.of(PUBLIC, STATIC),
         getTargetClass(), "element", "SQLiteDatabase", "db")
-        .emitStatement("%s(element.%s, db)", $$DELETE_OBJECT_FUNCTION, idColumnName)
+        .emitStatement("%s(element.%s, db)", $$DELETE_OBJECT_FUNCTION, idColumn.getMemberName())
         .endMethod();
   }
 
@@ -335,42 +336,43 @@ final class TableObject {
     javaWriter.beginMethod(targetClass, $$MAP_SINGLE_FUNCTION, EnumSet.of(PUBLIC, STATIC), "Cursor",
         "cursor", "SQLiteDatabase", "db")
         .emitStatement("%s tableObject = new %s()", targetClass, getTargetClass())
-        .emitStatement("tableObject.%s = cursor.getLong(cursor.getColumnIndex(\"%s\"))",
-            idColumnName, idColumnName);
+        .emitStatement("tableObject.%s = cursor.getLong(cursor.getColumnIndex(\"%s\"))", idColumn.getMemberName(),
+            idColumn.getColumnName());
 
     for (TableColumn column : columns) {
       String columnName = column.getColumnName();
+      String columnMember = column.getMemberName();
       if (column.isDate()) {
         javaWriter.emitStatement(
-            "tableObject.%s = new Date(cursor.%s(cursor.getColumnIndex(\"%s\")))", columnName,
+            "tableObject.%s = new Date(cursor.%s(cursor.getColumnIndex(\"%s\")))", columnMember,
             CursorFunctions.get(long.class.getName()), columnName);
       } else if (column.isOneToOne()) {
         javaWriter.emitStatement(
-            "tableObject.%s = %s%s.%s(cursor.%s(cursor.getColumnIndex(\"%s\")), db)", columnName,
+            "tableObject.%s = %s%s.%s(cursor.%s(cursor.getColumnIndex(\"%s\")), db)", columnMember,
             column.getType(), $$SUFFIX, $$GET_OBJECT_BY_ID,
             CursorFunctions.get(Long.class.getName()), columnName);
       } else if (column.isBoolean()) {
         javaWriter.emitStatement("tableObject.%s = cursor.%s(cursor.getColumnIndex(\"%s\")) == 1",
-            columnName, CursorFunctions.get(column.getType()), columnName);
+            columnMember, CursorFunctions.get(column.getType()), columnName);
       } else if (column.getSqlType() == SqliteType.BLOB) {
         if (column.isByteArray()) {
           javaWriter.emitStatement("tableObject.%s = cursor.%s(cursor.getColumnIndex(\"%s\"))",
-              columnName, CursorFunctions.get(column.getType()), columnName);
+              columnMember, CursorFunctions.get(column.getType()), columnName);
         } else {
           javaWriter.emitStatement("tableObject.%s = %s(cursor.%s(cursor.getColumnIndex(\"%s\")));",
-              columnName, DESERIALIZE_FUNCTION, CursorFunctions.get(column.getType()), columnName);
+              columnMember, DESERIALIZE_FUNCTION, CursorFunctions.get(column.getType()), columnName);
         }
       } else if (column.isOneToMany()) {
         javaWriter.emitStatement("Cursor childCursor = %s%s.%s(db)", column.getType(), $$SUFFIX,
             SELECT_ALL_FUNCTION)
-            .emitStatement("tableObject.%s = %s%s.%s(childCursor, db)", column.getColumnName(),
+            .emitStatement("tableObject.%s = %s%s.%s(childCursor, db)", column.getMemberName(),
                 column.getType(), $$SUFFIX, $$MAP_OBJECT_FUNCTION)
             .emitStatement("childCursor.close()");
       } else if (column.isOneToManyChild()) {
         // TODO Skip and have custom mapping?
       } else {
         javaWriter.emitStatement("tableObject.%s = cursor.%s(cursor.getColumnIndex(\"%s\"))",
-            columnName, CursorFunctions.get(column.getType()), columnName);
+            columnMember, CursorFunctions.get(column.getType()), columnName);
       }
     }
 
@@ -383,7 +385,7 @@ final class TableObject {
     javaWriter.beginMethod(getTargetClass(), $$GET_OBJECT_BY_ID, EnumSet.of(PUBLIC, STATIC), "long",
         "id", "SQLiteDatabase", "db")
         .emitStatement("Cursor cursor = db.rawQuery(\"SELECT * FROM %s WHERE %s  = id\", null)",
-            getTableName(), idColumnName)
+            getTableName(), idColumn.getColumnName())
         .emitStatement("%s value = %s(cursor, db).get(0)", getTargetClass(), $$MAP_OBJECT_FUNCTION)
         .emitStatement("cursor.close()")
         .emitStatement("return value")
@@ -397,27 +399,28 @@ final class TableObject {
         .emitStatement("ContentValues values = new ContentValues()");
     for (TableColumn column : columns) {
       String columnName = column.getColumnName();
+      String columnMember = column.getMemberName();
       if (column.getSqlType() == SqliteType.BLOB && !column.isByteArray()) {
         javaWriter.emitStatement("values.put(\"%s\", %s(child.%s))", columnName, SERIALIZE_FUNCTION,
-            columnName);
+            columnMember);
       } else if (column.isOneToOne()) {
         javaWriter.emitStatement("values.put(\"%s\", %s%s.%s(child.%s))", columnName,
-            column.getType(), $$SUFFIX, GET_ID_FUNCTION, columnName);
+            column.getType(), $$SUFFIX, GET_ID_FUNCTION, columnMember);
       } else if (column.isDate()) {
-        javaWriter.emitStatement("values.put(\"%s\", child.%s.getTime())", columnName, columnName);
+        javaWriter.emitStatement("values.put(\"%s\", child.%s.getTime())", columnName, columnMember);
       } else if (column.getSqlType() == SqliteType.ONE_TO_MANY) {
         javaWriter.emitStatement("%s.%s.%s(%s)", column.getType(), $$SUFFIX, PARENT_INSERT_FUNCTION,
             columnName);
       } else if (column.getSqlType() == SqliteType.ONE_TO_MANY_CHILD) {
         javaWriter.emitStatement("values.put(\"%s\", %s)", columnName, "parentId");
       } else {
-        javaWriter.emitStatement("values.put(\"%s\", child.%s)", columnName, columnName);
+        javaWriter.emitStatement("values.put(\"%s\", child.%s)", columnName, columnMember);
       }
     }
     javaWriter.emitStatement("db.insert(\"%s\", null, values)", getTableName())
         .emitStatement("long id = DatabaseUtils.longForQuery(db, \"SELECT ROWID FROM %s "
             + "ORDER BY ROWID DESC LIMIT 1\", null)", getTableName())
-        .emitStatement("child.%s = id", idColumnName)
+        .emitStatement("child.%s = id", idColumn.getMemberName())
         .endControlFlow()
         .endMethod();
   }
@@ -437,7 +440,7 @@ final class TableObject {
         .emitStatement("%s(element, db)", $$INSERT_OBJECT_FUNCTION)
         .emitStatement("long id = DatabaseUtils.longForQuery(db, \"%s\", null)",
             String.format(GET_ID_OF_LAST_INSERTED_ROW_SQL, getTableName()))
-        .emitStatement("element.%s = id", idColumnName)
+        .emitStatement("element.%s = id", idColumn.getMemberName())
         .endMethod();
   }
 

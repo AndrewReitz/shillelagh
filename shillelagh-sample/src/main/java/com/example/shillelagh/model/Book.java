@@ -19,16 +19,16 @@ package com.example.shillelagh.model;
 import java.util.Date;
 import java.util.List;
 
-import shillelagh.Field;
+import shillelagh.Column;
 import shillelagh.OrmOnly;
 import shillelagh.Table;
 
 @Table public class Book extends Base {
-  @Field String title;
-  @Field Author author;
-  @Field Date published;
-  @Field List<Chapter> chapters;
-  @Field(isBlob = true) Image image;
+  @Column String title;
+  @Column Author author;
+  @Column Date published;
+  @Column List<Chapter> chapters;
+  @Column(isBlob = true) Image image;
 
   /**
    * Used internally by Shillelagh. OrmOnly Annotation is only a documentation annotation, and

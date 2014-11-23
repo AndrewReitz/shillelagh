@@ -16,19 +16,19 @@
 
 package com.example.shillelagh.model;
 
-import shillelagh.Field;
+import shillelagh.Column;
 import shillelagh.Id;
 import shillelagh.Table;
 
 @Table public class  TestPrimitiveTable {
   @Id long id;
 
-  @Field short aShort;
-  @Field int anInt;
-  @Field long aLong;
-  @Field float aFloat;
-  @Field double aDouble;
-  @Field boolean aBoolean;
+  @Column short aShort;
+  @Column int anInt;
+  @Column long aLong;
+  @Column float aFloat;
+  @Column double aDouble;
+  @Column boolean aBoolean;
 
   public long getId() {
     return id;

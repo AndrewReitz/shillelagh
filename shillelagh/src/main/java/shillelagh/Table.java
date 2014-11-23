@@ -21,18 +21,19 @@ import java.lang.annotation.Target;
 
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.CLASS;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * To be placed on class that will be inserted into the database.
  *
  * @see shillelagh.Id
- * @see shillelagh.Field
+ * @see Column
  */
-@Retention(CLASS) @Target(TYPE)
+@Retention(RUNTIME) @Target(TYPE)
 public @interface Table {
   /**
    * Define the name of the table to be used by shillelagh. By default shillelagh uses the classes
    * name
    */
-  String tableName() default "";
+  String name() default "";
 }

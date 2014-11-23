@@ -27,7 +27,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
-import shillelagh.Field;
+import shillelagh.Column;
 
 /** Sqlite3 Types */
 enum SqliteType {
@@ -87,7 +87,7 @@ enum SqliteType {
       throw new NullPointerException("element must not be null");
     }
 
-    if (element.getAnnotation(Field.class).isBlob()) {
+    if (element.getAnnotation(Column.class).isBlob()) {
       return BLOB;
     }
 

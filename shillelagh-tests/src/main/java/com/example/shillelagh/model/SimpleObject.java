@@ -16,7 +16,7 @@
 
 package com.example.shillelagh.model;
 
-import shillelagh.Field;
+import shillelagh.Column;
 import shillelagh.Id;
 import shillelagh.OrmOnly;
 import shillelagh.Table;
@@ -25,9 +25,9 @@ import shillelagh.Table;
 public class SimpleObject {
 
   @Id long id;
-  @Field String name;
-  @Field String address;
-  @Field long customerId;
+  @Column String name;
+  @Column String address;
+  @Column long customerId;
 
   @OrmOnly SimpleObject() { /* Used internally by shillelagh */ }
 

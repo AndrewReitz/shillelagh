@@ -16,14 +16,14 @@
 
 package com.example.shillelagh.model;
 
-import shillelagh.Field;
+import shillelagh.Column;
 import shillelagh.Id;
 import shillelagh.OrmOnly;
 import shillelagh.Table;
 
 @Table public class TestOneToOne {
   @Id long id;
-  @Field OneToOneChild child;
+  @Column OneToOneChild child;
 
   @OrmOnly TestOneToOne() { }
 
@@ -49,7 +49,7 @@ import shillelagh.Table;
 
   @Table public static class OneToOneChild {
     @Id long id;
-    @Field String childName;
+    @Column String childName;
 
     public long getId() {
       return id;

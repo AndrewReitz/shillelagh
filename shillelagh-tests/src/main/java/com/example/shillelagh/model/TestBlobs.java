@@ -18,15 +18,15 @@ package com.example.shillelagh.model;
 
 import java.io.Serializable;
 
-import shillelagh.Field;
+import shillelagh.Column;
 import shillelagh.Id;
 import shillelagh.Table;
 
 @Table public class TestBlobs {
   @Id long id;
-  @Field(isBlob = true) Byte[] aByteArray;
-  @Field(isBlob = true) byte[] anotherByteArray; // TODO Make this not require isBlob == true
-  @Field(isBlob = true) TestBlobObject aTestBlobObject;
+  @Column(isBlob = true) Byte[] aByteArray;
+  @Column(isBlob = true) byte[] anotherByteArray; // TODO Make this not require isBlob == true
+  @Column(isBlob = true) TestBlobObject aTestBlobObject;
 
   public long getId() {
     return id;

@@ -16,13 +16,13 @@
 
 package com.example.shillelagh.model;
 
-import shillelagh.Field;
+import shillelagh.Column;
 import shillelagh.OrmOnly;
 import shillelagh.Table;
 
 @Table
 public class Chapter extends Base {
-  @Field String chapter;
+  @Column String chapter;
 
   /**
    * Used internally by Shillelagh. OrmOnly Annotation is only a documentation annotation, and

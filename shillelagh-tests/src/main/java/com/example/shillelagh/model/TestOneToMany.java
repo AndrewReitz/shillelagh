@@ -18,15 +18,15 @@ package com.example.shillelagh.model;
 
 import java.util.List;
 
-import shillelagh.Field;
+import shillelagh.Column;
 import shillelagh.Id;
 import shillelagh.OrmOnly;
 import shillelagh.Table;
 
 @Table public class TestOneToMany {
   @Id long id;
-  @Field String someValue;
-  @Field List<OneToManyChild> children;
+  @Column String someValue;
+  @Column List<OneToManyChild> children;
 
   @OrmOnly TestOneToMany() {}
 
@@ -45,8 +45,8 @@ import shillelagh.Table;
 
   @Table public static class OneToManyChild {
     @Id long id;
-    @Field String testString;
-    @Field int testInt;
+    @Column String testString;
+    @Column int testInt;
 
     @OrmOnly OneToManyChild() { }
 

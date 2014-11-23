@@ -43,13 +43,13 @@ import javax.tools.JavaFileManager;
 import javax.tools.JavaFileObject;
 
 import javax.tools.StandardLocation;
-import shillelagh.Field;
+import shillelagh.Column;
 import shillelagh.Id;
 import shillelagh.Shillelagh;
 import shillelagh.Table;
 
 public final class ShillelaghProcessor extends AbstractProcessor {
-  static final boolean DEBUG = true;
+  static final boolean DEBUG = false;
 
   private Map<String, TableObject> oneToManyCache;
 
@@ -90,7 +90,7 @@ public final class ShillelaghProcessor extends AbstractProcessor {
         String classPackage = getPackageName(element);
         String className = getClassName((TypeElement) element, classPackage) + Shillelagh.$$SUFFIX;
         TableObject tableObject = new TableObject(element, classPackage, className, logger,
-            element.getAnnotation(Table.class).tableName());
+            element.getAnnotation(Table.class).name());
         logger.d("Element: " + element.toString());
         logger.d("TargetType: " + targetType);
         logger.d("ClassPackage: " + classPackage);
@@ -118,7 +118,7 @@ public final class ShillelaghProcessor extends AbstractProcessor {
         }
 
         logger.d(tableObject.toString());
-        if (tableObject.getIdColumnName() == null) {
+        if (tableObject.getIdColumn() == null) {
           logger.e(String.format("%s does not have an id column. Did you forget @Id?", targetType));
         }
 
@@ -130,9 +130,9 @@ public final class ShillelaghProcessor extends AbstractProcessor {
     for (Map.Entry<String, TableObject> entry : oneToManyCache.entrySet()) {
       logger.d("Entry: " + entry.getKey() + " " + entry.getValue());
       TableObject tableObject = tableObjectCache.get(entry.getKey());
-      tableObject.addColumn(
-          new TableColumn(entry.getValue().getTableName().toLowerCase(), Integer.class.getName(),
-              SqliteType.ONE_TO_MANY_CHILD));
+      String columnName = entry.getValue().getTableName().toLowerCase();
+      tableObject.addColumn(new TableColumn(columnName, columnName, Integer.class.getName(),
+          SqliteType.ONE_TO_MANY_CHILD));
       tableObject.setIsChildTable(true);
     }
 
@@ -201,11 +201,14 @@ public final class ShillelaghProcessor extends AbstractProcessor {
       }
 
       // Id attribute set and continue
-      String columnName = Strings.isBlank(idAnnotation.columnName()) //
+      String columnName = Strings.isBlank(idAnnotation.name()) //
           ? element.getSimpleName().toString() //
-          : idAnnotation.columnName();
+          : idAnnotation.name();
 
-      tableObject.setIdColumnName(columnName);
+      final TableColumn idColumn = new TableColumn(columnName, element.getSimpleName().toString(),
+          element.asType().toString(), SqliteType.INTEGER);
+
+      tableObject.setIdColumn(idColumn);
     }
   }
 
@@ -214,15 +217,15 @@ public final class ShillelaghProcessor extends AbstractProcessor {
    * add it to the table object
    */
   private void checkForFields(TableObject tableObject, Element columnElement) {
-    Field fieldAnnotation = columnElement.getAnnotation(Field.class);
-    if (fieldAnnotation == null) return;
+    Column columnAnnotation = columnElement.getAnnotation(Column.class);
+    if (columnAnnotation == null) return;
 
     // Convert the element from a field to a type
     final Element typeElement = typeUtils.asElement(columnElement.asType());
     final String type = typeElement == null ? columnElement.asType().toString()
         : elementUtils.getBinaryName((TypeElement) typeElement).toString();
 
-    TableColumn tableColumn = new TableColumn(columnElement, type, fieldAnnotation.columnName());
+    TableColumn tableColumn = new TableColumn(columnElement, type, columnAnnotation.name());
     if (tableColumn.isBlob() && !tableColumn.isByteArray()) {
       if (!checkForSuperType(columnElement, Serializable.class) && !columnElement.asType()
           .toString()
