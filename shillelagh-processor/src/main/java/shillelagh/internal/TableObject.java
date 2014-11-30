@@ -51,6 +51,7 @@ final class TableObject {
 
   private static final String SERIALIZE_FUNCTION = "ShillelaghUtil.serialize";
   private static final String DESERIALIZE_FUNCTION = "ShillelaghUtil.deserialize";
+  private static final String NEW_INSTANCE_FUNCTION = "ShillelaghUtil.createInstance";
   private static final String GET_ID_FUNCTION = "getId";
   private static final String SELECT_ALL_FUNCTION = "selectAll";
   private static final String PARENT_INSERT_FUNCTION = "parentInsert";
@@ -337,7 +338,8 @@ final class TableObject {
     String targetClass = getTargetClass();
     javaWriter.beginMethod(targetClass, $$MAP_SINGLE_FUNCTION, EnumSet.of(PUBLIC, STATIC), "Cursor",
         "cursor", "SQLiteDatabase", "db")
-        .emitStatement("%s tableObject = new %s()", targetClass, getTargetClass())
+        .emitStatement("%s tableObject = %s(%s.class)", targetClass, NEW_INSTANCE_FUNCTION,
+            getTargetClass())
         .emitStatement("tableObject.%s = cursor.getLong(cursor.getColumnIndex(\"%s\"))",
             idColumn.getMemberName(), idColumn.getColumnName());
 

@@ -20,15 +20,12 @@ import java.util.List;
 
 import shillelagh.Column;
 import shillelagh.Id;
-import shillelagh.OrmOnly;
 import shillelagh.Table;
 
 @Table public class TestOneToMany {
   @Id long id;
   @Column String someValue;
   @Column List<OneToManyChild> children;
-
-  @OrmOnly TestOneToMany() {}
 
   public TestOneToMany(String someValue, List<OneToManyChild> children) {
     this.someValue = someValue;
@@ -47,8 +44,6 @@ import shillelagh.Table;
     @Id long id;
     @Column String testString;
     @Column int testInt;
-
-    @OrmOnly OneToManyChild() { }
 
     public OneToManyChild(String testString, int testInt) {
       this.testString = testString;

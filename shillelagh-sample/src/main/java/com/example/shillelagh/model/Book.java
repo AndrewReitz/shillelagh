@@ -20,21 +20,15 @@ import java.util.Date;
 import java.util.List;
 
 import shillelagh.Column;
-import shillelagh.OrmOnly;
 import shillelagh.Table;
 
-@Table public class Book extends Base {
+@Table
+public final class Book extends Base {
   @Column String title;
   @Column Author author;
   @Column Date published;
   @Column List<Chapter> chapters;
   @Column(isBlob = true) Image image;
-
-  /**
-   * Used internally by Shillelagh. OrmOnly Annotation is only a documentation annotation, and
-   * is not required for Shillelagh usage.
-   */
-  @OrmOnly Book() { }
 
   public Book(String title, Author author, Date published, List<Chapter> chapters, Image image) {
     this.title = title;

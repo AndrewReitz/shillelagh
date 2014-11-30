@@ -21,7 +21,7 @@ import shillelagh.Id;
 public class Base {
   @Id long id;
 
-  public long getId() {
+  public final long getId() {
     return id;
   }
 }
