@@ -45,8 +45,8 @@ Serializable interface.
 
 ## Other Notes
 
-- Empty constructors must be provided at package protected level or higher. There is the `@OrmOnly`
- annotation provided to indicate to others that the constructor is only visible for Shillelagh
+- Constructors must be provided at package protected level or higher (Put in a ticket if there is a
+legitimate use case for private).
 - Inner classes MUST be marked static.
 - Don't forget to update your database version if you change your models 
 (Also create migration scripts).
