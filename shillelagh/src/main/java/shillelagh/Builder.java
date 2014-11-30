@@ -36,12 +36,12 @@ public class Builder<T> {
   }
 
   /** Executes a query and returns the results as a list */
-  public List<T> toList() {
+  public final List<T> toList() {
     return shillelagh.rawQuery(tableObject, query.toString());
   }
 
   /** Executes a query and returns the results wrapped in an observable */
-  public Observable<T> toObservable() {
+  public final Observable<T> toObservable() {
     if (!HAS_RX_JAVA) {
       throw new RuntimeException(
           "RxJava not available! Add RxJava to your build to use this feature");
@@ -55,17 +55,17 @@ public class Builder<T> {
   }
 
   /** Executes a query and returns the results in a cursor */
-  public Cursor toCursor() {
+  public final Cursor toCursor() {
     return shillelagh.rawQuery(query.toString());
   }
 
   /** Returns the created query as a string */
-  @Override public String toString() {
+  @Override public final String toString() {
     return query.toString().trim();
   }
 
   /** Check to ensure that the column name provided is valid */
-  void checkColumnName(String columnName) {
+  final void checkColumnName(String columnName) {
     try {
       tableObject.getDeclaredField(columnName);
     } catch (NoSuchFieldException e) {
