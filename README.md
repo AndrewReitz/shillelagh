@@ -62,19 +62,19 @@ jar in your application compile time. You can download the jars
   <dependency>
     <groupId>com.andrewreitz</groupId>
     <artifactId>shillelagh</artifactId>
-    <version>0.4.0</version>
+    <version>0.5.0</version>
   </dependency>
   <dependency>
     <groupId>com.andrewreitz</groupId>
     <artifactId>shillelagh-processor</artifactId>
-    <version>0.4.0</version>
+    <version>0.5.0</version>
     <optional>true</optional>
   </dependency>
 ```
 ## Gradle:
 ```groovy
-  compile 'com.andrewreitz:shillelagh:0.4.0'
-  provided 'com.andrewreitz:shillelagh:0.4.0'
+  compile 'com.andrewreitz:shillelagh:0.5.0'
+  provided 'com.andrewreitz:shillelagh:0.5.0'
 ```
 
 # License
