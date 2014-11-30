@@ -18,7 +18,6 @@ package com.example.shillelagh.model;
 
 import shillelagh.Column;
 import shillelagh.Id;
-import shillelagh.OrmOnly;
 import shillelagh.Table;
 
 @Table
@@ -28,8 +27,6 @@ public class SimpleObject {
   @Column String name;
   @Column String address;
   @Column long customerId;
-
-  @OrmOnly SimpleObject() { /* Used internally by shillelagh */ }
 
   public SimpleObject(String name, String address, long customerId) {
     this.name = name;

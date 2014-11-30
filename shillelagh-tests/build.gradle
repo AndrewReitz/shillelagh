@@ -38,7 +38,7 @@ dependencies {
   compile project(':shillelagh')
   provided project(':shillelagh-processor')
 
-  compile 'com.netflix.rxjava:rxjava-android:0.20.6'
+  compile 'io.reactivex:rxandroid:0.23.0'
 
   androidTestCompile 'com.squareup.assertj:assertj-android:1.0.0'
 }

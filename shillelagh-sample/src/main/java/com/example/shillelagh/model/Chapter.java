@@ -17,18 +17,11 @@
 package com.example.shillelagh.model;
 
 import shillelagh.Column;
-import shillelagh.OrmOnly;
 import shillelagh.Table;
 
 @Table
 public class Chapter extends Base {
   @Column String chapter;
-
-  /**
-   * Used internally by Shillelagh. OrmOnly Annotation is only a documentation annotation, and
-   * is not required for Shillelagh usage.
-   */
-  @OrmOnly Chapter() { }
 
   public Chapter(String chapter) {
     this.chapter = chapter;

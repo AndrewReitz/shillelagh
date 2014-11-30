@@ -45,8 +45,8 @@ Serializable interface.
 
 ## Other Notes
 
-- Empty constructors must be provided at package protected level or higher. There is the `@OrmOnly`
- annotation provided to indicate to others that the constructor is only visible for Shillelagh
+- Constructors must be provided at package protected level or higher (Put in a ticket if there is a
+legitimate use case for private).
 - Inner classes MUST be marked static.
 - Don't forget to update your database version if you change your models 
 (Also create migration scripts).
@@ -62,19 +62,19 @@ jar in your application compile time. You can download the jars
   <dependency>
     <groupId>com.andrewreitz</groupId>
     <artifactId>shillelagh</artifactId>
-    <version>0.4.0</version>
+    <version>0.5.0</version>
   </dependency>
   <dependency>
     <groupId>com.andrewreitz</groupId>
     <artifactId>shillelagh-processor</artifactId>
-    <version>0.4.0</version>
+    <version>0.5.0</version>
     <optional>true</optional>
   </dependency>
 ```
 ## Gradle:
 ```groovy
-  compile 'com.andrewreitz:shillelagh:0.4.0'
-  provided 'com.andrewreitz:shillelagh:0.4.0'
+  compile 'com.andrewreitz:shillelagh:0.5.0'
+  provided 'com.andrewreitz:shillelagh:0.5.0'
 ```
 
 # License

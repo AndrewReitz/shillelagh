@@ -17,18 +17,11 @@
 package com.example.shillelagh.model;
 
 import shillelagh.Column;
-import shillelagh.OrmOnly;
 import shillelagh.Table;
 
 @Table
-public class Author extends Base {
+public final class Author extends Base {
   @Column String name;
-
-  /**
-   * Used internally by Shillelagh. OrmOnly Annotation is only a documentation annotation, and
-   * is not required for Shillelagh usage.
-   */
-  @OrmOnly Author() { }
 
   public Author(String name) {
     this.name = name;

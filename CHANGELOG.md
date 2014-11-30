@@ -3,7 +3,8 @@
 ## Version 0.5.0
 
 - Added ability to define column, id, and table names.
-- Renamed `Field` annotation to `Column`.
+- Renamed `@Field` annotation to `@Column`.
+- Removed `@OrmOnly` annotation and need for empty no arg constructors.
 
 ## Version 0.4.0 (11-27-2014)
 
