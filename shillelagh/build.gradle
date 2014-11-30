@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-apply plugin: 'java'
+apply plugin: 'groovy'
 apply plugin: 'maven-publish'
 apply from: rootProject.file('gradle/javaDoc.gradle')
 apply from: rootProject.file('gradle/bintray.gradle')
@@ -26,6 +26,9 @@ sourceCompatibility = JavaVersion.VERSION_1_6
 dependencies {
   compile 'com.google.android:android:+', optional
   compile 'com.netflix.rxjava:rxjava-core:+', optional
+
+  testCompile "org.codehaus.groovy:groovy-all:2.3.6"
+  testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
 }
 
 publishing {
