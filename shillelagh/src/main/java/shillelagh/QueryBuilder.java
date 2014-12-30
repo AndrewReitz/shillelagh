@@ -31,7 +31,7 @@ import static shillelagh.Operator.NULL;
 import static shillelagh.Operator.OR;
 import static shillelagh.Operator.ORDER_BY;
 
-/** A builder for building your queries. */
+/** A builder for building sql queries. */
 public final class QueryBuilder<T> extends Builder<T> {
   private final String columnName;
 
