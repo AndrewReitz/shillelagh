@@ -20,7 +20,7 @@ apply plugin: 'com.jfrog.bintray'
 
 bintray {
   user = bintrayUser
-  key = bintrayPassword
+  key = bintrayKey
   publications = ['mavenJava']
   pkg {
     repo = 'maven'
