@@ -14,5 +14,22 @@
  * limitations under the License.
  */
 
-include ':shillelagh', ':shillelagh-processor', ':shillelagh-sample', ':shillelagh-tests'
+include  \
+    ':shillelagh',
+    ':shillelagh-processor',
+    ':shillelagh-sample',
+    ':shillelagh-tests'
+
 rootProject.name = 'shillelagh-parent'
+
+def setBuildFile(project) {
+  project.buildFileName = "${project.name}.gradle"
+  project.children.each {
+    setBuildFile(it)
+  }
+}
+
+setBuildFile(rootProject)
+rootProject.children.each {
+  setBuildFile(it)
+}

@@ -29,7 +29,6 @@ proguard/
 .idea/
 
 # Gradle Stuff
-gradle.properties
 .gradle
 build/
 

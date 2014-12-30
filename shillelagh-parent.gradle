@@ -22,7 +22,7 @@ buildscript {
     jcenter()
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:0.14.4'
+    classpath 'com.android.tools.build:gradle:1.0.0'
     classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:1.12.3'
     classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.6'
     classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:3.0.1'
@@ -31,7 +31,7 @@ buildscript {
 }
 
 ext {
-  snapshot = !project.hasProperty('release')
+  isSnapshot = !project.hasProperty('release')
   minSdkVersion = 15
   targetSdkVersion = 21
   versionCode = 1
@@ -42,7 +42,7 @@ allprojects {
     jcenter()
   }
 
-  version = "0.5.0${project.hasProperty('release') ? '' : '-SNAPSHOT'}"
+  version = "0.5.0${isSnapshot ? '' : '-SNAPSHOT'}"
   group = 'com.andrewreitz'
 
   apply plugin: 'idea'
@@ -61,7 +61,7 @@ task bintraySign(type: RestTask) {
   httpMethod = 'post'
   uri = "https://api.bintray.com/gpg/pieces/maven/Shillelagh/versions/${version}"
   username = bintrayUser
-  password = bintrayPassword
+  password = bintrayKey
   requestBody = [passphrase: signingPassword]
   contentType = ContentType.JSON
 }
