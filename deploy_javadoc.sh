@@ -23,10 +23,8 @@ git checkout -t origin/gh-pages
 # Delete everything
 rm -rf *
 
-# Download the latest javadoc
-curl -L "http://repository.sonatype.org/service/local/artifact/maven/redirect?r=central-proxy&g=$GROUP_ID&a=$ARTIFACT_ID&v=LATEST&c=javadoc" > javadoc.zip
-unzip javadoc.zip
-rm javadoc.zip
+# Copy everything from javadocs folder
+cp -r ../shillelagh/build/docs/javadoc/* .
 
 # Stage all files in git and create a commit
 git add .
