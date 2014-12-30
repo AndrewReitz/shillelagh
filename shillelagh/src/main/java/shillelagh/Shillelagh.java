@@ -259,7 +259,7 @@ public final class Shillelagh {
     });
   }
 
-  /** Work in progress. */
+  /** Create a query using a query builder. */
   public <T> WhereBuilder<T> selectFrom(Class<? extends T> tableObject) {
     return new WhereBuilder<T>(this, tableObject);
   }
