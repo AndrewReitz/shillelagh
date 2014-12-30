@@ -3,9 +3,6 @@
 set -ex
 
 REPO="git@github.com:pieces029/shillelagh.git"
-GROUP_ID="com.andrewreitz"
-ARTIFACT_ID="shillelagh"
-
 DIR=temp-clone
 
 # Delete any existing temporary website clone
