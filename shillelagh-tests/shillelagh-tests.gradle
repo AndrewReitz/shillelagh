@@ -17,12 +17,12 @@
 apply plugin: 'com.android.application'
 
 android {
-  compileSdkVersion 21
-  buildToolsVersion "21.1.1"
+  compileSdkVersion commonVersions.compileSdkVersion
+  buildToolsVersion commonVersions.buildToolsVersion
 
   defaultConfig {
-    minSdkVersion rootProject.ext.minSdkVersion
-    targetSdkVersion rootProject.ext.targetSdkVersion
+    minSdkVersion project.minSdkVersion
+    targetSdkVersion project.targetSdkVersion
 
     versionCode versionCode
     versionName version
@@ -38,7 +38,7 @@ dependencies {
   compile project(':shillelagh')
   provided project(':shillelagh-processor')
 
-  compile 'io.reactivex:rxandroid:0.23.0'
+  compile "io.reactivex:rxandroid:${commonVersions.rxandroid}"
 
   androidTestCompile 'com.squareup.assertj:assertj-android:1.0.0'
 }

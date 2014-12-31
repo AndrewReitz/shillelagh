@@ -14,29 +14,11 @@
  * limitations under the License.
  */
 
-apply plugin: 'com.android.application'
-
-android {
-  compileSdkVersion commonVersions.compileSdkVersion
-  buildToolsVersion commonVersions.buildToolsVersion
-
-  defaultConfig {
-    minSdkVersion project.minSdkVersion
-    targetSdkVersion project.targetSdkVersion
-
-    versionCode versionCode
-    versionName version
-  }
-
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_6
-    targetCompatibility JavaVersion.VERSION_1_6
-  }
-}
-
-dependencies {
-  compile project(':shillelagh')
-  provided project(':shillelagh-processor')
-
-  compile "io.reactivex:rxandroid:${commonVersions.rxandroid}"
+ext {
+  commonVersions = [
+      rxjava: "1.0.4",
+      rxandroid: "0.23.0",
+      buildToolsVersion: "21.1.2",
+      compileSdkVersion: 21
+  ]
 }
