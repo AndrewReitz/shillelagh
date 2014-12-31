@@ -2,7 +2,8 @@
 
 ![Library Icon](AndroidShillelagh.png)
 
-[![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-Shillelagh-brightgreen.svg?style=flat)](https://android-arsenal.com/details/1/1026)
+[![Build Status](//snap-ci.com/pieces029/shillelagh/branch/master/build_image)](//snap-ci.com/pieces029/shillelagh/branch/master)
+[![Android Arsenal](//img.shields.io/badge/Android%20Arsenal-Shillelagh-brightgreen.svg?style=flat)](//android-arsenal.com/details/1/1026)
 
 Shillelagh is an sqlite library. It was built to make life easier. The entire library 
 was built around simplicity when using sqlite in Android. 
