@@ -53,25 +53,6 @@ legitimate use case for private).
 
 # Download
 
-You will need to include the shillelagh jar in your application's runtime and shillelagh-processor 
-jar in your application compile time. You can download the jars 
-[here](//bintray.com/pieces/maven/Shillelagh/view) or use Maven/Gradle configurations below.
-
-## Maven
-```xml
-  <dependency>
-    <groupId>com.andrewreitz</groupId>
-    <artifactId>shillelagh</artifactId>
-    <version>0.5.0</version>
-  </dependency>
-  <dependency>
-    <groupId>com.andrewreitz</groupId>
-    <artifactId>shillelagh-processor</artifactId>
-    <version>0.5.0</version>
-    <optional>true</optional>
-  </dependency>
-```
-## Gradle:
 ```groovy
   compile 'com.andrewreitz:shillelagh:0.5.0'
   provided 'com.andrewreitz:shillelagh:0.5.0'
