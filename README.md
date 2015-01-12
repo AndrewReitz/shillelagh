@@ -55,8 +55,12 @@ legitimate use case for private).
 # Download
 
 ```groovy
+dependencies {
+  ...
   compile 'com.andrewreitz:shillelagh:0.5.0'
   provided 'com.andrewreitz:shillelagh:0.5.0'
+  ...
+}
 ```
 
 # License
