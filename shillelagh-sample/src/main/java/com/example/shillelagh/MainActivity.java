@@ -41,7 +41,6 @@ import shillelagh.Shillelagh;
 import static shillelagh.Shillelagh.getTableName;
 
 public class MainActivity extends Activity {
-
   private static final String TAG = "ShillelaghExample";
 
   @Override protected void onCreate(Bundle savedInstanceState) {
@@ -103,6 +102,18 @@ public class MainActivity extends Activity {
         .subscribe(new Action1<String>() {
           @Override public void call(String title) {
             Log.d(TAG, title);
+          }
+        });
+
+    shillelagh.selectFrom(Chapter.class)
+        .where("chapter")
+        .isEqualTo("Chapter 1")
+        .toObservable()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Action1<Chapter>() {
+          @Override public void call(Chapter chapter) {
+            Log.d(TAG, chapter.toString());
           }
         });
   }
