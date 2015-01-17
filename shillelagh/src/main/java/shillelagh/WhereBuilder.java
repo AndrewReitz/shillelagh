@@ -20,6 +20,11 @@ import static shillelagh.Operator.ORDER_BY;
 import static shillelagh.Operator.WHERE;
 import static shillelagh.Shillelagh.getTableName;
 
+/**
+ * Builder for constructing where statements to query the database with RxJava.
+ *
+ * @param <T> The resulting database model object.
+ */
 public final class WhereBuilder<T> extends Builder<T> {
   WhereBuilder(Shillelagh shillelagh, Class<? extends T> tableObject) {
     super(shillelagh, tableObject,

@@ -14,26 +14,27 @@
  * limitations under the License.
  */
 
-package com.example.shillelagh.model;
+package shillelagh;
 
-import shillelagh.Column;
-import shillelagh.Table;
+final class Preconditions {
+  static <T> T checkNotNull(T object, String message) {
+    if (object == null) {
+      throw new NullPointerException(message);
+    }
 
-@Table
-public class Chapter extends Base {
-  @Column String chapter;
-
-  public Chapter(String chapter) {
-    this.chapter = chapter;
+    return object;
   }
 
-  public String getChapter() {
-    return chapter;
+  static <T> Table checkTableObject(Class<T> tableClass) {
+    Table annotation = tableClass.getAnnotation(Table.class);
+    if (annotation == null) {
+      throw new IllegalArgumentException(tableClass.getName() + " is not a table object.");
+    }
+
+    return annotation;
   }
 
-  @Override public String toString() {
-    return "Chapter{"
-        + "chapter='" + chapter + '\''
-        + '}';
+  private Preconditions() {
+    // No instances
   }
 }

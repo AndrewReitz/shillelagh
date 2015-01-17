@@ -31,6 +31,9 @@ import java.util.Map;
 import rx.Observable;
 import rx.Subscriber;
 
+import static shillelagh.Preconditions.checkNotNull;
+import static shillelagh.Preconditions.checkTableObject;
+
 public final class Shillelagh {
 
   /**
@@ -68,10 +71,21 @@ public final class Shillelagh {
   }
 
   /**
-   * Creates the table from the object. The DB must be passed in from the SQLiteOpenHelper
-   * otherwise an illegal state exception will occur
+   * Creates the table from the object.
+   *
+   * @param db The database from a overridden SQLiteOpenHelper to create the table in.
+   * @param tableClass The class type of the table to create. This should be annotated with
+   * {@link Table}.
+   * @throws IllegalStateException if SQLiteDatabase was not passed in from the SQLiteOpenHelper,
+   * or if tableClass does not have the {@link Table} annotation.
+   * @throws NullPointerException if either of the parameters are null.
+   * @see Table
    */
   public static void createTable(SQLiteDatabase db, Class<?> tableClass) {
+    checkNotNull(db, "db may not be null.");
+    checkNotNull(tableClass, "tableClass may not be null.");
+    checkTableObject(tableClass);
+
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableClass);
       executeMethod(shillelagh, $$CREATE_TABLE_FUNCTION, db);
@@ -84,10 +98,21 @@ public final class Shillelagh {
   }
 
   /**
-   * Drops the table created from the table object. The DB must be passed in from
-   * the SQLiteOpenHelper otherwise an illegal state exception will occur
+   * Drops the table created from the table object.
+   *
+   * @param db The database from a overridden SQLiteOpenHelper to create the table in.
+   * @param tableClass The class type of the table to create. This should be annotated with
+   * {@link Table}.
+   * @throws IllegalStateException if SQLiteDatabase was not passed in from the SQLiteOpenHelper,
+   * or if tableClass does not have the {@link Table} annotation.
+   * @throws NullPointerException if either of the parameters are null.
+   * @see Table
    */
   public static void dropTable(SQLiteDatabase db, Class<?> tableClass) {
+    checkNotNull(db, "db may not be null.");
+    checkNotNull(tableClass, "tableClass may not be null.");
+    checkTableObject(tableClass);
+
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableClass);
       executeMethod(shillelagh, $$DROP_TABLE_FUNCTION, db);
@@ -99,8 +124,18 @@ public final class Shillelagh {
     }
   }
 
-  /** Insert the object into the table */
+  /**
+   * Insert the object into the table
+   *
+   * @param tableObject The object to insert. This class must be annotated with {@link Table}.
+   * @throws NullPointerException if tableObject is null.
+   * @throws IllegalArgumentException if tableObject does not have the {@link Table} annotation.
+   * @see Table
+   */
   public void insert(Object tableObject) {
+    checkNotNull(tableObject, "tableObject may not be null.");
+    checkTableObject(tableObject.getClass());
+
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableObject.getClass());
       executeMethod(shillelagh, $$INSERT_OBJECT_FUNCTION, tableObject,
@@ -113,8 +148,7 @@ public final class Shillelagh {
     } catch (Exception e) {
       throw new RuntimeException("Unable to insert into "
           + tableObject.getClass().getName()
-          + ". Did you forget to call Shillelagh.createTable "
-          + "or are you missing @Table annotation?", e);
+          + ". Did you forget to call Shillelagh.createTable", e);
     }
   }
 
@@ -123,8 +157,14 @@ public final class Shillelagh {
    * with the id of the row you are trying to update.
    *
    * @param tableObject The object that will update a row in the table
+   * @throws NullPointerException if tableObject is null.
+   * @throws IllegalArgumentException if tableObject does not have the {@link Table} annotation.
+   * @see Table
    */
   public void update(Object tableObject) {
+    checkNotNull(tableObject, "tableObject may not be null.");
+    checkTableObject(tableObject.getClass());
+
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableObject.getClass());
       executeMethod(shillelagh, $$UPDATE_OBJECT_FUNCTION, tableObject,
@@ -143,8 +183,14 @@ public final class Shillelagh {
    * the ID of the object. Passing in an object with out and ID will not delete other rows.
    *
    * @param tableObject table object with ID field populated.
+   * @throws NullPointerException if tableObject is null.
+   * @throws IllegalArgumentException if tableObject does not have the {@link Table} annotation.
+   * @see Table
    */
   public void delete(Object tableObject) {
+    checkNotNull(tableObject, "tableObject may not be null.");
+    checkTableObject(tableObject.getClass());
+
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableObject.getClass());
       executeMethod(shillelagh, $$DELETE_OBJECT_FUNCTION, tableObject,
@@ -161,9 +207,15 @@ public final class Shillelagh {
    *
    * @param tableClass The class which was used to generate the table that
    * you want to delete the corresponding row out of.
-   * @param id the id of the row you want to match
+   * @param id the id of the row you want to match.
+   * @throws NullPointerException if tableClass is null.
+   * @throws IllegalArgumentException if tableClass does not have the {@link Table} annotation.
+   * @see Table
    */
   public void delete(final Class<?> tableClass, final long id) {
+    checkNotNull(tableClass, "tableClass may not be null.");
+    checkTableObject(tableClass);
+
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableClass);
       executeMethod(shillelagh, $$DELETE_OBJECT_FUNCTION, id,
@@ -181,10 +233,16 @@ public final class Shillelagh {
    * @param tableClass Class the data from the cursor should be mapped to. This class must have the
    * @param cursor Cursor of data pulled from the tableClass's generated table.
    * @return List of tableClass objects mapped from the cursor.
-   * @see shillelagh.Table annotation on it
+   * @throws NullPointerException if either parameter is null.
+   * @throws IllegalArgumentException if tableClass does not have the {@link Table} annotation.
+   * @see Table
    */
   @SuppressWarnings("unchecked")
   public <T extends List<M>, M> T map(Class<? extends M> tableClass, Cursor cursor) {
+    checkNotNull(tableClass, "tableClass may not be null.");
+    checkNotNull(cursor, "cursor may not be null.");
+    checkTableObject(tableClass);
+
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableClass);
       final Method mapMethod = findMethodForClass(shillelagh, $$MAP_OBJECT_FUNCTION,
@@ -209,9 +267,16 @@ public final class Shillelagh {
    * @param tableClass The class to map to.
    * @param cursor The cursor to get the values from it's current position.
    * @return The mapped value.
+   * @throws NullPointerException if either parameter is null.
+   * @throws IllegalArgumentException if tableClass does not have the {@link Table} annotation.
+   * @see Table
    */
   @SuppressWarnings("unchecked")
   public <T> T singleMap(Class<? extends T> tableClass, Cursor cursor) {
+    checkNotNull(tableClass, "tableClass may not be null.");
+    checkNotNull(cursor, "cursor may not be null.");
+    checkTableObject(tableClass);
+
     try {
       final Class<?> shillelagh = findShillelaghForClass(tableClass);
       final Method mapMethod = findMethodForClass(shillelagh, $$MAP_SINGLE_FUNCTION,
@@ -227,12 +292,17 @@ public final class Shillelagh {
     }
   }
 
-  /** Get the table name of the class */
+  /**
+   * Get the table name of the class.
+   *
+   * @param tableClass The class to get the name of the table from.
+   * @throws NullPointerException if tableClass is null.
+   * @throws IllegalArgumentException if tableClass does not have the {@link Table} annotation.
+   * @see Table
+   */
   public static String getTableName(Class<?> tableClass) {
-    final Table annotation = tableClass.getAnnotation(Table.class);
-    if (annotation == null) {
-      throw new IllegalArgumentException("Class is not a table object.");
-    }
+    checkNotNull(tableClass, "tableClass my not be null.");
+    Table annotation = checkTableObject(tableClass);
     return annotation.name().trim().length() == 0 //
         ? tableClass.getSimpleName() //
         : annotation.name();
@@ -245,12 +315,18 @@ public final class Shillelagh {
    *
    * @param tableClass The class to get the data for.
    * @return Observable with loaded data.
+   * @throws NullPointerException if tableClass is null.
+   * @throws IllegalArgumentException if tableClass does not have the {@link Table} annotation.
+   * @throws RuntimeException if RxJava is not on the classpath.
    */
   public <T> Observable<T> get(final Class<T> tableClass) {
     if (!HAS_RX_JAVA) {
       throw new RuntimeException(
           "RxJava not available! Add RxJava to your build to use this feature");
     }
+
+    checkNotNull(tableClass, "tableClass may not be null.");
+    checkTableObject(tableClass);
 
     return getObservable(tableClass, new CursorLoader() {
       @Override public Cursor getCursor() {
@@ -259,9 +335,17 @@ public final class Shillelagh {
     });
   }
 
-  /** Create a query using a query builder. */
+  /**
+   * Create a query using a query builder.
+   *
+   * @param tableObject The table object to create a select query from.
+   * @throws NullPointerException if tableObject is null.
+   * @throws IllegalArgumentException if tableClass does not have the {@link Table} annotation.
+   * @see Table
+   * @see WhereBuilder
+   */
   public <T> WhereBuilder<T> selectFrom(Class<? extends T> tableObject) {
-    return new WhereBuilder<T>(this, tableObject);
+    return new WhereBuilder<T>(this, checkNotNull(tableObject, "tableObject may not be null."));
   }
 
   // End Shillelagh Selectors

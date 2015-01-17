@@ -288,9 +288,8 @@ public class InsertTest extends AndroidTestCase {
     try {
       shillelagh.insert(row);
     } catch (RuntimeException e) {
-      assertThat(e.getMessage()).isEqualTo("Unable to insert into com.example.shillelagh.model." +
-          "TestNotTableObject. Did you forget to call Shillelagh.createTable or are you missing " +
-          "@Table annotation?");
+      assertThat(e.getMessage()).isEqualTo("com.example.shillelagh.model.TestNotTableObject is "
+          + "not a table object.");
       return;
     }
 

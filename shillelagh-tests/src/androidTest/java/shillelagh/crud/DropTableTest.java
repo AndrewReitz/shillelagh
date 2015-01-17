@@ -97,8 +97,8 @@ public class DropTableTest extends AndroidTestCase {
     try {
       Shillelagh.dropTable(database, TestNotTableObject.class);
     } catch (RuntimeException e) {
-      assertThat(e.getMessage()).isEqualTo("Unable to drop table for class com.example." +
-          "shillelagh.model.TestNotTableObject. Are you missing @Table annotation?");
+      assertThat(e.getMessage()).isEqualTo("com.example.shillelagh.model.TestNotTableObject is not "
+          + "a table object.");
       return;
     }
 

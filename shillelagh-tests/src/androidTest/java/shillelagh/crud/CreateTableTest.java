@@ -391,8 +391,8 @@ public class CreateTableTest extends AndroidTestCase {
     try {
       Shillelagh.createTable(database, TestNotTableObject.class);
     } catch (RuntimeException e) {
-      assertThat(e.getMessage()).isEqualTo("Unable to create table for class com.example.shillelagh"
-          + ".model.TestNotTableObject. Are you missing @Table annotation?");
+      assertThat(e.getMessage()).isEqualTo("com.example.shillelagh.model.TestNotTableObject is "
+          + "not a table object.");
       return;
     }
 

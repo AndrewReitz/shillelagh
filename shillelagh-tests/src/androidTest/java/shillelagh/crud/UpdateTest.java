@@ -329,8 +329,8 @@ public class UpdateTest extends AndroidTestCase {
     try {
       shillelagh.update(row);
     } catch (RuntimeException e) {
-      assertThat(e.getMessage()).isEqualTo("Unable to update com.example.shillelagh.model." +
-          "TestNotTableObject. Are you missing @Table annotation?");
+      assertThat(e.getMessage()).isEqualTo("com.example.shillelagh.model.TestNotTableObject is "
+          + "not a table object.");
       return;
     }
 
