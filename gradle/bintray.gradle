@@ -31,6 +31,17 @@ bintray {
     vcsUrl = 'https://github.com/pieces029/shillelagh.git'
     licenses = ['Apache-2.0']
     labels = ['Android', 'ORM', 'Database', 'SQLite']
-    publicDownloadNumbers = true
+    version {
+      name = $project.version
+      gpg {
+        sign = true
+        passphrase = signingPassword
+      }
+      mavenCentralSync {
+        sync = true
+        user = sonatypeUserName
+        password = sonatypePassword
+      }
+    }
   }
 }
