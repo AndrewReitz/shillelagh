@@ -32,7 +32,7 @@ bintray {
     licenses = ['Apache-2.0']
     labels = ['Android', 'ORM', 'Database', 'SQLite']
     version {
-      name = $project.version
+      name = project.version
       gpg {
         sign = true
         passphrase = signingPassword
