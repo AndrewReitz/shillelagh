@@ -51,6 +51,7 @@ legitimate use case for private).
 - Inner classes MUST be marked static.
 - Don't forget to update your database version if you change your models 
 (Also create migration scripts).
+- For proguard just add `-keep class **$$Shillelagh { *; }` to your rules.
 
 # Download
 

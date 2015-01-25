@@ -32,6 +32,17 @@ android {
     sourceCompatibility JavaVersion.VERSION_1_6
     targetCompatibility JavaVersion.VERSION_1_6
   }
+
+  buildTypes {
+    debug {
+      minifyEnabled true
+      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+    }
+    release {
+      minifyEnabled true
+      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+    }
+  }
 }
 
 dependencies {

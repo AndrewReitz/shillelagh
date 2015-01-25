@@ -1,0 +1,4 @@
+-ignorewarnings
+-dontobfuscate
+
+-keep class **$$Shillelagh { *; }
