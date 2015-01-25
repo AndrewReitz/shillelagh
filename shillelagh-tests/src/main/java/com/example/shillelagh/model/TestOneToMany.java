@@ -55,11 +55,11 @@ import shillelagh.Table;
     }
 
     @Override public String toString() {
-      return "Child{" +
-          "id=" + id +
-          ", testString='" + testString + '\'' +
-          ", testInt=" + testInt +
-          '}';
+      return "Child{"
+          + "id=" + id
+          + ", testString='" + testString + '\''
+          + ", testInt=" + testInt
+          + '}';
     }
   }
 }
