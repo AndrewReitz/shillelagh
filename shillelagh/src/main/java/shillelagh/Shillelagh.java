@@ -37,7 +37,7 @@ import static shillelagh.Preconditions.checkTableObject;
 public final class Shillelagh {
 
   /**
-   * Internal class function names
+   * Internal class and function names
    */
   public static final String $$SUFFIX = "$$Shillelagh";
   public static final String $$CREATE_TABLE_FUNCTION = "createTable";
@@ -148,7 +148,7 @@ public final class Shillelagh {
     } catch (Exception e) {
       throw new RuntimeException("Unable to insert into "
           + tableObject.getClass().getName()
-          + ". Did you forget to call Shillelagh.createTable", e);
+          + ". Are you using progaurd, or did you forget to call Shillelagh.createTable?", e);
     }
   }
 
@@ -172,9 +172,7 @@ public final class Shillelagh {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new RuntimeException("Unable to update "
-          + tableObject.getClass().getName()
-          + ". Are you missing @Table annotation?", e);
+      throw new RuntimeException("Unable to update " + tableObject.getClass().getName(), e);
     }
   }
 
@@ -198,7 +196,7 @@ public final class Shillelagh {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new RuntimeException("Unable to update " + tableObject.getClass().getName(), e);
+      throw new RuntimeException("Unable to delete " + tableObject.getClass().getName(), e);
     }
   }
 
