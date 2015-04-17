@@ -29,7 +29,6 @@ def setBuildFile(project) {
   }
 }
 
-setBuildFile(rootProject)
 rootProject.children.each {
   setBuildFile(it)
 }
