@@ -34,7 +34,7 @@ import rx.Subscriber;
 import static shillelagh.Preconditions.checkNotNull;
 import static shillelagh.Preconditions.checkTableObject;
 
-public final class Shillelagh {
+public class Shillelagh {
 
   /**
    * Internal class and function names
