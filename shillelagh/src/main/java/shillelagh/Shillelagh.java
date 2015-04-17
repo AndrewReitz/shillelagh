@@ -124,6 +124,23 @@ public final class Shillelagh {
     }
   }
 
+  // todo
+  public static void dropTable(SQLiteDatabase db, Class<?> tableClass, boolean dropChildren) {
+    checkNotNull(db, "db may not be null.");
+    checkNotNull(tableClass, "tableClass may not be null.");
+    checkTableObject(tableClass);
+
+    try {
+      final Class<?> shillelagh = findShillelaghForClass(tableClass);
+      executeMethod(shillelagh, $$DROP_TABLE_FUNCTION, db);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(
+          "Unable to drop table for " + tableClass + ". Are you missing @Table annotation?", e);
+    }
+  }
+
   /**
    * Insert the object into the table
    *
@@ -725,6 +742,6 @@ public final class Shillelagh {
         cursor.close();
         subscriber.onCompleted();
       }
-    });
+    }).onBackpressureBuffer();
   }
 }

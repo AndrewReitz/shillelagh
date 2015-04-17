@@ -52,6 +52,8 @@ legitimate use case for private).
 - Don't forget to update your database version if you change your models 
 (Also create migration scripts).
 - For proguard just add `-keep class **$$Shillelagh { *; }` to your rules.
+- If you do not provide a defualt constructor, Shillelagh will attempt to use the constructor you
+ provided and pass in null.
 
 # Download
 

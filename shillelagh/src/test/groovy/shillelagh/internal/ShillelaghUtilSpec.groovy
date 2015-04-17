@@ -16,37 +16,87 @@
 
 package shillelagh.internal
 
+import groovy.transform.TypeChecked
+import shillelagh.test.BooleanConstructor
+import shillelagh.test.ByteConstructor
+import shillelagh.test.CharConstructor
+import shillelagh.test.FloatConstructor
+import shillelagh.test.IntConstructor
+import shillelagh.test.LongConstructor
+import shillelagh.test.LotsOfParamConstructor
+import shillelagh.test.NoParamConstructor
+import shillelagh.test.ShortConstructor
+import shillelagh.test.StringConstructor
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import static shillelagh.internal.ShillelaghUtil.*
 
 class ShillelaghUtilSpec extends Specification {
   def "serialize then deserialize"() {
     given:
-      String expectedString = "ItWorks"
-      int expectedInt = 11
-      TestSerializeClass input = new TestSerializeClass(expectedString, expectedInt)
+    String expectedString = "ItWorks"
+    int expectedInt = 11
+    TestSerializeClass input = new TestSerializeClass(expectedString, expectedInt)
 
     when: "serialize then deserialize"
-      TestSerializeClass output = deserialize(serialize(input))
+    TestSerializeClass output = deserialize(serialize(input))
 
     then: "expected values of output to be the same as input"
-      output.testString == expectedString
-      output.testInt == expectedInt
+    output.testString == expectedString
+    output.testInt == expectedInt
   }
 
-  def "create new instance"() {
-    when: "no params"
-      NoParamConstructor noParams = createInstance(NoParamConstructor.class)
+  @Unroll
+  def "should create new instance of #classToCreate"() {
+    given:
+    def object = createInstance(classToCreate)
 
-    then: "not null"
-      noParams != null
+    expect:
+    object != null
 
-    when: "lots of params"
-      LotsOfParamConstructor lotsOfParams = createInstance(LotsOfParamConstructor.class)
+    where:
+    classToCreate          | _
+    NoParamConstructor     | _
+    BooleanConstructor     | _
+    ByteConstructor        | _
+    IntConstructor         | _
+    ShortConstructor       | _
+    LongConstructor        | _
+    FloatConstructor       | _
+    CharConstructor        | _
+    BooleanConstructor     | _
+    StringConstructor      | _
+    LotsOfParamConstructor | _
+    HashMap                | _
+    List                   | _
+    Map                    | _
+  }
 
-    then: "not null"
-      lotsOfParams != null
+  @TypeChecked
+  def "should create a new list"() {
+    given:
+    List<String> stringList = createInstance(List)
+
+    when:
+    stringList.add("Hello")
+
+    then:
+    noExceptionThrown()
+    stringList.get(0) == "Hello"
+  }
+
+  @TypeChecked
+  def "should create a new map"() {
+    given:
+    Map<String, String> stringMap = createInstance(Map)
+
+    when:
+    stringMap.put("John", "Doe")
+
+    then:
+    noExceptionThrown()
+    stringMap.get("John") == "Doe"
   }
 
   final static class TestSerializeClass implements Serializable {
@@ -57,22 +107,5 @@ class ShillelaghUtilSpec extends Specification {
       this.testString = testString
       this.testInt = testInt
     }
-  }
-
-  final static class NoParamConstructor {
-    String test
-  }
-
-  final static class LotsOfParamConstructor {
-    byte testByte
-    short testShort
-    int testInt
-    long testLong
-    float testFloat
-    double testDouble
-    char testChar
-    boolean testBool
-    String testString
-    NoParamConstructor testObject
   }
 }

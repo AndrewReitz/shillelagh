@@ -23,6 +23,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Build;
 import android.os.StrictMode;
 
+import com.facebook.stetho.Stetho;
 import shillelagh.Shillelagh;
 
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
@@ -33,6 +34,12 @@ public class ShillelaghApp extends Application {
 
   @Override public void onCreate() {
     super.onCreate();
+
+    // stetho for debugging databases
+    Stetho.initialize(Stetho.newInitializerBuilder(this)
+            .enableDumpapp(Stetho.defaultDumperPluginsProvider(this))
+            .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
+            .build());
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
       StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()

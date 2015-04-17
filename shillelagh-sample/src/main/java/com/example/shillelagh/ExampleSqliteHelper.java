@@ -24,6 +24,7 @@ import com.example.shillelagh.model.Author;
 import com.example.shillelagh.model.Book;
 import com.example.shillelagh.model.Chapter;
 
+import com.example.shillelagh.model.CollectionsTest;
 import shillelagh.Shillelagh;
 
 public class ExampleSqliteHelper extends SQLiteOpenHelper {
@@ -38,6 +39,7 @@ public class ExampleSqliteHelper extends SQLiteOpenHelper {
     Shillelagh.createTable(db, Author.class);
     Shillelagh.createTable(db, Book.class);
     Shillelagh.createTable(db, Chapter.class);
+    Shillelagh.createTable(db, CollectionsTest.class);
   }
 
   @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {

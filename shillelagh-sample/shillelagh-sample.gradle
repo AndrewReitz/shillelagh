@@ -50,4 +50,6 @@ dependencies {
   provided project(':shillelagh-processor')
 
   compile "io.reactivex:rxandroid:${commonVersions.rxandroid}"
+
+  compile 'com.facebook.stetho:stetho:1.1.0'
 }

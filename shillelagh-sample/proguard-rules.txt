@@ -2,3 +2,5 @@
 -dontobfuscate
 
 -keep class **$$Shillelagh { *; }
+
+-keep class com.facebook.stetho.** { *; }
