@@ -227,9 +227,12 @@ public final class ShillelaghProcessor extends AbstractProcessor {
 
     TableColumn tableColumn = new TableColumn(columnElement, type, columnAnnotation.name());
     if (tableColumn.isBlob() && !tableColumn.isByteArray()) {
-      if (!checkForSuperType(columnElement, Serializable.class) && !columnElement.asType()
-          .toString()
-          .equals("java.lang.Byte[]")) {
+      String columnType = columnElement.asType().toString();
+      logger.d("Column Element Type: " + columnType);
+      if (!checkForSuperType(columnElement, Serializable.class)
+          && !columnType.equals("java.lang.Byte[]")
+          && !columnType.startsWith("java.util.Map")
+          && !columnType.startsWith("java.util.List")) {
         logger.e(String.format(
             "%s in %s is not Serializable and will not be able to be converted to a byte array",
             columnElement.toString(), tableObject.getTableName()));

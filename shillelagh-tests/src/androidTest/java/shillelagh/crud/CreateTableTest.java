@@ -31,6 +31,8 @@ import com.example.shillelagh.model.TestPrimitiveTable;
 
 import java.io.File;
 
+import java.util.List;
+import java.util.Map;
 import shillelagh.Column;
 import shillelagh.Id;
 import shillelagh.Shillelagh;
@@ -397,6 +399,46 @@ public class CreateTableTest extends AndroidTestCase {
     }
 
     throw new AssertionError("Expected Exception Not Thrown");
+  }
+
+  public void testCreateCollectionsTable() {
+    setName("Should create a table with a list and map as blobs");
+
+    // Act
+    Shillelagh.createTable(database, CollectionsTestTable.class);
+    final Cursor cursor = database.rawQuery(
+        String.format(TABLE_INFO_QUERY, getTableName(CollectionsTestTable.class)), null);
+
+    // Assert
+    assertThat(cursor.getCount()).isEqualTo(3);
+
+    assertThat(cursor.moveToNext()).isTrue();
+    assertThat(cursor.getString(TABLE_INFO_NAME_COLUMN)).isEqualTo("id");
+    assertThat(cursor.getString(TABLE_INFO_TYPE_COLUMN)).isEqualTo(SQL_INTEGER);
+    assertThat(cursor.getString(TABLE_INFO_NULLABLE_COLUMN)).isEqualTo("0");
+    assertThat(cursor.getString(TABLE_INFO_PRIMARAY_KEY_COLUMN)).isEqualTo("1");
+
+    assertThat(cursor.moveToNext()).isTrue();
+    assertThat(cursor.getString(TABLE_INFO_NAME_COLUMN)).isEqualTo("maps");
+    assertThat(cursor.getString(TABLE_INFO_TYPE_COLUMN)).isEqualTo(SQL_BLOB);
+    assertThat(cursor.getString(TABLE_INFO_NULLABLE_COLUMN)).isEqualTo("0");
+    assertThat(cursor.getString(TABLE_INFO_PRIMARAY_KEY_COLUMN)).isEqualTo("0");
+
+    assertThat(cursor.moveToNext()).isTrue();
+    assertThat(cursor.getString(TABLE_INFO_NAME_COLUMN)).isEqualTo("lists");
+    assertThat(cursor.getString(TABLE_INFO_TYPE_COLUMN)).isEqualTo(SQL_BLOB);
+    assertThat(cursor.getString(TABLE_INFO_NULLABLE_COLUMN)).isEqualTo("0");
+    assertThat(cursor.getString(TABLE_INFO_PRIMARAY_KEY_COLUMN)).isEqualTo("0");
+
+    assertThat(cursor.moveToNext()).isFalse();
+    cursor.close();
+  }
+
+  @Table
+  static final class CollectionsTestTable {
+    @Id long id;
+    @Column(isBlob = true) Map<String, String> maps;
+    @Column(isBlob = true) List<String> lists;
   }
 
   public void testCreateTableWithCustomNames() {

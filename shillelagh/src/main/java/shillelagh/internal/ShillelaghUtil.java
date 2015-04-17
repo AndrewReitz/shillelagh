@@ -21,7 +21,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
@@ -39,7 +38,7 @@ public final class ShillelaghUtil {
    * Takes an object and serializes it to a byte array. Don't enforce that it extends serializable
    * to allow for lists and maps to be passed in.
    *
-   * @param object The object to serialize. Must implement {@link Serializable}
+   * @param object The object to serialize. Must implement {@link java.io.Serializable;}
    * @return The object as a byte array.
    */
   public static <T> byte[] serialize(T object) {
