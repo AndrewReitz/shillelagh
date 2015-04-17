@@ -4,6 +4,7 @@
 
 - Allowed Lists and Maps to be saved as blobs.
 - Fixed issues with constructing objects that don't have default empty constructors.
+- Removed final modifier from Shillelagh to allow for mocking.
 
 ## Version 0.5.0 (11-30-2014)
 
