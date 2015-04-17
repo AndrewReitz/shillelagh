@@ -165,7 +165,7 @@ public final class Shillelagh {
     } catch (Exception e) {
       throw new RuntimeException("Unable to insert into "
           + tableObject.getClass().getName()
-          + ". Are you using progaurd, or did you forget to call Shillelagh.createTable?", e);
+          + ". Are you using proguard, or did you forget to call Shillelagh.createTable?", e);
     }
   }
 
