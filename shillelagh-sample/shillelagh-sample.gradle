@@ -43,10 +43,18 @@ android {
       proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
     }
   }
+
+  packagingOptions {
+    exclude 'META-INF/INDEX.LIST'
+  }
 }
 
 dependencies {
-  compile project(':shillelagh')
+  compile(project(':shillelagh')) {
+    // exclude since optional doesn't work through project includes and objenesis is
+    // included in the jar with jarjar
+    exclude group: 'org.objenesis'
+  }
   provided project(':shillelagh-processor')
 
   compile "io.reactivex:rxandroid:${commonVersions.rxandroid}"
