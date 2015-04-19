@@ -16,9 +16,9 @@
 
 ext {
   commonVersions = [
-      rxjava: "1.0.4",
-      rxandroid: "0.23.0",
-      buildToolsVersion: "21.1.2",
-      compileSdkVersion: 21
+      rxjava: "1.0.9",
+      rxandroid: "0.24.0",
+      buildToolsVersion: "22.0.1",
+      compileSdkVersion: 22
   ]
 }

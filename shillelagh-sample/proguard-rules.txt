@@ -4,3 +4,6 @@
 -keep class **$$Shillelagh { *; }
 
 -keep class com.facebook.stetho.** { *; }
+
+-dontwarn rx.internal.**
+-dontwarn shillelagh.internal.objenesis.**
