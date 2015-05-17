@@ -19,7 +19,7 @@ buildscript {
     jcenter()
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:1.0.0'
+    classpath 'com.android.tools.build:gradle:1.2.3'
     classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:1.12.3'
     classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.0'
     classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:3.0.1'
