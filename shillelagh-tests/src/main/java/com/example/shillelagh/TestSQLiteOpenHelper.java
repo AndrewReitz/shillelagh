@@ -25,6 +25,7 @@ import com.example.shillelagh.model.TestBoxedPrimitivesTable;
 import com.example.shillelagh.model.TestJavaObjectsTable;
 import com.example.shillelagh.model.TestOneToMany;
 import com.example.shillelagh.model.TestOneToOne;
+import com.example.shillelagh.model.TestParcelable;
 import com.example.shillelagh.model.TestPrimitiveTable;
 
 import shillelagh.Shillelagh;
@@ -46,6 +47,7 @@ public class TestSQLiteOpenHelper extends SQLiteOpenHelper {
     Shillelagh.createTable(db, TestOneToOne.OneToOneChild.class);
     Shillelagh.createTable(db, TestOneToMany.class);
     Shillelagh.createTable(db, TestOneToMany.OneToManyChild.class);
+    Shillelagh.createTable(db, TestParcelable.class);
   }
 
   @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -58,6 +60,7 @@ public class TestSQLiteOpenHelper extends SQLiteOpenHelper {
     Shillelagh.dropTable(db, TestOneToOne.OneToOneChild.class);
     Shillelagh.dropTable(db, TestOneToMany.class);
     Shillelagh.dropTable(db, TestOneToMany.OneToManyChild.class);
+    Shillelagh.dropTable(db, TestParcelable.class);
     onCreate(db);
   }
 }
