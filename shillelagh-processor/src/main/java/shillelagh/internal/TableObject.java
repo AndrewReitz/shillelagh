@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Andrew Reitz
+ * Copyright 2015 Andrew Reitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,6 +118,7 @@ final class TableObject {
     return element.toString();
   }
 
+  // TODO Write a test for this.
   /** Get table schema */
   private String getSchema() {
     StringBuilder sb = new StringBuilder();
@@ -138,8 +139,10 @@ final class TableObject {
       }
     }
 
-    return String.format(CREATE_TABLE_DEFAULT, getTableName(), idColumn.getColumnName(),
-        sb.toString());
+    // writes out id_missing for logging, the actual idMissing check happens
+    // by the annotation processor.
+    String idCol = idColumn == null ? "id_missing" : idColumn.getColumnName();
+    return String.format(CREATE_TABLE_DEFAULT, getTableName(), idCol, sb.toString());
   }
 
   /** Get the fully qualified class name */
