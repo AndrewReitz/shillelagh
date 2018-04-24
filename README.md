@@ -60,7 +60,7 @@ legitimate use case for private).
 ```groovy
 dependencies {
   ...
-  compile 'com.andrewreitz:shillelagh:0.5.0'
+  implementation 'com.andrewreitz:shillelagh:0.5.0'
   provided 'com.andrewreitz:shillelagh-processor:0.5.0'
   ...
 }
